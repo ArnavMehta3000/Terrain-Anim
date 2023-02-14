@@ -1,6 +1,7 @@
 #pragma once
 #include "Application/Application.h"
 
+
 class Window
 {
 public:
@@ -28,5 +29,11 @@ private:
 	UINT m_clientWidth, m_clientHeight;
 
 	std::unique_ptr<Application> m_app;
+
+	std::unique_ptr<DirectX::Keyboard> m_keyboard;
+	std::unique_ptr<DirectX::Mouse> m_mouse;
+
+	DirectX::Keyboard::State m_kbState;
+	DirectX::Mouse::State m_mouseState;
 };
 

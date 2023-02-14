@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "Application.h"
 
-Application::Application()
+Application::Application(HWND window, UINT width, UINT height)
+	:
+	m_hWnd(window),
+	m_width(width),
+	m_height(height)
 {
 }
 
@@ -14,11 +18,15 @@ bool Application::Init()
 	return true;
 }
 
-void Application::Run()
+void Application::Run(const InputEvent input)
 {
-	LOG("App running")
+	LOG(input.MouseState.leftButton)
 }
 
 void Application::Shutdown()
+{
+}
+
+void Application::Resize()
 {
 }

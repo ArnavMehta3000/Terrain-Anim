@@ -56,6 +56,10 @@ Window::Window(HINSTANCE hInst, UINT width, UINT height)
 		exit(GetLastError());
 	}
 	LOG("Registered window")
+
+	m_keyboard = std::make_unique<Keyboard>();
+	m_mouse = std::make_unique<Mouse>();
+	m_mouse->SetWindow(m_hWnd);
 }
 
 Window::~Window()
@@ -69,6 +73,7 @@ void Window::InitAppAndShow(bool showMaximized)
 	SetFocus(m_hWnd);
 
 	LOG("Initializing app")
+	m_app = std::make_unique<Application>(m_hWnd, m_clientWidth, m_clientHeight);
 
 	if (!m_app->Init())
 	{
@@ -79,7 +84,8 @@ void Window::InitAppAndShow(bool showMaximized)
 	// ----- Main loop -----
 	while (ProcessMessages())
 	{
-		m_app->Run();
+		
+		m_app->Run({ m_kbState, m_mouseState });
 	}
 	// ----- Main loop -----
 
@@ -100,11 +106,11 @@ bool Window::ProcessMessages()
 		else
 		{
 			// Process input here
-			/*m_kbState = m_keyboard->GetState();
+			m_kbState = m_keyboard->GetState();
 			m_mouseState = m_mouse->GetState();
 
 			m_mouse->SetMode(m_mouseState.rightButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
-			m_mouse->ResetScrollWheelValue();*/
+			m_mouse->ResetScrollWheelValue();
 
 			return true;
 		}
@@ -139,8 +145,8 @@ LRESULT Window::MyWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg)
 	{
 	case WM_ACTIVATEAPP:
-		//Keyboard::ProcessMessage(msg, wParam, lParam);
-		//Mouse::ProcessMessage(msg, wParam, lParam);
+		Keyboard::ProcessMessage(msg, wParam, lParam);
+		Mouse::ProcessMessage(msg, wParam, lParam);
 		break;
 
 	case WM_ACTIVATE:
@@ -156,12 +162,12 @@ LRESULT Window::MyWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_XBUTTONDOWN:
 	case WM_XBUTTONUP:
 	case WM_MOUSEHOVER:
-		//Mouse::ProcessMessage(msg, wParam, lParam);
+		Mouse::ProcessMessage(msg, wParam, lParam);
 
 	case WM_KEYDOWN:
 	case WM_KEYUP:
 	case WM_SYSKEYUP:
-		//Keyboard::ProcessMessage(msg, wParam, lParam);
+		Keyboard::ProcessMessage(msg, wParam, lParam);
 		break;
 
 	case WM_DESTROY:
