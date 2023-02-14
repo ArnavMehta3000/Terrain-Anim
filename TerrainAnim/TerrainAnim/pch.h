@@ -23,14 +23,17 @@
 #include <d3d11_1.h>
 #include <wrl.h>
 
+#include "Core.h"
+
 // Using DXTK
-//#include  <SimpleMath.h>
+#include  <SimpleMath.h>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "D3DCompiler.lib")
 
 using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 template <typename T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
