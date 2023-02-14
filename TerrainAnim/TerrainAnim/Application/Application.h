@@ -1,6 +1,7 @@
 #pragma once
 #include "Mouse.h"
 #include "Keyboard.h"
+#include "Graphics/Direct3D.h"
 
 struct InputEvent
 {
