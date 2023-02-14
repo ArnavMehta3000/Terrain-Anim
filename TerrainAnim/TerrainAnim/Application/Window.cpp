@@ -78,6 +78,7 @@ void Window::InitAppAndShow(bool showMaximized)
 	if (!m_app->Init())
 	{
 		LOG("Failed to initialize app. Returning...");
+		__debugbreak();
 		return;
 	}
 
