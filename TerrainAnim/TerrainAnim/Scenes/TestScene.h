@@ -9,4 +9,6 @@ public:
 
 	virtual void Update(float dt) override;
 	virtual void Render() override;
+
+private:
 };
