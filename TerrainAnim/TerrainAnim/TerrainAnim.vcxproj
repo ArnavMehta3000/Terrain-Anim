@@ -90,6 +90,8 @@
   <ItemGroup>
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
+    <ClCompile Include="Core\Entities\CubeEntity.cpp" />
+    <ClCompile Include="Core\Entities\Entity.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Graphics\Direct3D.cpp" />
@@ -108,6 +110,9 @@
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core.h" />
+    <ClInclude Include="Core\Entities\CubeEntity.h" />
+    <ClInclude Include="Core\Entities\Entity.h" />
+    <ClInclude Include="Core\Object.h" />
     <ClInclude Include="Core\Structures.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Graphics\Direct3D.h" />

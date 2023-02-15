@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Scene.h"
+#include "Core/Entities/CubeEntity.h"
 
 class TestScene : public Scene
 {
@@ -13,8 +14,6 @@ public:
 	virtual void Unload() override;
 
 private:
-	ComPtr<ID3D11Buffer> m_vertexBuffer;
-	ComPtr<ID3D11Buffer> m_indexBuffer;
 	ComPtr<ID3D11Buffer> m_wvpBuffer;
-	std::unique_ptr<Shader> m_shader;
+	std::unique_ptr<CubeEntity> m_cube;
 };
