@@ -1,5 +1,5 @@
 #pragma once
-#include "Application/Application.h"
+#include "Core/Application.h"
 
 
 class Window
@@ -22,18 +22,18 @@ public:
 	const UINT GetClientHeight() const noexcept;
 
 private:
-	HWND      m_hWnd;
-	HINSTANCE m_hInst;
+	HWND                               m_hWnd;
+	HINSTANCE                          m_hInst;
 
-	UINT m_windowWidth, m_windowHeight;
-	UINT m_clientWidth, m_clientHeight;
+	UINT                               m_windowWidth, m_windowHeight;
+	UINT                               m_clientWidth, m_clientHeight;
 
-	std::unique_ptr<Application> m_app;
+	std::unique_ptr<Application>       m_app;
 
 	std::unique_ptr<DirectX::Keyboard> m_keyboard;
-	std::unique_ptr<DirectX::Mouse> m_mouse;
+	std::unique_ptr<DirectX::Mouse>    m_mouse;
 
-	DirectX::Keyboard::State m_kbState;
-	DirectX::Mouse::State m_mouseState;
+	DirectX::Keyboard::State           m_kbState;
+	DirectX::Mouse::State              m_mouseState;
 };
 

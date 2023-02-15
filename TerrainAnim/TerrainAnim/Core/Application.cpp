@@ -23,8 +23,8 @@ bool Application::Init()
 
 void Application::Run(const InputEvent input)
 {
-	D3D->ClearBackBuffer({ 1, 0, 0 ,1 });
-	D3D->Present();
+	Update();
+	Render();
 }
 
 void Application::Shutdown()
@@ -33,4 +33,14 @@ void Application::Shutdown()
 
 void Application::Resize()
 {
+}
+
+void Application::Update(float dt)
+{
+}
+
+void Application::Render()
+{
+	D3D->ClearBackBuffer({ 1, 0, 0 ,1 });
+	D3D->Present();
 }

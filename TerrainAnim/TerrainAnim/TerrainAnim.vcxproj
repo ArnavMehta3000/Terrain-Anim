@@ -88,9 +88,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application\Application.cpp" />
-    <ClCompile Include="Application\Camera.cpp" />
+    <ClCompile Include="Core\Application.cpp" />
+    <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Graphics\Direct3D.cpp" />
+    <ClCompile Include="Graphics\Shaders.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -98,15 +99,18 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Application\Window.cpp" />
+    <ClCompile Include="Core\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\Application.h" />
-    <ClInclude Include="Application\Camera.h" />
+    <ClInclude Include="Core\Application.h" />
+    <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core.h" />
+    <ClInclude Include="Core\Structures.h" />
     <ClInclude Include="Graphics\Direct3D.h" />
+    <ClInclude Include="Graphics\Primitives.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Application\Window.h" />
+    <ClInclude Include="Core\Window.h" />
+    <ClInclude Include="Graphics\Shaders.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

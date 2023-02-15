@@ -8,6 +8,7 @@ struct InputEvent
 	DirectX::Keyboard::State KeyboardState;
 	DirectX::Mouse::State MouseState;
 };
+
 class Application
 {
 public:
@@ -19,6 +20,10 @@ public:
 	void Shutdown();
 
 	void Resize();
+
+private:
+	void Update(float dt = 0.0f);
+	void Render();
 
 private:
 	HWND m_hWnd;
