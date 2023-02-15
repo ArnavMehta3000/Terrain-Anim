@@ -2,6 +2,7 @@
 #include "Mouse.h"
 #include "Keyboard.h"
 #include "Graphics/Direct3D.h"
+#include "Scenes/TestScene.h"
 
 struct InputEvent
 {
@@ -28,5 +29,7 @@ private:
 private:
 	HWND m_hWnd;
 	UINT m_width, m_height;
+
+	std::unique_ptr<TestScene> m_testScene;
 };
 

@@ -90,7 +90,6 @@ void Window::InitAppAndShow(bool showMaximized)
 	}
 	// ----- Main loop -----
 
-
 	m_app->Shutdown();
 }
 

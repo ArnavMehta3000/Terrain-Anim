@@ -15,8 +15,10 @@ Application::~Application()
 
 bool Application::Init()
 {
-	if(!D3D->Init(m_hWnd))
-		LOG("Failed to initialize Direct3D")
+	if (!D3D->Init(m_hWnd))
+		LOG("Failed to initialize Direct3D");
+
+	m_testScene = std::make_unique<TestScene>();
 
 	return true;
 }

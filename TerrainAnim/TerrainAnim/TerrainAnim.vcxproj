@@ -90,6 +90,7 @@
   <ItemGroup>
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
+    <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Graphics\Direct3D.cpp" />
     <ClCompile Include="Graphics\Shaders.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -100,6 +101,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Core\Window.cpp" />
+    <ClCompile Include="Scenes\TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h" />
@@ -111,6 +113,8 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Core\Window.h" />
     <ClInclude Include="Graphics\Shaders.h" />
+    <ClInclude Include="Core\Scene.h" />
+    <ClInclude Include="Scenes\TestScene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
