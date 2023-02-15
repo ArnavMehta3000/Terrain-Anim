@@ -58,3 +58,10 @@ void CubeEntity::Render()
 	D3D_CONTEXT->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
 	D3D_CONTEXT->DrawIndexed(Primitives::Cube::IndicesCount, 0, 0);
 }
+
+void CubeEntity::GUI()
+{
+	ImGui::DragFloat3("Cube Position", &m_position.x, 0.1f);
+	ImGui::DragFloat3("Cube Rotation", &m_rotation.x, 0.1f);
+	ImGui::DragFloat3("Cube Scale", &m_scale.x, 0.1f);
+}

@@ -17,11 +17,10 @@ public:
 	void Run(const InputEvent& input);
 	void Shutdown();
 
-	void Resize();
-
 private:
 	void Update(float dt, const InputEvent& input);
 	void Render();
+	void GUI();
 
 private:
 	HWND m_hWnd;

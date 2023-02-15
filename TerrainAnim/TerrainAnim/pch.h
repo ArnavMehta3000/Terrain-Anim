@@ -24,6 +24,9 @@
 #include <wrl.h>
 
 #include "Core.h"
+#include <Imgui/imgui_impl_dx11.h>
+#include <Imgui/imgui_impl_win32.h>
+#include "Imgui/imgui.h" 
 
 // Using DXTK
 #include  <SimpleMath.h>

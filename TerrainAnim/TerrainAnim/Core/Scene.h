@@ -12,6 +12,7 @@ public:
 	virtual void Load() = 0;
 	virtual void Update(float dt, const InputEvent& input) = 0;
 	virtual void Render() = 0;
+	virtual void GUI() = 0;
 	virtual void Unload() = 0;
 
 protected:

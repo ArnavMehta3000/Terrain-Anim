@@ -2,6 +2,10 @@
 #include "Core/Entities/Entity.h"
 
 Entity::Entity()
+	:
+	m_position(Vector3::Zero),
+	m_rotation(Vector3::Zero),
+	m_scale(Vector3::One)
 {
 	UpdateTransform();
 }

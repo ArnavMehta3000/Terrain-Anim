@@ -9,6 +9,7 @@ public:
 
 	void Update(float dt, const InputEvent& input) override;
 	void Render() override;
+	void GUI() override;
 
 private:
 	std::unique_ptr<Shader> m_shader;

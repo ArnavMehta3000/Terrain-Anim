@@ -23,7 +23,7 @@ void TestScene::Update(float dt, const InputEvent& input)
 	m_sceneCamera.Update(dt, input.KeyboardState, input.MouseState);
 
 	WVPBuffer wvp;
-	wvp.World      = Matrix::Identity;
+	wvp.World      = m_cube->GetWorldMatrix().Transpose();
 	wvp.View       = m_sceneCamera.GetView().Transpose();
 	wvp.Projection = m_sceneCamera.GetProjection().Transpose();
 
@@ -35,6 +35,12 @@ void TestScene::Update(float dt, const InputEvent& input)
 void TestScene::Render()
 {
 	m_cube->Render();
+}
+
+void TestScene::GUI()
+{
+	if (ImGui::CollapsingHeader("Test Scene Settings"))
+		m_cube->GUI();
 }
 
 void TestScene::Unload()

@@ -11,6 +11,7 @@ public:
 	virtual void Load() override;
 	virtual void Update(float dt, const InputEvent& input) override;
 	virtual void Render() override;
+	virtual void GUI() override;
 	virtual void Unload() override;
 
 private:

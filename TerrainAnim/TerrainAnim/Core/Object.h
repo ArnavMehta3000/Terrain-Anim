@@ -7,4 +7,5 @@ class Object
 public:
 	virtual void Update(float dt, const InputEvent& input) = 0;
 	virtual void Render() = 0;
+	virtual void GUI() {}
 };
