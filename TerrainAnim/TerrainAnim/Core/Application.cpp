@@ -74,6 +74,8 @@ void Application::GUI()
 	ImGui::NewFrame();
 	
 	ImGui::Begin("Editor");
+	ImGui::SetWindowPos({ 0.0f, 0.0f }, ImGuiCond_Always);
+	ImGui::SetWindowSize({ 350.0f, static_cast<float>(m_width) }, ImGuiCond_Once);
 	m_testScene->GUI();
 	ImGui::End();
 	

@@ -61,7 +61,11 @@ void CubeEntity::Render()
 
 void CubeEntity::GUI()
 {
-	ImGui::DragFloat3("Cube Position", &m_position.x, 0.1f);
-	ImGui::DragFloat3("Cube Rotation", &m_rotation.x, 0.1f);
-	ImGui::DragFloat3("Cube Scale", &m_scale.x, 0.1f);
+	if (ImGui::TreeNode("Cube Transform"))
+	{
+		ImGui::DragFloat3("Cube Position", &m_position.x, 0.1f);
+		ImGui::DragFloat3("Cube Rotation", &m_rotation.x, 0.1f);
+		ImGui::DragFloat3("Cube Scale", &m_scale.x, 0.1f);
+		ImGui::TreePop();
+	}
 }
