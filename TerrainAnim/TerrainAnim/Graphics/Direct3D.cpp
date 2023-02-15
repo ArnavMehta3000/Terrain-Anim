@@ -142,6 +142,7 @@ bool Direct3D::Init(HWND window)
 
 	// Set defaults
 	m_context->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
+	m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	SetWireframe(false);
 
 	// Create viewport
@@ -420,9 +421,10 @@ void Direct3D::CreatePixelShader(std::shared_ptr<PixelShader>& ps, LPCWSTR srcFi
 void Direct3D::CreateConstantBuffer(ComPtr<ID3D11Buffer>& buf, UINT size, D3D11_USAGE usage, UINT cpuAccess)
 {
 	CREATE_ZERO(D3D11_BUFFER_DESC, cbd);
-	cbd.Usage = usage;
-	cbd.ByteWidth = size;
-	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbd.Usage          = usage;
+	cbd.ByteWidth      = size;
+	cbd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
 	cbd.CPUAccessFlags = cpuAccess;
 	HR(m_device->CreateBuffer(&cbd, nullptr, buf.ReleaseAndGetAddressOf()));
+	LOG("Created constant buffer of size: " << size);
 }

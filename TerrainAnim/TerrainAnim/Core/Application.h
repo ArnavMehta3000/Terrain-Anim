@@ -3,12 +3,9 @@
 #include "Keyboard.h"
 #include "Graphics/Direct3D.h"
 #include "Scenes/TestScene.h"
+#include "Core/Structures.h"
+#include "Core/Timer.h"
 
-struct InputEvent
-{
-	DirectX::Keyboard::State KeyboardState;
-	DirectX::Mouse::State MouseState;
-};
 
 class Application
 {
@@ -17,19 +14,19 @@ public:
 	~Application();
 
 	bool Init();
-	void Run(const InputEvent input);
+	void Run(const InputEvent& input);
 	void Shutdown();
 
 	void Resize();
 
 private:
-	void Update(float dt = 0.0f);
+	void Update(float dt, const InputEvent& input);
 	void Render();
 
 private:
 	HWND m_hWnd;
 	UINT m_width, m_height;
-
+	Timer m_appTimer;
 	std::unique_ptr<TestScene> m_testScene;
 };
 

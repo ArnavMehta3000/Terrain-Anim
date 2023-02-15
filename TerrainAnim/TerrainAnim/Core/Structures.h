@@ -1,5 +1,11 @@
 #pragma once
 
+struct InputEvent
+{
+	DirectX::Keyboard::State KeyboardState;
+	DirectX::Mouse::State MouseState;
+};
+
 struct SimpleVertex
 {
 	Vector3 Pos;

@@ -1,4 +1,6 @@
-float4 PS() : SV_TARGET
+#include "Includes.hlsli"
+
+float4 PS(VSOutput input) : SV_TARGET
 {
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+    return input.Position;
 }
