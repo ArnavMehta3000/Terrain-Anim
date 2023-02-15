@@ -51,7 +51,7 @@ void TestScene::Update(float dt, const InputEvent& input)
 	m_sceneCamera.Update(dt, input.KeyboardState, input.MouseState);
 
 	WVPBuffer wvp;
-	wvp.World      = Matrix::CreateTranslation(Vector3(0,0,5));
+	wvp.World      = Matrix::Identity;
 	wvp.View       = m_sceneCamera.GetView().Transpose();
 	wvp.Projection = m_sceneCamera.GetProjection().Transpose();
 

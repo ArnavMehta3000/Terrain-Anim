@@ -2,5 +2,5 @@
 
 float4 PS(VSOutput input) : SV_TARGET
 {
-    return input.Position;
+    return float4(input.TexCoord, 0, 1);
 }

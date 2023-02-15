@@ -138,7 +138,7 @@ bool Direct3D::Init(HWND window)
 	ComPtr<ID3D11Texture2D> backBufferPtr;
 	HR(m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBufferPtr.ReleaseAndGetAddressOf())));
 	HR(m_device->CreateRenderTargetView(backBufferPtr.Get(), nullptr, m_backBufferRTV.ReleaseAndGetAddressOf()));
-	LOG("Init Back Buffer");
+	LOG("Init back buffer");
 
 	// Set defaults
 	m_context->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
