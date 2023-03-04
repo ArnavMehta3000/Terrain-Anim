@@ -13,7 +13,7 @@ void TestScene::Load()
 {	
 	m_sceneCamera.Position(Vector3(0, 0, -8));
 	D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
-	D3D_CONTEXT->VSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
+	D3D_CONTEXT->DSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
 
 	m_cube = std::make_unique<CubeEntity>();
 }

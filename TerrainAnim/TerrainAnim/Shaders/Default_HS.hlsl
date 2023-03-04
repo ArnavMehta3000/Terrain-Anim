@@ -1,48 +1,32 @@
-struct VS_CONTROL_POINT_OUTPUT
-{
-	float3 vPosition : WORLDPOS;
-};
-
-struct HS_CONTROL_POINT_OUTPUT
-{
-	float3 vPosition : WORLDPOS; 
-};
-
-struct HS_CONSTANT_DATA_OUTPUT
-{
-	float EdgeTessFactor[3]			: SV_TessFactor;
-	float InsideTessFactor			: SV_InsideTessFactor;
-};
-
-#define NUM_CONTROL_POINTS 3
-
-HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
-	InputPatch<VS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> ip,
-	uint PatchID : SV_PrimitiveID)
-{
-	HS_CONSTANT_DATA_OUTPUT Output;
-
-	Output.EdgeTessFactor[0] = 
-		Output.EdgeTessFactor[1] = 
-		Output.EdgeTessFactor[2] = 
-		Output.InsideTessFactor = 15;
-
-	return Output;
-}
+#include "Includes.hlsli"
 
 [domain("tri")]
-[partitioning("fractional_odd")]
+[partitioning("fractional_even")]
 [outputtopology("triangle_cw")]
 [outputcontrolpoints(3)]
-[patchconstantfunc("CalcHSPatchConstants")]
-HS_CONTROL_POINT_OUTPUT HS( 
-	InputPatch<VS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> ip, 
-	uint i : SV_OutputControlPointID,
-	uint PatchID : SV_PrimitiveID )
+[patchconstantfunc("PassThroughConstantHS")]
+[maxtessfactor(7.0)]
+
+HS_IO HS(InputPatch<HS_IO, 3> ip, uint i : SV_OutputControlPointID, uint PatchID : SV_PrimitiveID)
 {
-	HS_CONTROL_POINT_OUTPUT Output;
+    HS_IO output;
+    
+    output.Position  = ip[i].Position;
+    output.PositionW = ip[i].PositionW;
+    output.TexCoord  = ip[i].TexCoord;
+    
+    return output;
+}
 
-	Output.vPosition = ip[i].vPosition;
-
-	return Output;
+HS_CONSTANT_DATA_OUTPUT PassThroughConstantHS(InputPatch<HS_IO, 3> ip, uint PatchID : SV_PrimitiveID)
+{
+    float tessellationFactor = 0.1f;
+    
+    HS_CONSTANT_DATA_OUTPUT output;
+    output.Edges[0] = tessellationFactor;
+    output.Edges[1] = tessellationFactor;
+    output.Edges[2] = tessellationFactor;
+    output.Inside   = tessellationFactor;
+    
+    return output;
 }

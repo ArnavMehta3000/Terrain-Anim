@@ -12,12 +12,11 @@ CubeEntity::CubeEntity()
 {
 	Shader::InitInfo desc{};
 	desc.VertexShaderFile = L"Shaders/Default_VS.hlsl";
-	desc.PixelShaderFile = L"Shaders/Default_PS.hlsl";
-	desc.HullShaderFile = L"Shaders/Default_HS.hlsl";
+	desc.PixelShaderFile  = L"Shaders/Default_PS.hlsl";
+	desc.HullShaderFile   = L"Shaders/Default_HS.hlsl";
 	desc.DomainShaderFile = L"Shaders/Default_DS.hlsl";
 
 	m_shader = std::make_unique<Shader>(desc);
-	m_shader->BindAll();
 
 	// Create vertex buffer
 	CREATE_ZERO(D3D11_BUFFER_DESC, vbd);
@@ -58,10 +57,11 @@ void CubeEntity::Update(float dt, const InputEvent& input)
 void CubeEntity::Render()
 {
 	Entity::Render();
+	m_shader->BindAll();
 
 	// For tessellation purposes
 	D3D_CONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
-	
+
 	UINT stride = Primitives::Cube::VerticesTypeSize;
 	UINT offset = 0;
 	D3D_CONTEXT->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);

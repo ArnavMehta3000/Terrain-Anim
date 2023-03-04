@@ -1,31 +1,27 @@
-struct DS_OUTPUT
-{
-	float4 vPosition  : SV_POSITION;
-};
+#include "Includes.hlsli"
 
-struct HS_CONTROL_POINT_OUTPUT
+cbuffer WVPBuffer : register(b0)
 {
-	float3 vPosition : WORLDPOS; 
+    matrix World;
+    matrix View;
+    matrix Projection;
 };
-
-struct HS_CONSTANT_DATA_OUTPUT
-{
-	float EdgeTessFactor[3]			: SV_TessFactor;
-	float InsideTessFactor			: SV_InsideTessFactor;
-};
-
-#define NUM_CONTROL_POINTS 3
 
 [domain("tri")]
-DS_OUTPUT DS(
-	HS_CONSTANT_DATA_OUTPUT input,
-	float3 domain : SV_DomainLocation,
-	const OutputPatch<HS_CONTROL_POINT_OUTPUT, NUM_CONTROL_POINTS> patch)
+PSInput DS(HS_CONSTANT_DATA_OUTPUT input, float3 bcCoords : SV_DomainLocation, const OutputPatch<HS_IO, 3> TrianglePatch)
 {
-	DS_OUTPUT Output;
-
-	Output.vPosition = float4(
-		patch[0].vPosition*domain.x+patch[1].vPosition*domain.y+patch[2].vPosition*domain.z,1);
-
-	return Output;
+    PSInput output;
+    
+    float3 worldPos = bcCoords.x * TrianglePatch[0].Position.xyz +
+                      bcCoords.y * TrianglePatch[1].Position.xyz +
+                      bcCoords.z * TrianglePatch[2].Position.xyz;
+    
+    output.TexCoord = bcCoords.x * TrianglePatch[0].TexCoord + bcCoords.y + TrianglePatch[1].TexCoord;
+    
+    output.Position  = mul(float4(worldPos, 1.0f), World);
+    output.PositionW = output.Position;
+    output.Position  = mul(output.Position, View);
+    output.Position  = mul(output.Position, Projection);
+    
+    return output;
 }
