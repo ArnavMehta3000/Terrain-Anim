@@ -2,7 +2,7 @@
 
 struct VertexShader
 {
-	VertexShader() {}
+	VertexShader() = default;
 	~VertexShader() { this->Release(); }
 	LPCWSTR Name = L"Vertex Shader";
 
@@ -16,7 +16,7 @@ struct VertexShader
 
 struct PixelShader
 {
-	PixelShader() {}
+	PixelShader() = default;
 	~PixelShader() { this->Release(); }
 
 	LPCWSTR Name = L"PixelShader";
@@ -26,16 +26,59 @@ struct PixelShader
 	void Release();
 };
 
+struct HullShader
+{
+	HullShader() = default;
+	~HullShader() { this->Release(); }
+
+	LPCWSTR Name = L"HullShader";
+	ComPtr<ID3D11HullShader> Shader;
+	ComPtr<ID3DBlob> Blob;
+
+	void Release();
+};
+
+struct DomainShader
+{
+	DomainShader() = default;
+	~DomainShader() { this->Release(); }
+
+	LPCWSTR Name = L"DomainShader";
+	ComPtr<ID3D11DomainShader> Shader;
+	ComPtr<ID3DBlob> Blob;
+
+	void Release();
+};
+
 struct Shader
 {
-	Shader();
+	struct ShaderCreationDesc
+	{
+		LPCWSTR VertexShaderFile;
+		LPCWSTR PixelShaderFile;
+		LPCWSTR HullShaderFile;
+		LPCWSTR DomainShaderFile;
+
+		LPCSTR vsEntry = "VS";
+		LPCSTR psEntry = "PS";
+		LPCSTR hsEntry = "HS";
+		LPCSTR dsEntry = "DS";
+	};
+
+	Shader() = default;
 	Shader(LPCWSTR vsFile, LPCWSTR psFile, LPCSTR vsEntry = "VS", LPCSTR psEntry = "PS");
-	~Shader();
+	Shader(const ShaderCreationDesc& desc);
+	~Shader() = default;
 
 	void BindVS(bool applyInputLayout);
 	void BindPS();
-	void BindShader(bool applyInputLayout = true);
+	void BindAll(bool applyInputLayout = true);
 
 	std::shared_ptr<VertexShader> m_VertexShader;
-	std::shared_ptr<PixelShader> m_PixelShader;
+	std::shared_ptr<PixelShader>  m_PixelShader;
+	std::shared_ptr<HullShader>   m_HullShader;
+	std::shared_ptr<DomainShader> m_DomainShader;
+
+private:
+	bool m_isCompleteShader = false;  // A complete shader contains all 4 shaders
 };

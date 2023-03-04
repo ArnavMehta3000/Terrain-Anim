@@ -11,13 +11,13 @@ CubeEntity::CubeEntity()
 	m_shader(nullptr)
 {
 	m_shader = std::make_unique<Shader>(L"Shaders/Default_VS.hlsl", L"Shaders/Default_PS.hlsl");
-	m_shader->BindShader();
+	m_shader->BindAll();
 
 	// Create vertex buffer
 	CREATE_ZERO(D3D11_BUFFER_DESC, vbd);
-	vbd.Usage = D3D11_USAGE_DEFAULT;
-	vbd.ByteWidth = Primitives::Cube::VerticesByteWidth;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.Usage          = D3D11_USAGE_DEFAULT;
+	vbd.ByteWidth      = Primitives::Cube::VerticesByteWidth;
+	vbd.BindFlags      = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 
 	CREATE_ZERO(D3D11_SUBRESOURCE_DATA, vertexInitData);
@@ -27,9 +27,9 @@ CubeEntity::CubeEntity()
 
 	// Create index buffer
 	CREATE_ZERO(D3D11_BUFFER_DESC, ibd);
-	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.ByteWidth = Primitives::Cube::IndicesByteWidth;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.Usage          = D3D11_USAGE_DEFAULT;
+	ibd.ByteWidth      = Primitives::Cube::IndicesByteWidth;
+	ibd.BindFlags      = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 
 	CREATE_ZERO(D3D11_SUBRESOURCE_DATA, indexInitData);

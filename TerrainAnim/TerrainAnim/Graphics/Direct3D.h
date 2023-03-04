@@ -19,6 +19,8 @@ public:
 
 	void CreateVertexShader(std::shared_ptr<VertexShader>& vs, LPCWSTR srcFile, LPCSTR profile = "vs_5_0", LPCSTR entryPoint = "VS");
 	void CreatePixelShader(std::shared_ptr<PixelShader>& ps, LPCWSTR srcFile, LPCSTR profile = "ps_5_0", LPCSTR entryPoint = "PS");
+	void CreateHullShader(std::shared_ptr<HullShader>& hs, LPCWSTR srcFile, LPCSTR profile = "hs_5_0", LPCSTR entryPoint = "HS");
+	void CreateDomainShader(std::shared_ptr<DomainShader>& ds, LPCWSTR srcFile, LPCSTR profile = "ds_5_0", LPCSTR entryPoint = "DS");
 	void CreateConstantBuffer(ComPtr<ID3D11Buffer>& buf, UINT size, D3D11_USAGE usage = D3D11_USAGE_DEFAULT, UINT cpuAccess = 0);
 
 private:

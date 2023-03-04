@@ -238,6 +238,7 @@ void Direct3D::CreateResources(UINT width, UINT height)
 }
 
 
+#pragma region Shader Creation
 void Direct3D::CreateVertexShader(std::shared_ptr<VertexShader>& vs, LPCWSTR srcFile, LPCSTR profile, LPCSTR entryPoint)
 {
 	assert(vs.get() != nullptr);
@@ -417,6 +418,108 @@ void Direct3D::CreatePixelShader(std::shared_ptr<PixelShader>& ps, LPCWSTR srcFi
 
 	LOG("Created pixel shader from file");
 }
+
+void Direct3D::CreateHullShader(std::shared_ptr<HullShader>& hs, LPCWSTR srcFile, LPCSTR profile, LPCSTR entryPoint)
+{
+	assert(hs.get() != nullptr);
+
+	hs->Name = srcFile;
+
+	DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+	shaderFlags |= D3DCOMPILE_DEBUG;
+	shaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif // _DEBUG
+
+		ComPtr<ID3DBlob> errorBlob = nullptr;
+	HRESULT hr = D3DCompileFromFile(
+		srcFile,
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		entryPoint,
+		profile,
+		shaderFlags,
+		0,
+		hs->Blob.ReleaseAndGetAddressOf(),
+		errorBlob.ReleaseAndGetAddressOf()
+	);
+
+	if (FAILED(hr))  // Failed to compile
+	{
+		if (errorBlob)
+		{
+			LOG(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()));
+			COM_RELEASE(errorBlob);
+		}
+		HR(hr);  // If error halts here, check console for message
+	}
+	else  // Compiled warnings
+	{
+		if (errorBlob)
+		{
+			LOG(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()));
+			COM_RELEASE(errorBlob);
+		}
+	}
+	COM_RELEASE(errorBlob);
+
+	// Create hull shader
+	HR(m_device->CreateHullShader(hs->Blob->GetBufferPointer(), hs->Blob->GetBufferSize(), nullptr, hs->Shader.ReleaseAndGetAddressOf()));
+	
+	LOG("Created hull shader from file");
+}
+
+void Direct3D::CreateDomainShader(std::shared_ptr<DomainShader>& ds, LPCWSTR srcFile, LPCSTR profile, LPCSTR entryPoint)
+{
+	assert(ds.get() != nullptr);
+
+	ds->Name = srcFile;
+
+	DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+	shaderFlags |= D3DCOMPILE_DEBUG;
+	shaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif // _DEBUG
+
+		ComPtr<ID3DBlob> errorBlob = nullptr;
+	HRESULT hr = D3DCompileFromFile(
+		srcFile,
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		entryPoint,
+		profile,
+		shaderFlags,
+		0,
+		ds->Blob.ReleaseAndGetAddressOf(),
+		errorBlob.ReleaseAndGetAddressOf()
+	);
+
+	if (FAILED(hr))  // Failed to compile
+	{
+		if (errorBlob)
+		{
+			LOG(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()));
+			COM_RELEASE(errorBlob);
+		}
+		HR(hr);  // If error halts here, check console for message
+	}
+	else  // Compiled warnings
+	{
+		if (errorBlob)
+		{
+			LOG(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()));
+			COM_RELEASE(errorBlob);
+		}
+	}
+	COM_RELEASE(errorBlob);
+
+	// Create domain shader
+	HR(m_device->CreateDomainShader(ds->Blob->GetBufferPointer(), ds->Blob->GetBufferSize(), nullptr, ds->Shader.ReleaseAndGetAddressOf()));
+
+	LOG("Created domain shader from file");
+}
+#pragma endregion
+
 
 void Direct3D::CreateConstantBuffer(ComPtr<ID3D11Buffer>& buf, UINT size, D3D11_USAGE usage, UINT cpuAccess)
 {

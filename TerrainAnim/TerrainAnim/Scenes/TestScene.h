@@ -15,6 +15,7 @@ public:
 	virtual void Unload() override;
 
 private:
-	ComPtr<ID3D11Buffer> m_wvpBuffer;
+	ComPtr<ID3D11Buffer>        m_wvpBuffer;
+
 	std::unique_ptr<CubeEntity> m_cube;
 };
