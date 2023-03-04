@@ -16,6 +16,5 @@ public:
 
 private:
 	ComPtr<ID3D11Buffer>        m_wvpBuffer;
-
 	std::unique_ptr<CubeEntity> m_cube;
 };

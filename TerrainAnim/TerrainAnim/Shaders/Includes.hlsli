@@ -11,3 +11,8 @@ struct VSOutput
     float4 PositionW : POSITION;
     float2 TexCoord : TEXCOORD0;
 };
+
+struct HSInput
+{
+    
+}

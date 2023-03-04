@@ -27,7 +27,7 @@ Shader::Shader(LPCWSTR vsFile, LPCWSTR psFile, LPCSTR vsEntry, LPCSTR psEntry)
 	D3D->CreatePixelShader(m_PixelShader, psFile, "ps_5_0", psEntry);
 }
 
-Shader::Shader(const ShaderCreationDesc& desc)
+Shader::Shader(const InitInfo& desc)
 	:
 	m_VertexShader(std::make_shared<VertexShader>()),
 	m_PixelShader(std::make_shared<PixelShader>()),
@@ -37,8 +37,8 @@ Shader::Shader(const ShaderCreationDesc& desc)
 {
 	D3D->CreateVertexShader(m_VertexShader, desc.VertexShaderFile, "vs_5_0", desc.vsEntry);
 	D3D->CreatePixelShader(m_PixelShader, desc.PixelShaderFile, "ps_5_0", desc.psEntry);
-	D3D->CreateHullShader(m_HullShader, desc.HullShaderFile, "ps_5_0", desc.hsEntry);
-	D3D->CreateDomainShader(m_DomainShader, desc.DomainShaderFile, "ps_5_0", desc.dsEntry);
+	D3D->CreateHullShader(m_HullShader, desc.HullShaderFile, "hs_5_0", desc.hsEntry);
+	D3D->CreateDomainShader(m_DomainShader, desc.DomainShaderFile, "ds_5_0", desc.dsEntry);
 }
 
 void Shader::BindVS(bool applyInputLayout)
@@ -53,10 +53,22 @@ void Shader::BindPS()
 	D3D_CONTEXT->PSSetShader(m_PixelShader->Shader.Get(), nullptr, 0);
 }
 
+void Shader::BindHS()
+{
+	D3D_CONTEXT->HSSetShader(m_HullShader->Shader.Get(), nullptr, 0);
+}
+
+void Shader::BindDS()
+{
+	D3D_CONTEXT->DSSetShader(m_DomainShader->Shader.Get(), nullptr, 0);
+}
+
 void Shader::BindAll(bool applyInputLayout)
 {
 	BindVS(applyInputLayout);
 	BindPS();
+	BindHS();
+	BindDS();
 }
 
 void HullShader::Release()

@@ -52,7 +52,7 @@ struct DomainShader
 
 struct Shader
 {
-	struct ShaderCreationDesc
+	struct InitInfo
 	{
 		LPCWSTR VertexShaderFile;
 		LPCWSTR PixelShaderFile;
@@ -67,11 +67,13 @@ struct Shader
 
 	Shader() = default;
 	Shader(LPCWSTR vsFile, LPCWSTR psFile, LPCSTR vsEntry = "VS", LPCSTR psEntry = "PS");
-	Shader(const ShaderCreationDesc& desc);
+	Shader(const InitInfo& desc);
 	~Shader() = default;
 
 	void BindVS(bool applyInputLayout);
 	void BindPS();
+	void BindHS();
+	void BindDS();
 	void BindAll(bool applyInputLayout = true);
 
 	std::shared_ptr<VertexShader> m_VertexShader;
