@@ -22,5 +22,5 @@ struct HS_IO
 struct HS_CONSTANT_DATA_OUTPUT
 {
     float Edges[3] : SV_TessFactor;
-    float Inside : SV_InsideTessFactor;
+    float Inside   : SV_InsideTessFactor;
 };

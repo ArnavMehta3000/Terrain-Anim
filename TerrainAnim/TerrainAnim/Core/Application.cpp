@@ -76,7 +76,23 @@ void Application::GUI()
 	ImGui::Begin("Editor");
 	ImGui::SetWindowPos({ 0.0f, 0.0f }, ImGuiCond_Always);
 	ImGui::SetWindowSize({ 350.0f, static_cast<float>(m_width) }, ImGuiCond_Once);
+	
+	if (ImGui::CollapsingHeader("Application", nullptr, ImGuiTreeNodeFlags_Bullet))
+	{
+		ImGui::Text("How to use the Application");
+		ImGui::Text("1 - Set view to solid");
+		ImGui::Text("2 - Set view to wirerframe");
+		
+		if (ImGui::TreeNode("App Stats"))
+		{
+			ImGui::Text("Frame Time: %.4fms", m_appTimer.DeltaTime() * 1000.0f);
+			ImGui::Text("FPS: %.4f", 1.0f / m_appTimer.DeltaTime());
+			ImGui::TreePop();
+		}
+	}
+	
 	m_testScene->GUI();
+	
 	ImGui::End();
 	
 	ImGui::Render();
