@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Object.h"
 #include "Graphics/Shaders.h"
+#include "Graphics/Texture.h"
 
 class Entity : public Object
 {
@@ -21,5 +22,5 @@ protected:
 	Vector3 m_position;
 	Vector3 m_rotation;
 	Vector3 m_scale;
-	Matrix m_worldMatrix;
+	Matrix  m_worldMatrix;
 };

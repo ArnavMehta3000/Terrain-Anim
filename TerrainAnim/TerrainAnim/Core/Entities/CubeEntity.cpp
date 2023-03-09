@@ -3,12 +3,13 @@
 #include "Graphics/Direct3D.h"
 #include "Core/Primitives.h"
 
-CubeEntity::CubeEntity()
+CubeEntity::CubeEntity(const wchar_t* textureFile)
 	:
 	Entity(),
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
-	m_shader(nullptr)
+	m_shader(nullptr),
+	m_texture(L"Textures/PFP.JPG")
 {
 	ZeroMemory(&m_tessellationFactors, sizeof(TessellationFactors));
 	m_tessellationFactors.EdgeTessFactor = 1.0f;
@@ -66,7 +67,7 @@ void CubeEntity::Render()
 {
 	Entity::Render();
 	m_shader->BindAll();
-
+	m_texture.SetInPS(0);
 	// For tessellation purposes
 	D3D_CONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 	

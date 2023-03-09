@@ -143,6 +143,7 @@ bool Direct3D::Init(HWND window)
 	// Set defaults
 	m_context->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
 	m_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_context->PSSetSamplers(0, 1, m_samplerAnisotropicWrap.GetAddressOf());
 	LOG("Set default primitive topology: [TRIANGLE_LIST]");
 	SetWireframe(false);
 

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Application.h"
+#include "Graphics/Texture.h"
 #include <algorithm>
 
 
@@ -11,6 +12,7 @@ Application::Application(HWND window, UINT width, UINT height)
 	m_appTimer(Timer()),
 	m_currentScene(0)
 {
+	HR(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
 }
 
 Application::~Application()
@@ -31,7 +33,8 @@ bool Application::Init()
 
 	m_scenes.push_back(new TestScene(m_width, m_height));
 	m_scenes.push_back(new GridScene(m_width*2, m_height*2));
-
+	Texture2D(L"Textures/PFP.JPG");
+	
 	std::for_each(m_scenes.begin(), m_scenes.end(), [](Scene* scene) {scene->Load(); });
 	
 	m_appTimer.Reset();

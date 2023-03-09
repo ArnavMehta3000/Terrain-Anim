@@ -1,6 +1,9 @@
 #include "Includes.hlsli"
 
+Texture2D tex          : register(t0);
+SamplerState samLinear : register(s0);
+
 float4 PS(PSInput input) : SV_TARGET
 {
-    return float4(input.PositionW.xz, 1, 1);
+    return tex.Sample(samLinear, input.TexCoord);
 }
