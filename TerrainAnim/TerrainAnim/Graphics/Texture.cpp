@@ -11,7 +11,14 @@ Texture2D::Texture2D(const wchar_t* fileName)
         LOG("--- Texture2D file path empty ---");
         return;
     }
-    else
+
+    ID3D11Resource* res = nullptr;
+    DirectX::CreateWICTextureFromFile(D3D_DEVICE,
+        fileName, &res, nullptr);
+
+    HR(res->QueryInterface(IID_ID3D11Texture2D, (void**)m_texture.ReleaseAndGetAddressOf()));
+    
+    m_texture->GetDesc(&m_desc);
 
     HR(DirectX::CreateWICTextureFromFileEx(D3D_DEVICE, D3D_CONTEXT,
         fileName,
@@ -19,11 +26,6 @@ Texture2D::Texture2D(const wchar_t* fileName)
         D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0,
         WIC_LOADER_DEFAULT,
         nullptr, m_srv.ReleaseAndGetAddressOf()));
-
-    CREATE_ZERO(D3D11_SHADER_RESOURCE_VIEW_DESC, desc);
-
-    m_srv->GetDesc(&desc);
-
 }
 
 Texture2D::~Texture2D()
