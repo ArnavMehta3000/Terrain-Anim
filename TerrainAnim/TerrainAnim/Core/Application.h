@@ -3,6 +3,7 @@
 #include "Keyboard.h"
 #include "Graphics/Direct3D.h"
 #include "Scenes/TestScene.h"
+#include "Scenes/GridScene.h"
 #include "Core/Structures.h"
 #include "Core/Timer.h"
 
@@ -23,9 +24,10 @@ private:
 	void GUI();
 
 private:
-	HWND m_hWnd;
-	UINT m_width, m_height;
-	Timer m_appTimer;
-	std::unique_ptr<TestScene> m_testScene;
+	HWND                m_hWnd;
+	UINT                m_width, m_height;
+	Timer               m_appTimer;
+	std::vector<Scene*> m_scenes;
+	int                 m_currentScene;
 };
 

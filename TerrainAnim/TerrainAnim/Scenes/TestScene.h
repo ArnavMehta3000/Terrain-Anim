@@ -6,7 +6,7 @@ class TestScene : public Scene
 {
 public:
 	TestScene(UINT width, UINT height);
-	~TestScene() {}
+	~TestScene() = default;
 
 	virtual void Load() override;
 	virtual void Update(float dt, const InputEvent& input) override;

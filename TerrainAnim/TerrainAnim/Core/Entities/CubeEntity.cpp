@@ -11,10 +11,10 @@ CubeEntity::CubeEntity()
 	m_shader(nullptr)
 {
 	Shader::InitInfo desc{};
-	desc.VertexShaderFile = L"Shaders/Default_VS.hlsl";
-	desc.PixelShaderFile  = L"Shaders/Default_PS.hlsl";
-	desc.HullShaderFile   = L"Shaders/Default_HS.hlsl";
-	desc.DomainShaderFile = L"Shaders/Default_DS.hlsl";
+	desc.VertexShaderFile = L"Shaders/Tess_VS.hlsl";
+	desc.PixelShaderFile  = L"Shaders/Tess_PS.hlsl";
+	desc.HullShaderFile   = L"Shaders/Tess_HS.hlsl";
+	desc.DomainShaderFile = L"Shaders/Tess_DS.hlsl";
 
 	m_shader = std::make_unique<Shader>(desc);
 

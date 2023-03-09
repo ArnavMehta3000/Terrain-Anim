@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Camera.h"
 #include "Core/Structures.h"
+
 struct Shader;
 
 class Scene
@@ -15,7 +16,9 @@ public:
 	virtual void GUI() = 0;
 	virtual void Unload() = 0;
 
+	const Camera& GetSceneCamera() const noexcept { return m_sceneCamera; }
+
 protected:
 	Camera m_sceneCamera;
-	UINT m_sceneWidth, m_sceneHeight;
+	UINT   m_sceneWidth, m_sceneHeight;
 };

@@ -11,8 +11,9 @@ public:
 
 	void Update(double dt, const DirectX::Keyboard::State& kb, const DirectX::Mouse::State& mouse);
 
-	void Position(Vector3 pos) { m_position = pos; }
-	const Vector3& Position() { return m_position; }
+	void Position(Vector3 pos)               { m_position = pos; }
+	const Vector3& Position() const noexcept { return m_position; }
+	const float GetSpeed()    const noexcept { return m_speed; }
 
 	const Matrix& GetView()           const { return m_view; }
 	const Matrix& GetProjection()     const { return m_projection; }
@@ -29,16 +30,16 @@ private:
 	Vector3 m_target;
 	Vector3 m_up;
 
-	float m_viewAngle;
-	float m_width;
-	float m_height;
-	float m_nearPlane;
-	float m_farPlane;
+	float   m_viewAngle;
+	float   m_width;
+	float   m_height;
+	float   m_nearPlane;
+	float   m_farPlane;
 
-	float m_speed;
-	float m_sensitivity;
+	float   m_speed;
+	float   m_sensitivity;
 
-	Matrix m_view;
-	Matrix m_projection;
+	Matrix  m_view;
+	Matrix  m_projection;
 };
 

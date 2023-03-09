@@ -132,6 +132,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Core\Window.cpp" />
+    <ClCompile Include="Scenes\GridScene.cpp" />
     <ClCompile Include="Scenes\TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +158,7 @@
     <ClInclude Include="Core\Window.h" />
     <ClInclude Include="Graphics\Shaders.h" />
     <ClInclude Include="Core\Scene.h" />
+    <ClInclude Include="Scenes\GridScene.h" />
     <ClInclude Include="Scenes\TestScene.h" />
   </ItemGroup>
   <ItemGroup>

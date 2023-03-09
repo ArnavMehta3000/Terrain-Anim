@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Scenes/TestScene.h"
 #include "Graphics/Direct3D.h"
-#include "Core/Primitives.h"
 
 TestScene::TestScene(UINT width, UINT height)
 	:
@@ -13,7 +12,6 @@ void TestScene::Load()
 {	
 	m_sceneCamera.Position(Vector3(0, 0, -8));
 	D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
-	D3D_CONTEXT->DSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
 
 	m_cube = std::make_unique<CubeEntity>();
 }
@@ -34,6 +32,7 @@ void TestScene::Update(float dt, const InputEvent& input)
 
 void TestScene::Render()
 {
+	D3D_CONTEXT->DSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
 	m_cube->Render();
 }
 
