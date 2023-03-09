@@ -30,7 +30,7 @@ bool Application::Init()
 	ImGui::StyleColorsDark();
 
 	m_scenes.push_back(new TestScene(m_width, m_height));
-	m_scenes.push_back(new GridScene(m_width, m_height, GridDesc(20, 20)));
+	m_scenes.push_back(new GridScene(m_width*2, m_height*2));
 
 	std::for_each(m_scenes.begin(), m_scenes.end(), [](Scene* scene) {scene->Load(); });
 	
@@ -39,6 +39,7 @@ bool Application::Init()
 	return true;
 }
 
+static bool doOnce = true;
 void Application::Run(const InputEvent& input)
 {
 	m_appTimer.Tick();
@@ -47,6 +48,12 @@ void Application::Run(const InputEvent& input)
 	Update(m_appTimer, input);
 	Render();
 	GUI();
+
+	/*if (doOnce)
+	{
+		m_currentScene = 1;
+		doOnce = false;
+	}*/
 
 	D3D->Present();
 }

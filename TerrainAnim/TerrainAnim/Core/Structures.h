@@ -2,6 +2,8 @@
 #include "Mouse.h"
 #include "Keyboard.h"
 
+constexpr float HS_MAX_TESS_FACTOR = 64.0f;
+
 struct InputEvent
 {
 	DirectX::Keyboard::State KeyboardState;
@@ -20,4 +22,11 @@ struct WVPBuffer
 	Matrix World;
 	Matrix View;
 	Matrix Projection;
+};
+
+struct TessellationFactors
+{
+	float EdgeTessFactor = 8.0f;
+	float InsideTessFactor = 8.0f;
+	Vector2 _pad1;
 };

@@ -13,6 +13,9 @@ public:
 
 private:
 	std::unique_ptr<Shader> m_shader;
-	ComPtr<ID3D11Buffer> m_vertexBuffer;
-	ComPtr<ID3D11Buffer> m_indexBuffer;
+	ComPtr<ID3D11Buffer>    m_vertexBuffer;
+	ComPtr<ID3D11Buffer>    m_indexBuffer;
+
+	ComPtr<ID3D11Buffer>    m_tessFactorsHS;
+	TessellationFactors     m_tessellationFactors;
 };

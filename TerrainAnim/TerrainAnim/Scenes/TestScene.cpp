@@ -5,8 +5,7 @@
 TestScene::TestScene(UINT width, UINT height)
 	:
 	Scene(width, height)
-{
-}
+{}
 
 void TestScene::Load()
 {	
@@ -14,6 +13,7 @@ void TestScene::Load()
 	D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 
 	m_cube = std::make_unique<CubeEntity>();
+	LOG("Loaded test scene");
 }
 
 void TestScene::Update(float dt, const InputEvent& input)
@@ -44,4 +44,7 @@ void TestScene::GUI()
 
 void TestScene::Unload()
 {
+	COM_RELEASE(m_wvpBuffer);
+
+	LOG("Unloaded grid scene");
 }

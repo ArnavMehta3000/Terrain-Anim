@@ -1,11 +1,18 @@
 #include "Includes.hlsli"
 
+cbuffer TessellationFactors : register(b0)
+{
+    float EdgeTessFactor = 8.0;
+    float InsideTessFactor = 8.0;
+    float2 _pad1;
+}
+
 [domain("tri")]
-[partitioning("fractional_odd")]
+[partitioning("fractional_even")]
 [outputtopology("triangle_cw")]
 [outputcontrolpoints(3)]
 [patchconstantfunc("PassThroughConstantHS")]
-[maxtessfactor(7.0)]
+[maxtessfactor(64.0f)]
 
 HS_IO HS(InputPatch<HS_IO, 3> ip, uint i : SV_OutputControlPointID, uint PatchID : SV_PrimitiveID)
 {
@@ -20,13 +27,12 @@ HS_IO HS(InputPatch<HS_IO, 3> ip, uint i : SV_OutputControlPointID, uint PatchID
 
 HS_CONSTANT_DATA_OUTPUT PassThroughConstantHS(InputPatch<HS_IO, 3> ip, uint PatchID : SV_PrimitiveID)
 {
-    float tessellationFactor = 0.1f;
     
     HS_CONSTANT_DATA_OUTPUT output;
-    output.Edges[0] = tessellationFactor;
-    output.Edges[1] = tessellationFactor;
-    output.Edges[2] = tessellationFactor;
-    output.Inside   = tessellationFactor;
+    output.Edges[0] = EdgeTessFactor;
+    output.Edges[1] = EdgeTessFactor;
+    output.Edges[2] = EdgeTessFactor;
+    output.Inside   = InsideTessFactor;
     
     return output;
 }

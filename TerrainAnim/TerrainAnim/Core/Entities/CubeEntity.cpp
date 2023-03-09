@@ -10,6 +10,12 @@ CubeEntity::CubeEntity()
 	m_indexBuffer(nullptr),
 	m_shader(nullptr)
 {
+	ZeroMemory(&m_tessellationFactors, sizeof(TessellationFactors));
+	m_tessellationFactors.EdgeTessFactor = 1.0f;
+	m_tessellationFactors.InsideTessFactor = 1.0f;
+
+	D3D->CreateConstantBuffer(m_tessFactorsHS, sizeof(TessellationFactors));
+
 	Shader::InitInfo desc{};
 	desc.VertexShaderFile = L"Shaders/Tess_VS.hlsl";
 	desc.PixelShaderFile  = L"Shaders/Tess_PS.hlsl";
@@ -52,6 +58,8 @@ CubeEntity::~CubeEntity()
 void CubeEntity::Update(float dt, const InputEvent& input)
 {
 	Entity::Update(dt, input);
+	D3D_CONTEXT->UpdateSubresource(m_tessFactorsHS.Get(), 0, nullptr, &m_tessellationFactors, 0, 0);
+
 }
 
 void CubeEntity::Render()
@@ -61,6 +69,8 @@ void CubeEntity::Render()
 
 	// For tessellation purposes
 	D3D_CONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+	
+	D3D_CONTEXT->HSSetConstantBuffers(0, 1, m_tessFactorsHS.GetAddressOf());
 
 	UINT stride = Primitives::Cube::VerticesTypeSize;
 	UINT offset = 0;
@@ -76,6 +86,13 @@ void CubeEntity::GUI()
 		ImGui::DragFloat3("Cube Position", &m_position.x, 0.1f);
 		ImGui::DragFloat3("Cube Rotation", &m_rotation.x, 0.1f);
 		ImGui::DragFloat3("Cube Scale", &m_scale.x, 0.1f);
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("Cube Tessellation"))
+	{
+		ImGui::DragFloat("Edge", &m_tessellationFactors.EdgeTessFactor, 0.1f, 0.1f, HS_MAX_TESS_FACTOR);
+		ImGui::DragFloat("Inside", &m_tessellationFactors.InsideTessFactor, 0.1f, 0.1f, HS_MAX_TESS_FACTOR);
 		ImGui::TreePop();
 	}
 }
