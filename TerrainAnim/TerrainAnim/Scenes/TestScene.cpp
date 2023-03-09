@@ -12,7 +12,7 @@ void TestScene::Load()
 	m_sceneCamera.Position(Vector3(0, 0, -8));
 	D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 
-	m_cube = std::make_unique<CubeEntity>();
+	m_cube = std::make_unique<CubeEntity>(L"Textures/PFP.JPG");
 	LOG("Loaded test scene");
 }
 

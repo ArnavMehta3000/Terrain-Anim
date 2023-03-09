@@ -40,7 +40,7 @@ void Texture2D::SetInPS(UINT slot) const noexcept
 {
     if (!IsValid())
     {
-        LOG("--- Texture2D not valid, Failed to set in pixel shader slot " << slot);
+        LOG("--> Texture2D not valid, Failed to set in pixel shader slot " << slot);
         return;
     }
 

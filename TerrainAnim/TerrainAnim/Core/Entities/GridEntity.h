@@ -20,6 +20,7 @@ private:
 
 private:
 	std::unique_ptr<Shader> m_shader;
+	Texture2D               m_texture;
 	ComPtr<ID3D11Buffer>    m_vertexBuffer;
 	ComPtr<ID3D11Buffer>    m_indexBuffer;
 	UINT                    m_indexCount;

@@ -9,7 +9,7 @@ CubeEntity::CubeEntity(const wchar_t* textureFile)
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
 	m_shader(nullptr),
-	m_texture(L"Textures/PFP.JPG")
+	m_texture(textureFile)
 {
 	ZeroMemory(&m_tessellationFactors, sizeof(TessellationFactors));
 	m_tessellationFactors.EdgeTessFactor = 1.0f;

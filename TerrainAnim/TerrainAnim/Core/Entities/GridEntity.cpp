@@ -8,7 +8,8 @@ GridEntity::GridEntity(UINT resolution)
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
 	m_tessFactorsHS(nullptr),
-	m_indexCount(0)
+	m_indexCount(0),
+	m_texture(L"Textures/PFP.JPG")
 {
 	m_gridWidth = 255;
 	m_gridHeight = 255;
@@ -42,6 +43,7 @@ void GridEntity::Update(float dt, const InputEvent& input)
 void GridEntity::Render()
 {
 	m_shader->BindAll();
+	m_texture.SetInPS();
 
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
