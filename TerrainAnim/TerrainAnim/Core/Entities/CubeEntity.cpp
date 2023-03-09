@@ -18,10 +18,10 @@ CubeEntity::CubeEntity(const wchar_t* textureFile)
 	D3D->CreateConstantBuffer(m_tessFactorsHS, sizeof(TessellationFactors));
 
 	Shader::InitInfo desc{};
-	desc.VertexShaderFile = L"Shaders/Tess_VS.hlsl";
-	desc.PixelShaderFile  = L"Shaders/Tess_PS.hlsl";
-	desc.HullShaderFile   = L"Shaders/Tess_HS.hlsl";
-	desc.DomainShaderFile = L"Shaders/Tess_DS.hlsl";
+	desc.VertexShaderFile = L"Shaders/Tessellation/Tess_VS.hlsl";
+	desc.PixelShaderFile  = L"Shaders/Tessellation/Tess_PS.hlsl";
+	desc.HullShaderFile   = L"Shaders/Tessellation/Tess_HS.hlsl";
+	desc.DomainShaderFile = L"Shaders/Tessellation/Tess_DS.hlsl";
 
 	m_shader = std::make_unique<Shader>(desc);
 

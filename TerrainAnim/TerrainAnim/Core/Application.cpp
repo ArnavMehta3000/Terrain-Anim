@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Graphics/Texture.h"
 #include <algorithm>
+#include <execution>
 
 
 Application::Application(HWND window, UINT width, UINT height)
@@ -15,9 +16,7 @@ Application::Application(HWND window, UINT width, UINT height)
 	HR(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
 }
 
-Application::~Application()
-{
-}
+Application::~Application() {}
 
 bool Application::Init()
 {
@@ -33,9 +32,19 @@ bool Application::Init()
 
 	m_scenes.push_back(new TestScene(m_width, m_height));
 	m_scenes.push_back(new GridScene(m_width*2, m_height*2));
-	Texture2D(L"Textures/PFP.JPG");
 	
-	std::for_each(m_scenes.begin(), m_scenes.end(), [](Scene* scene) {scene->Load(); });
+	Timer totalTime; 
+	totalTime.Start();
+
+	// Load all scenes sequentially
+	std::for_each(std::execution::seq, m_scenes.begin(), m_scenes.end(), 
+		[](Scene* scene)
+		{
+			scene->Load();
+		});
+
+		totalTime.Stop();
+	LOG("Total load time: " << totalTime.TotalTime() * 1000.0f << "s");
 	
 	m_appTimer.Reset();
 	m_appTimer.Start();
@@ -73,8 +82,7 @@ void Application::Update(float dt, const InputEvent& input)
 	if (input.KeyboardState.D2)
 		D3D->SetWireframe(true);
 
-	//m_scenes[m_currentScene]->Update(dt, input);
-	std::for_each(m_scenes.begin(), m_scenes.end(), [&](Scene* scene) {scene->Update(dt, input); });
+	m_scenes[m_currentScene]->Update(dt, input);
 }
 
 void Application::Render()

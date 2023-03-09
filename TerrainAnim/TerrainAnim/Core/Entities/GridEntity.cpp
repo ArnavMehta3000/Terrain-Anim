@@ -19,10 +19,10 @@ GridEntity::GridEntity(UINT resolution)
 	m_tessellationFactors.InsideTessFactor = 1.0f;
 
 	Shader::InitInfo desc{};
-	desc.VertexShaderFile = L"Shaders/Tess_VS.hlsl";
-	desc.PixelShaderFile  = L"Shaders/Tess_PS.hlsl";
-	desc.HullShaderFile   = L"Shaders/Tess_HS.hlsl";
-	desc.DomainShaderFile = L"Shaders/Tess_DS.hlsl";
+	desc.VertexShaderFile = L"Shaders/Grid/Grid_VS.hlsl";
+	desc.PixelShaderFile  = L"Shaders/Grid/Grid_PS.hlsl";
+	desc.HullShaderFile   = L"Shaders/Grid/Grid_HS.hlsl";
+	desc.DomainShaderFile = L"Shaders/Grid/Grid_DS.hlsl";
 
 	D3D->CreateConstantBuffer(m_tessFactorsHS, sizeof(TessellationFactors));
 

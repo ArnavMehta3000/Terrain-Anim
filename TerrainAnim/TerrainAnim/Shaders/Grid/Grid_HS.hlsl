@@ -1,4 +1,4 @@
-#include "Includes.hlsli"
+#include "../Includes.hlsli"
 
 cbuffer TessellationFactors : register(b0)
 {

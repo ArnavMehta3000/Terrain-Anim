@@ -1,4 +1,4 @@
-#include "Includes.hlsli"
+#include "../Includes.hlsli"
 PSInput VS(VSInput input)
 {
     PSInput output = (PSInput) 0;
