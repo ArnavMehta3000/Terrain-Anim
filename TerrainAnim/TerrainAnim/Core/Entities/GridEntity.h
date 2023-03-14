@@ -31,6 +31,7 @@ private:
 							   
 	UINT                       m_gridWidth;
 	UINT                       m_gridHeight;
+	float                      m_multiplier;
 
 	std::unique_ptr<HeightMap> m_heightMap;
 };

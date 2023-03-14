@@ -16,7 +16,10 @@ HeightMap::HeightMap(const char* fileName, UINT w, UINT h)
 
 	// Catch file open error here
 	if (!inFile)
+	{
+		LOG("Failed to open heightmap file: " << fileName);
 		__debugbreak();
+	}
 
 	inFile.read((char*)&in[0], (std::streamsize)in.size());
 
@@ -27,9 +30,12 @@ HeightMap::HeightMap(const char* fileName, UINT w, UINT h)
 		// Cnnvert 0 - 255 to 0.0 - 1.0 range
 		m_heightMap[i] = (in[i] / 255.0f);
 	}
+
+	LOG("Loaded heightmap file: " << fileName);
 }
 
 
 HeightMap::~HeightMap()
 {
+	m_heightMap.clear();
 }

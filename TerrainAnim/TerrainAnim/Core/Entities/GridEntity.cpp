@@ -8,7 +8,8 @@ GridEntity::GridEntity(HeightMap map)
 	m_indexBuffer(nullptr),
 	m_tessFactorsHS(nullptr),
 	m_indexCount(0),
-	m_texture(L"Textures/PFP.JPG")
+	m_texture(L"Textures/PFP.JPG"),
+	m_multiplier(100)
 {
 	m_heightMap  = std::make_unique<HeightMap>(map);
 	m_gridWidth  = m_heightMap->GetWidth();
@@ -67,7 +68,9 @@ void GridEntity::GUI()
 	{
 		ImGui::Text("Heightmap File: %s", m_heightMap->GetFileName().c_str());
 		ImGui::Text("Heightmap Dimensions: %ux%u", m_heightMap->GetWidth(), m_heightMap->GetHeight());
-		
+		ImGui::DragFloat("Multiplier", &m_multiplier, 0.1f, 0.0f);
+		if (ImGui::IsItemDeactivatedAfterEdit())
+			ApplyChanges();
 		ImGui::TreePop();
 	}
 
@@ -113,20 +116,21 @@ void GridEntity::CreateTerrainVB()
 		float z = halfHeight - row * dz;
 		for (UINT col = 0; col < zSize; col++)
 		{
-			float x = -halfWidth + col * dx;
-			float y = 0.0f;
+			float x      = -halfWidth + col * dx;
+			float height = m_heightMap->GetValue(m_heightMap->GetWidth() * row + col);
+			height *= m_multiplier;
 
-			vertices[row * zSize + col] = { Vector3(x, y, z),
+			vertices[row * zSize + col] = { Vector3(x, height, z),
 											Vector3(0.0f, 1.0f, 0.0f),
 											Vector2(row * du, col * dv) };
 		}
 	}
 
 	CREATE_ZERO(D3D11_BUFFER_DESC, vbd);
-	vbd.Usage          = D3D11_USAGE_DYNAMIC;
+	vbd.Usage          = D3D11_USAGE_DEFAULT;
 	vbd.ByteWidth      = sizeof(SimpleVertex) * vertexCount;
 	vbd.BindFlags      = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vbd.CPUAccessFlags = 0;
 
 	CREATE_ZERO(D3D11_SUBRESOURCE_DATA, vsd);
 	vsd.pSysMem = vertices.data();

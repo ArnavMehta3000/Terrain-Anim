@@ -11,6 +11,8 @@ public:
 
 	const std::string& GetFileName() const noexcept { return m_file; }
 
+	float GetValue(UINT i) const noexcept { return m_heightMap[i]; }
+
 private:
 	std::string m_file;
 	UINT m_width;
