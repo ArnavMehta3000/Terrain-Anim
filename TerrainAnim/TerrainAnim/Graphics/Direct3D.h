@@ -13,7 +13,7 @@ public:
 	void Present();
 
 	inline void SetWireframe(bool isWireframe = true) { m_context->RSSetState(isWireframe ? m_rasterizerWireframe.Get() : m_rasterizerSolid.Get()); }
-
+	
 	inline ID3D11Device* GetDevice() const noexcept { return m_device.Get(); }
 	inline ID3D11DeviceContext* GetContext() const noexcept { return m_context.Get(); }
 

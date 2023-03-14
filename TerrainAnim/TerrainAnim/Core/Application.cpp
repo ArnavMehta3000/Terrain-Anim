@@ -51,7 +51,6 @@ bool Application::Init()
 	return true;
 }
 
-static bool doOnce = true;
 void Application::Run(const InputEvent& input)
 {
 	m_appTimer.Tick();
@@ -60,12 +59,6 @@ void Application::Run(const InputEvent& input)
 	Update(m_appTimer, input);
 	Render();
 	GUI();
-
-	/*if (doOnce)
-	{
-		m_currentScene = 1;
-		doOnce = false;
-	}*/
 
 	D3D->Present();
 }

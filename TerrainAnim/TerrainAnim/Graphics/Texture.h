@@ -6,7 +6,7 @@ class Texture2D
 {
 public:
 	Texture2D(const wchar_t* fileName);
-	~Texture2D();
+	virtual ~Texture2D();
 
 	static bool IsPathEmpty(const wchar_t* path) noexcept;
 
@@ -17,10 +17,10 @@ public:
 	void SetInPS(UINT slot = 0) const noexcept;
 
 
-	// returns
+	// Returns true if SRV exists
 	bool IsValid() const { return m_srv != nullptr; }
 
-private:
+protected:
 	D3D11_TEXTURE2D_DESC             m_desc;
 	ComPtr<ID3D11Texture2D>          m_texture;
 	ComPtr<ID3D11ShaderResourceView> m_srv;

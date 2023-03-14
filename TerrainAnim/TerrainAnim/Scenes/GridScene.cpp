@@ -13,7 +13,7 @@ void GridScene::Load()
 	m_sceneCamera.Position(Vector3(0, 10, -8));
 	D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 
-	m_grid = std::make_unique<GridEntity>();
+	m_grid = std::make_unique<GridEntity>(HeightMap("Assets/Textures2049/terrain.raw", 2049, 2049));
 	LOG("Loaded grid scene");
 }
 

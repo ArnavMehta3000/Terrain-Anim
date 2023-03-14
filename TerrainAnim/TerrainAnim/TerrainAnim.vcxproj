@@ -96,6 +96,7 @@
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Graphics\Direct3D.cpp" />
+    <ClCompile Include="Graphics\HeightMap.cpp" />
     <ClCompile Include="Graphics\Shaders.cpp" />
     <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Imgui\imgui.cpp">
@@ -149,6 +150,7 @@
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Graphics\Direct3D.h" />
     <ClInclude Include="Core\Primitives.h" />
+    <ClInclude Include="Graphics\HeightMap.h" />
     <ClInclude Include="Graphics\Texture.h" />
     <ClInclude Include="Imgui\imconfig.h" />
     <ClInclude Include="Imgui\imgui.h" />

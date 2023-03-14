@@ -30,6 +30,7 @@ Texture2D::Texture2D(const wchar_t* fileName)
 
 Texture2D::~Texture2D()
 {
+    COM_RELEASE(m_texture);
     COM_RELEASE(m_srv);
 }
 

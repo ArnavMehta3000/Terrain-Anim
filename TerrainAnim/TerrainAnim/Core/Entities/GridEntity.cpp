@@ -2,17 +2,17 @@
 #include "Core/Entities/GridEntity.h"
 #include "Graphics/Direct3D.h"
 
-GridEntity::GridEntity(UINT resolution)
+GridEntity::GridEntity(HeightMap map)
 	:
-	m_resolution(resolution),
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
 	m_tessFactorsHS(nullptr),
 	m_indexCount(0),
 	m_texture(L"Textures/PFP.JPG")
 {
-	m_gridWidth = 255;
-	m_gridHeight = 255;
+	m_heightMap  = std::make_unique<HeightMap>(map);
+	m_gridWidth  = m_heightMap->GetWidth();
+	m_gridHeight = m_heightMap->GetHeight();
 
 	ZeroMemory(&m_tessellationFactors, sizeof(TessellationFactors));
 	m_tessellationFactors.EdgeTessFactor   = 1.0f;
@@ -33,10 +33,15 @@ GridEntity::GridEntity(UINT resolution)
 
 GridEntity::~GridEntity()
 {
+	COM_RELEASE(m_vertexBuffer);
+	COM_RELEASE(m_indexBuffer);
+	COM_RELEASE(m_tessFactorsHS);
 }
 
 void GridEntity::Update(float dt, const InputEvent& input)
 {
+	Entity::Update(dt, input);
+
 	D3D_CONTEXT->UpdateSubresource(m_tessFactorsHS.Get(), 0, nullptr, &m_tessellationFactors, 0, 0);
 }
 
@@ -58,16 +63,22 @@ void GridEntity::Render()
 
 void GridEntity::GUI()
 {
+	if (ImGui::TreeNode("Heightmap Data"))
+	{
+		ImGui::Text("Heightmap File: %s", m_heightMap->GetFileName().c_str());
+		ImGui::Text("Heightmap Dimensions: %ux%u", m_heightMap->GetWidth(), m_heightMap->GetHeight());
+		
+		ImGui::TreePop();
+	}
+
 	if (ImGui::TreeNode("Grid Settings"))
 	{
-		ImGui::Text("Grid Resolution: %u", m_resolution);
 		ImGui::Text("Grid Index Count: %u", m_indexCount);
 		
 		ImGui::Spacing();
-
 		ImGui::DragFloat("Edge", &m_tessellationFactors.EdgeTessFactor, 0.1f, 0.1f, HS_MAX_TESS_FACTOR);
 		ImGui::DragFloat("Inside", &m_tessellationFactors.InsideTessFactor, 0.1f, 0.1f, HS_MAX_TESS_FACTOR);
-		
+
 		ImGui::TreePop();
 	}
 }
@@ -107,7 +118,7 @@ void GridEntity::CreateTerrainVB()
 
 			vertices[row * zSize + col] = { Vector3(x, y, z),
 											Vector3(0.0f, 1.0f, 0.0f),
-											Vector2(col * du, row * dv) };
+											Vector2(row * du, col * dv) };
 		}
 	}
 
