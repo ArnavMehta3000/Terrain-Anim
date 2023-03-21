@@ -2,15 +2,15 @@
 #include "Entities/GridEntity.h"
 #include "Graphics/Direct3D.h"
 
-GridEntity::GridEntity()
+GridEntity::GridEntity(int resolution)
 	:
 	m_texture(L"Textures/PFP.JPG"),
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
 	m_indexCount(0),
 	m_tessFactorsHS(nullptr),
-	m_gridSize(513),
-	m_multiplier(100)
+	m_multiplier(100),
+	m_resolution(resolution)
 {
 	ZeroMemory(&m_tessellationFactors, sizeof(TessellationFactors));
 	m_tessellationFactors.EdgeTessFactor   = 1.0f;
@@ -25,7 +25,7 @@ GridEntity::GridEntity()
 
 	D3D->CreateConstantBuffer(m_tessFactorsHS, sizeof(TessellationFactors));
 
-
+	CreateFlatGrid();
 	ApplyChanges();
 }
 
@@ -36,15 +36,55 @@ GridEntity::~GridEntity()
 	COM_RELEASE(m_tessFactorsHS);
 }
 
+void GridEntity::ApplyChanges()
+{
+	CreateTerrainVB();
+	CreateTerrainIB();
+}
+
 void GridEntity::SetHeightMap(HeightMap map) noexcept
 {
+	m_heightMap.reset();
 	m_heightMap = std::make_unique<HeightMap>(map);
+
+	// Recreate vertex buffer
+
+	m_vertices.clear();
+
+	auto size = (UINT)GetGridSize();
+	auto vertexCount = UINT(size * size);
+
+	float halfSize = 0.5f * size;
+
+	float dx = size / (size - 1.0f);
+	float dz = size / (size - 1.0f);
+
+	float du = 1.0f / (size - 1.0f);
+	float dv = 1.0f / (size - 1.0f);
+
+	m_vertices = std::vector<SimpleVertex>(vertexCount);
+	// Generate vertices
+	for (UINT row = 0; row < size; row++)
+	{
+		float z = halfSize - (float)row * dz;
+		for (UINT col = 0; col < size; col++)
+		{
+			float x = -halfSize + (float)col * dx;
+			float height = (m_heightMap == nullptr) ? 0.0f : m_heightMap->GetValue(m_heightMap->GetWidth() * row + col);
+
+			m_vertices[row * size + col] = { Vector3(x, height * m_multiplier, z),         // Position
+											 Vector3(0.0f, 1.0f, 0.0f),                    // Normal
+											 Vector2((float)row * du, (float)col * dv) };  // TexCoord
+		}
+	}
+
 	ApplyChanges();
 }
 
 void GridEntity::ClearHeightMap() noexcept
 {
 	m_heightMap.reset();
+	CreateFlatGrid();
 	ApplyChanges();
 }
 
@@ -79,7 +119,10 @@ void GridEntity::GUI()
 		ImGui::Text("Heightmap Dimensions: %ux%u", m_heightMap->GetWidth(), m_heightMap->GetHeight());
 		ImGui::DragFloat("Multiplier", &m_multiplier, 0.1f, 0.0f);
 		if (ImGui::IsItemDeactivatedAfterEdit())
+		{
+			SetHeightMap(*m_heightMap.get());
 			ApplyChanges();
+		}
 		ImGui::TreePop();
 	}
 
@@ -96,14 +139,10 @@ void GridEntity::GUI()
 }
 
 
-void GridEntity::ApplyChanges()
+void GridEntity::CreateFlatGrid()
 {
-	CreateTerrainVB();
-	CreateTerrainIB();
-}
+	m_vertices.clear();
 
-std::vector<SimpleVertex> GridEntity::CreateFlatGrid(int resolution) const
-{
 	auto size = (UINT)GetGridSize();
 	auto vertexCount = UINT(size * size);
 
@@ -115,7 +154,7 @@ std::vector<SimpleVertex> GridEntity::CreateFlatGrid(int resolution) const
 	float du = 1.0f / (size - 1.0f);
 	float dv = 1.0f / (size - 1.0f);
 
-	std::vector<SimpleVertex> vertices(vertexCount);
+	m_vertices = std::vector<SimpleVertex>(vertexCount);
 	// Generate vertices
 	for (UINT row = 0; row < size; row++)
 	{
@@ -124,48 +163,18 @@ std::vector<SimpleVertex> GridEntity::CreateFlatGrid(int resolution) const
 		{
 			float x = -halfSize + (float)col * dx;
 
-			vertices[row * size + col] = { Vector3(x, 0.0f, z),                          // Position
-										   Vector3(0.0f, 1.0f, 0.0f),                    // Normal
-										   Vector2((float)row * du, (float)col * dv) };  // TexCoord
+			m_vertices[row * size + col] = { Vector3(x, 0.0f, z),                          // Position
+										     Vector3(0.0f, 1.0f, 0.0f),                    // Normal
+										     Vector2((float)row * du, (float)col * dv) };  // TexCoord
 		}
 	}
-
-	return vertices;
 }
 
 
 void GridEntity::CreateTerrainVB()
 {
-	UINT xSize       = m_gridSize;
-	UINT zSize       = m_gridSize;
-	UINT vertexCount = xSize * zSize;
-
-	float halfSize  = 0.5f * (float)m_gridSize;
-
-	float dx = (float)xSize / ((float)zSize - 1.0f);
-	float dz = (float)zSize / ((float)zSize - 1.0f);
-
-	float du = 1.0f / ((float)zSize - 1.0f);
-	float dv = 1.0f / ((float)xSize - 1.0f);
-
-	std::vector<SimpleVertex> vertices(vertexCount);
-	// Generate vertices
-	for (UINT row = 0; row < xSize; row++)
-	{
-		float z = halfSize - (float)row * dz;
-		for (UINT col = 0; col < zSize; col++)
-		{
-			float x = -halfSize + (float)col * dx;
-
-			// Set height value depending on availabilty of heightmap
-			float height = (m_heightMap == nullptr) ? 0.0f : m_heightMap->GetValue(m_heightMap->GetWidth() * row + col);
-			height *= m_multiplier;
-
-			vertices[row * zSize + col] = { Vector3(x, height, z),
-											Vector3(0.0f, 1.0f, 0.0f),
-											Vector2((float)row * du, (float)col * dv) };
-		}
-	}
+	auto size = (UINT)GetGridSize();
+	auto vertexCount = UINT(size * size);
 
 	CREATE_ZERO(D3D11_BUFFER_DESC, vbd);
 	vbd.Usage          = D3D11_USAGE_DEFAULT;
@@ -174,15 +183,15 @@ void GridEntity::CreateTerrainVB()
 	vbd.CPUAccessFlags = 0;
 
 	CREATE_ZERO(D3D11_SUBRESOURCE_DATA, vsd);
-	vsd.pSysMem = vertices.data();
+	vsd.pSysMem = m_vertices.data();
 
 	HR(D3D_DEVICE->CreateBuffer(&vbd, &vsd, m_vertexBuffer.ReleaseAndGetAddressOf()))
 }
 
 void GridEntity::CreateTerrainIB()
 {
-	UINT xSize     = m_gridSize;
-	UINT zSize     = m_gridSize;
+	UINT xSize     = GetGridSize();
+	UINT zSize     = GetGridSize();
 	UINT faceCount = (xSize - 1) * (zSize - 1) * 2;
 
 	UINT tris = 0;

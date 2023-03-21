@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Scene.h"
+#include "Graphics/HeightMap.h"
 
 class GridEntity;
 
@@ -16,6 +17,7 @@ public:
 	virtual void Unload() override;
 
 private:
+	HeightMap                   m_heightmap;
 	ComPtr<ID3D11Buffer>        m_wvpBuffer;
 	std::unique_ptr<GridEntity> m_grid;
 };

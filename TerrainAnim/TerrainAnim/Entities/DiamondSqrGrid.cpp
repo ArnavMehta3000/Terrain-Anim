@@ -3,24 +3,16 @@
 #include "Graphics/Direct3D.h"
 #include  <random>
 
-float RandFloat()
+float RandFloat(float rangeMin = 1.0f, float rangeMax = 1.0f)
 {
 	static std::mt19937 gen(0);
-	static std::uniform_real_distribution<float> dist(-1.f, 1.f);
+	static std::uniform_real_distribution<float> dist(rangeMin, rangeMax);
 	return dist(gen);
 }
 
 
-DiamondSqrGrid::DiamondSqrGrid(UINT resolution)
-	:
-	m_resolution(resolution),
-	m_heightMultiplier(1.0f)
-	
+DiamondSqrGrid::DiamondSqrGrid()	
 {
-	ZeroMemory(&m_tessellationFactors, sizeof(TessellationFactors));
-	m_tessellationFactors.EdgeTessFactor   = 1.0f;
-	m_tessellationFactors.InsideTessFactor = 1.0f;
-
 	Shader::InitInfo desc{};
 	desc.VertexShaderFile = L"Shaders/Grid/Grid_VS.hlsl";
 	desc.PixelShaderFile  = L"Shaders/Grid/Grid_PS.hlsl";
@@ -34,8 +26,7 @@ DiamondSqrGrid::DiamondSqrGrid(UINT resolution)
 
 DiamondSqrGrid::~DiamondSqrGrid()
 {
-	COM_RELEASE(m_vertexBuffer);
-	COM_RELEASE(m_indexBuffer);
+	GridEntity::~GridEntity();
 }
 
 void DiamondSqrGrid::Update(float dt, const InputEvent& input)
@@ -45,24 +36,14 @@ void DiamondSqrGrid::Update(float dt, const InputEvent& input)
 
 void DiamondSqrGrid::Render()
 {
-	m_shader->BindAll();
-
-	/*UINT stride = sizeof(SimpleVertex);
-	UINT offset = 0;
-
-	D3D_CONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
-	D3D_CONTEXT->HSSetConstantBuffers(0, 1, m_tessFactorsHS.GetAddressOf());
-	D3D_CONTEXT->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-	D3D_CONTEXT->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-	D3D_CONTEXT->DrawIndexed(m_indexCount, 0, 0);*/
+	GridEntity::Render();
 }
 
 void DiamondSqrGrid::GUI()
 {
 	if (ImGui::TreeNode("DS-grid Settings"))
 	{
-		ImGui::DragFloat("Multiplier", &m_heightMultiplier, 0.1f, 0.0f);
+		ImGui::Text("Nothing here yet");
 
 		ImGui::TreePop();
 	}

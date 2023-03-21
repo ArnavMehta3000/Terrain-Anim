@@ -5,7 +5,8 @@
 
 GridScene::GridScene(UINT width, UINT height)
 	:
-	Scene(width, height)
+	Scene(width, height),
+	m_heightmap("Assets/Textures513/coastMountain513.raw", 513, 513)
 {}
 
 void GridScene::Load()
@@ -42,7 +43,7 @@ void GridScene::GUI()
 	if (ImGui::CollapsingHeader("Grid Scene Settings", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		if (ImGui::Button("Set Heightmap"))
-			m_grid->SetHeightMap(HeightMap("Assets/Textures513/coastMountain513.raw", 513, 513));
+			m_grid->SetHeightMap(m_heightmap);
 		
 		ImGui::SameLine();
 

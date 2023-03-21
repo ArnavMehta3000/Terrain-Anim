@@ -5,7 +5,7 @@
 class GridEntity : public Entity
 {
 public:
-	GridEntity();
+	GridEntity(int resolution = 9);
 	virtual ~GridEntity();
 
 	void SetHeightMap(HeightMap map) noexcept;
@@ -18,10 +18,10 @@ public:
 	// Recreate the vertex and index buffers
 	void ApplyChanges();
 
-	inline float GetGridSize() const noexcept { return static_cast<float>(std::pow(2, m_resolution) + 1); }
+	inline UINT GetGridSize() const noexcept { return static_cast<UINT>(std::pow(2, m_resolution) + 1); }
 
 protected:
-	std::vector<SimpleVertex> CreateFlatGrid(int resolution = 9) const;
+	void CreateFlatGrid();
 
 private:
 	virtual void CreateTerrainVB();
@@ -32,6 +32,7 @@ protected:
 
 private:
 	std::vector<SimpleVertex>  m_vertices;
+
 	std::unique_ptr<Shader>    m_shader;
 	Texture2D                  m_texture;
 	ComPtr<ID3D11Buffer>       m_vertexBuffer;
@@ -41,7 +42,6 @@ private:
 	ComPtr<ID3D11Buffer>       m_tessFactorsHS;
 	TessellationFactors        m_tessellationFactors;
 							   
-	UINT                       m_gridSize;
 	float                      m_multiplier;
 
 	std::unique_ptr<HeightMap> m_heightMap;
