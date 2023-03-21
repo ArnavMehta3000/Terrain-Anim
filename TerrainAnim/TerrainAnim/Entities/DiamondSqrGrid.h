@@ -15,7 +15,4 @@ public:
 
 private:
 	std::unique_ptr<Shader>    m_shader;
-	
-	UINT                       m_indexCount;
-	UINT                       m_vertexCount;
 };

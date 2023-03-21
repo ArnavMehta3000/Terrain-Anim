@@ -12,16 +12,10 @@ float RandFloat(float rangeMin = 1.0f, float rangeMax = 1.0f)
 
 
 DiamondSqrGrid::DiamondSqrGrid()	
+	:
+	GridEntity()
 {
-	Shader::InitInfo desc{};
-	desc.VertexShaderFile = L"Shaders/Grid/Grid_VS.hlsl";
-	desc.PixelShaderFile  = L"Shaders/Grid/Grid_PS.hlsl";
-	desc.HullShaderFile   = L"Shaders/Grid/Grid_HS.hlsl";
-	desc.DomainShaderFile = L"Shaders/Grid/Grid_DS.hlsl";
-	m_shader              = std::make_unique<Shader>(desc);
-
-	//std::vector<SimpleVertex> v = CreateFlatGrid();
-	//DoDiamondSquareGrid(v);
+	
 }
 
 DiamondSqrGrid::~DiamondSqrGrid()
@@ -32,6 +26,7 @@ DiamondSqrGrid::~DiamondSqrGrid()
 void DiamondSqrGrid::Update(float dt, const InputEvent& input)
 {
 	// Nothing to update yet
+	GridEntity::Update(dt, input);
 }
 
 void DiamondSqrGrid::Render()
@@ -41,6 +36,8 @@ void DiamondSqrGrid::Render()
 
 void DiamondSqrGrid::GUI()
 {
+	GridEntity::GUI();
+
 	if (ImGui::TreeNode("DS-grid Settings"))
 	{
 		ImGui::Text("Nothing here yet");

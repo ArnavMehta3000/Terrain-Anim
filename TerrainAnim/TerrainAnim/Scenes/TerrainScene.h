@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Scene.h"
+#include "Entities/DiamondSqrGrid.h"
 
 class DiamondSqrGrid;
 

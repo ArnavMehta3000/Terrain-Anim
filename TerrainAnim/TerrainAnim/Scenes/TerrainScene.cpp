@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "TerrainScene.h"
 #include "Graphics/Direct3D.h"
-#include "Scenes/TerrainScene.h"
-#include "Entities/DiamondSqrGrid.h"
+
 
 
 TerrainScene::TerrainScene(UINT width, UINT height)
