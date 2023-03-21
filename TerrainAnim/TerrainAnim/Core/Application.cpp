@@ -13,6 +13,7 @@ Application::Application(HWND window, UINT width, UINT height)
 	m_appTimer(Timer()),
 	m_currentScene(0)
 {
+	// For WIC Texture loader
 	HR(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
 }
 

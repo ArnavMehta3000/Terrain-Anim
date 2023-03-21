@@ -39,6 +39,10 @@ GridEntity::~GridEntity()
 	COM_RELEASE(m_tessFactorsHS);
 }
 
+void GridEntity::SetHeightMap(HeightMap map)
+{
+}
+
 void GridEntity::Update(float dt, const InputEvent& input)
 {
 	Entity::Update(dt, input);

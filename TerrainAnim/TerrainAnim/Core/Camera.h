@@ -6,7 +6,7 @@ class Camera
 {
 public:
 	Camera() = default;
-	Camera(float angle, float clientWidth, float clientHeight, float nearPlane = 0.01f, float farPlane = 100.0f);
+	Camera(float angle, float clientWidth, float clientHeight, float nearPlane = 0.01f, float farPlane = 10000.0f);
 	~Camera();
 
 	void Update(double dt, const DirectX::Keyboard::State& kb, const DirectX::Mouse::State& mouse);

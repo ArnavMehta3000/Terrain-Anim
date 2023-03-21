@@ -36,7 +36,6 @@ private:
 	ComPtr<IDXGISwapChain>          m_swapChain;
 	ComPtr<ID3D11RenderTargetView>  m_backBufferRTV;
 	ComPtr<ID3D11BlendState>        m_blendState;
-	ComPtr<ID3D11Texture2D>         m_depthTexture;
 	ComPtr<ID3D11DepthStencilView>  m_depthStencilView;
 	ComPtr<ID3D11DepthStencilState> m_depthStencilState;
 

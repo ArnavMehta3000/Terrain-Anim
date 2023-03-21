@@ -5,8 +5,11 @@
 class GridEntity : public Entity
 {
 public:
-	GridEntity(HeightMap map);
+	GridEntity();
 	~GridEntity();
+
+	void SetHeightMap(HeightMap map);
+	void ClearHeightMap();
 
 	void Update(float dt, const InputEvent& input) override;
 	void Render() override;
