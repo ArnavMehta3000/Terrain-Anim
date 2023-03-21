@@ -90,10 +90,10 @@
   <ItemGroup>
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
-    <ClCompile Include="Core\Entities\CubeEntity.cpp" />
-    <ClCompile Include="Core\Entities\DiamondSqrGrid.cpp" />
-    <ClCompile Include="Core\Entities\Entity.cpp" />
-    <ClCompile Include="Core\Entities\GridEntity.cpp" />
+    <ClCompile Include="Entities\CubeEntity.cpp" />
+    <ClCompile Include="Entities\DiamondSqrGrid.cpp" />
+    <ClCompile Include="Entities\Entity.cpp" />
+    <ClCompile Include="Entities\GridEntity.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Graphics\Direct3D.cpp" />
@@ -137,16 +137,17 @@
     </ClCompile>
     <ClCompile Include="Core\Window.cpp" />
     <ClCompile Include="Scenes\GridScene.cpp" />
+    <ClCompile Include="Scenes\TerrainScene.cpp" />
     <ClCompile Include="Scenes\TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core.h" />
-    <ClInclude Include="Core\Entities\CubeEntity.h" />
-    <ClInclude Include="Core\Entities\DiamondSqrGrid.h" />
-    <ClInclude Include="Core\Entities\Entity.h" />
-    <ClInclude Include="Core\Entities\GridEntity.h" />
+    <ClInclude Include="Entities\CubeEntity.h" />
+    <ClInclude Include="Entities\DiamondSqrGrid.h" />
+    <ClInclude Include="Entities\Entity.h" />
+    <ClInclude Include="Entities\GridEntity.h" />
     <ClInclude Include="Core\Object.h" />
     <ClInclude Include="Core\Structures.h" />
     <ClInclude Include="Core\Timer.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="Graphics\Shaders.h" />
     <ClInclude Include="Core\Scene.h" />
     <ClInclude Include="Scenes\GridScene.h" />
+    <ClInclude Include="Scenes\TerrainScene.h" />
     <ClInclude Include="Scenes\TestScene.h" />
   </ItemGroup>
   <ItemGroup>

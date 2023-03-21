@@ -2,8 +2,7 @@
 #include "Mouse.h"
 #include "Keyboard.h"
 #include "Graphics/Direct3D.h"
-#include "Scenes/TestScene.h"
-#include "Scenes/GridScene.h"
+#include "Core/Scene.h"
 #include "Core/Structures.h"
 #include "Core/Timer.h"
 

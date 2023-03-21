@@ -1,7 +1,7 @@
 #pragma once
-#include "Core/Entities/Entity.h"
+#include "Entities/GridEntity.h"
 
-class DiamondSqrGrid : public Entity
+class DiamondSqrGrid : public GridEntity
 {
 public:
 	explicit DiamondSqrGrid(UINT resolution = 9);
@@ -11,11 +11,8 @@ public:
 	void Render() override;
 	void GUI() override;
 
-	inline float GetGridSize() const noexcept { return static_cast<float>(std::pow(2, m_resolution) + 1); }
+	
 
-private:
-	// Create a flat grid of vertices
-	std::vector<SimpleVertex> CreateFlatGrid() const;
 	void DoDiamondSquareGrid(std::vector<SimpleVertex>& vertices);
 
 private:
@@ -29,6 +26,5 @@ private:
 	ComPtr<ID3D11Buffer>       m_tessFactorsHS;
 	TessellationFactors        m_tessellationFactors;
 
-	UINT                       m_resolution;
 	float                      m_heightMultiplier;
 };

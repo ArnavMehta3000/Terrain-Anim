@@ -45,10 +45,10 @@
     <ClCompile Include="Core\Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Entities\Entity.cpp">
+    <ClCompile Include="Entities\Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Entities\CubeEntity.cpp">
+    <ClCompile Include="Entities\CubeEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Imgui\imgui.cpp">
@@ -75,7 +75,7 @@
     <ClCompile Include="Scenes\GridScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Entities\GridEntity.cpp">
+    <ClCompile Include="Entities\GridEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Texture.cpp">
@@ -84,7 +84,10 @@
     <ClCompile Include="Graphics\HeightMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Entities\DiamondSqrGrid.cpp">
+    <ClCompile Include="Entities\DiamondSqrGrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\TerrainScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,13 +128,13 @@
     <ClInclude Include="Core\Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Entities\Entity.h">
+    <ClInclude Include="Entities\Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Entities\CubeEntity.h">
+    <ClInclude Include="Entities\CubeEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imconfig.h">
@@ -161,7 +164,7 @@
     <ClInclude Include="Scenes\GridScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Entities\GridEntity.h">
+    <ClInclude Include="Entities\GridEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Texture.h">
@@ -170,7 +173,10 @@
     <ClInclude Include="Graphics\HeightMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Entities\DiamondSqrGrid.h">
+    <ClInclude Include="Entities\DiamondSqrGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\TerrainScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

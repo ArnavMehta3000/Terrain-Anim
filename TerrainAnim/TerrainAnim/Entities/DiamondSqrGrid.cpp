@@ -28,9 +28,8 @@ DiamondSqrGrid::DiamondSqrGrid(UINT resolution)
 	desc.DomainShaderFile = L"Shaders/Grid/Grid_DS.hlsl";
 	m_shader              = std::make_unique<Shader>(desc);
 
-	std::vector<SimpleVertex> v;
-	v = CreateFlatGrid();
-	DiamondSqrGrid(v);
+	//std::vector<SimpleVertex> v = CreateFlatGrid();
+	//DoDiamondSquareGrid(v);
 }
 
 DiamondSqrGrid::~DiamondSqrGrid()
@@ -48,7 +47,7 @@ void DiamondSqrGrid::Render()
 {
 	m_shader->BindAll();
 
-	UINT stride = sizeof(SimpleVertex);
+	/*UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
 
 	D3D_CONTEXT->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
@@ -56,7 +55,7 @@ void DiamondSqrGrid::Render()
 	D3D_CONTEXT->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
 	D3D_CONTEXT->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
-	D3D_CONTEXT->DrawIndexed(m_indexCount, 0, 0);
+	D3D_CONTEXT->DrawIndexed(m_indexCount, 0, 0);*/
 }
 
 void DiamondSqrGrid::GUI()
@@ -64,38 +63,9 @@ void DiamondSqrGrid::GUI()
 	if (ImGui::TreeNode("DS-grid Settings"))
 	{
 		ImGui::DragFloat("Multiplier", &m_heightMultiplier, 0.1f, 0.0f);
+
+		ImGui::TreePop();
 	}
-}
-
-std::vector<SimpleVertex> DiamondSqrGrid::CreateFlatGrid() const 
-{
-	auto size        = (UINT)GetGridSize();
-	auto vertexCount = UINT(size * size);
-
-	float halfSize = 0.5f * size;
-
-	float dx = size / (size - 1.0f);
-	float dz = size / (size - 1.0f);
-
-	float du = 1.0f / (size - 1.0f);
-	float dv = 1.0f / (size - 1.0f);
-
-	std::vector<SimpleVertex> vertices(vertexCount);
-	// Generate vertices
-	for (UINT row = 0; row < size; row++)
-	{
-		float z = halfSize - (float)row * dz;
-		for (UINT col = 0; col < size; col++)
-		{
-			float x = -halfSize + (float)col * dx;
-
-			vertices[row * size + col] = { Vector3(x, 0.0f, z),
-										   Vector3(0.0f, 1.0f, 0.0f),
-										   Vector2((float)row * du, (float)col * dv) };
-		}
-	}
-
-	return vertices;
 }
 
 void DiamondSqrGrid::DoDiamondSquareGrid(std::vector<SimpleVertex>& vertices)

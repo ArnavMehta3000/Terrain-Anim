@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Scenes/GridScene.h"
-#include "Core/Entities/GridEntity.h"
+#include "Entities/GridEntity.h"
 #include "Graphics/Direct3D.h"
 
 GridScene::GridScene(UINT width, UINT height)

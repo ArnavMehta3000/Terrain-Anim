@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Core/Entities/Entity.h"
+#include "Entities/Entity.h"
 
 Entity::Entity()
 	:

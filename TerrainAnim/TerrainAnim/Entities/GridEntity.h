@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Entities/Entity.h"
+#include "Entities/Entity.h"
 #include "Graphics/HeightMap.h"
 
 class GridEntity : public Entity
@@ -18,11 +18,20 @@ public:
 	// Recreate the vertex and index buffers
 	void ApplyChanges();
 
+	inline float GetGridSize() const noexcept { return static_cast<float>(std::pow(2, m_resolution) + 1); }
+
 protected:
+	std::vector<SimpleVertex> CreateFlatGrid(int resolution = 9) const;
+
+private:
 	virtual void CreateTerrainVB();
 	virtual void CreateTerrainIB();
 
+protected:
+	int m_resolution;
+
 private:
+	std::vector<SimpleVertex>  m_vertices;
 	std::unique_ptr<Shader>    m_shader;
 	Texture2D                  m_texture;
 	ComPtr<ID3D11Buffer>       m_vertexBuffer;

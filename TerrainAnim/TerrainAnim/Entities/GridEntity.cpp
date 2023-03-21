@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Core/Entities/GridEntity.h"
+#include "Entities/GridEntity.h"
 #include "Graphics/Direct3D.h"
 
 GridEntity::GridEntity()
@@ -100,6 +100,37 @@ void GridEntity::ApplyChanges()
 {
 	CreateTerrainVB();
 	CreateTerrainIB();
+}
+
+std::vector<SimpleVertex> GridEntity::CreateFlatGrid(int resolution) const
+{
+	auto size = (UINT)GetGridSize();
+	auto vertexCount = UINT(size * size);
+
+	float halfSize = 0.5f * size;
+
+	float dx = size / (size - 1.0f);
+	float dz = size / (size - 1.0f);
+
+	float du = 1.0f / (size - 1.0f);
+	float dv = 1.0f / (size - 1.0f);
+
+	std::vector<SimpleVertex> vertices(vertexCount);
+	// Generate vertices
+	for (UINT row = 0; row < size; row++)
+	{
+		float z = halfSize - (float)row * dz;
+		for (UINT col = 0; col < size; col++)
+		{
+			float x = -halfSize + (float)col * dx;
+
+			vertices[row * size + col] = { Vector3(x, 0.0f, z),                          // Position
+										   Vector3(0.0f, 1.0f, 0.0f),                    // Normal
+										   Vector2((float)row * du, (float)col * dv) };  // TexCoord
+		}
+	}
+
+	return vertices;
 }
 
 

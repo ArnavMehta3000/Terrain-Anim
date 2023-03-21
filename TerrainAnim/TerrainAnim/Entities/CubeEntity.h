@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Entities/Entity.h"
+#include "Entities/Entity.h"
 
 class CubeEntity : public Entity
 {

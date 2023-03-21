@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Application.h"
-#include "Graphics/Texture.h"
+#include "Scenes/TestScene.h"
+#include "Scenes/GridScene.h"
+#include "Scenes/TerrainScene.h"
 #include <algorithm>
 #include <execution>
 
@@ -32,7 +34,8 @@ bool Application::Init()
 	ImGui::StyleColorsDark();
 
 	m_scenes.push_back(new TestScene(m_width, m_height));
-	m_scenes.push_back(new GridScene(m_width*2, m_height*2));
+	m_scenes.push_back(new GridScene(m_width, m_height));
+	m_scenes.push_back(new TerrainScene(m_width, m_height));
 	
 	Timer totalTime; 
 	totalTime.Start();
@@ -45,7 +48,7 @@ bool Application::Init()
 		});
 
 		totalTime.Stop();
-	LOG("Total load time: " << totalTime.TotalTime() * 1000.0f << "s");
+	LOG("Total load time: " << totalTime.TotalTime() * 1000.0f << "ms");
 	
 	m_appTimer.Reset();
 	m_appTimer.Start();
@@ -111,6 +114,9 @@ void Application::GUI()
 
 			if (ImGui::Selectable("Grid Scene"))
 				m_currentScene = 1;
+
+			if (ImGui::Selectable("Terrain Scene"))
+				m_currentScene = 2;
 
 			ImGui::EndCombo();
 		}

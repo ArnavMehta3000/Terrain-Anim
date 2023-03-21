@@ -1,12 +1,13 @@
 #pragma once
 #include "Core/Scene.h"
-#include "Entities/CubeEntity.h"
 
-class TestScene : public Scene
+class DiamondSqrGrid;
+
+class TerrainScene : public Scene
 {
 public:
-	TestScene(UINT width, UINT height);
-	~TestScene() = default;
+	TerrainScene(UINT width, UINT height);
+	~TerrainScene() = default;
 
 	virtual void Load() override;
 	virtual void Update(float dt, const InputEvent& input) override;
@@ -15,6 +16,6 @@ public:
 	virtual void Unload() override;
 
 private:
-	ComPtr<ID3D11Buffer>        m_wvpBuffer;
-	std::unique_ptr<CubeEntity> m_cube;
+	ComPtr<ID3D11Buffer> m_wvpBuffer;
+	std::unique_ptr<DiamondSqrGrid> m_dsTerrain;
 };
