@@ -76,17 +76,14 @@ void GridEntity::Render()
 
 void GridEntity::GUI()
 {
-	if (m_heightMap != nullptr)
+	if (m_heightMap != nullptr && ImGui::TreeNode("Heightmap Data"))
 	{
-		if (ImGui::TreeNode("Heightmap Data"))
-		{
-			ImGui::Text("Heightmap File: %s", m_heightMap->GetFileName().c_str());
-			ImGui::Text("Heightmap Dimensions: %ux%u", m_heightMap->GetWidth(), m_heightMap->GetHeight());
-			ImGui::DragFloat("Multiplier", &m_multiplier, 0.1f, 0.0f);
-			if (ImGui::IsItemDeactivatedAfterEdit())
-				ApplyChanges();
-			ImGui::TreePop();
-		}
+		ImGui::Text("Heightmap File: %s", m_heightMap->GetFileName().c_str());
+		ImGui::Text("Heightmap Dimensions: %ux%u", m_heightMap->GetWidth(), m_heightMap->GetHeight());
+		ImGui::DragFloat("Multiplier", &m_multiplier, 0.1f, 0.0f);
+		if (ImGui::IsItemDeactivatedAfterEdit())
+			ApplyChanges();
+		ImGui::TreePop();
 	}
 
 	if (ImGui::TreeNode("Grid Settings"))

@@ -71,11 +71,6 @@ void Application::Shutdown()
 
 void Application::Update(float dt, const InputEvent& input)
 {
-	if (input.KeyboardState.D1)
-		D3D->SetWireframe(false);
-	if (input.KeyboardState.D2)
-		D3D->SetWireframe(true);
-
 	m_scenes[m_currentScene]->Update(dt, input);
 }
 
@@ -83,6 +78,8 @@ void Application::Render()
 {
 	m_scenes[m_currentScene]->Render();
 }
+
+static bool isWireframe = false;
 
 void Application::GUI()
 {
@@ -94,11 +91,18 @@ void Application::GUI()
 	ImGui::SetWindowPos({ 0.0f, 0.0f }, ImGuiCond_Always);
 	ImGui::SetWindowSize({ 350.0f, static_cast<float>(m_width) }, ImGuiCond_Once);
 	
-	if (ImGui::CollapsingHeader("Application", nullptr, ImGuiTreeNodeFlags_Bullet))
+	if (ImGui::CollapsingHeader("Application", nullptr, ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		ImGui::Text("How to use the Application");
 		ImGui::Text("1 - Set view to solid");
 		ImGui::Text("2 - Set view to wirerframe");
+
+		if (ImGui::Button("Toggle Wireframe"))
+		{
+			isWireframe = !isWireframe;
+			D3D->SetWireframe(isWireframe);
+		}
+		ImGui::SameLine();
 
 		if (ImGui::BeginCombo("##SceneSelect", "Select Scene"))
 		{
@@ -110,8 +114,9 @@ void Application::GUI()
 
 			ImGui::EndCombo();
 		}
+		ImGui::Separator();
 		
-		if (ImGui::TreeNode("App Stats"))
+		if (ImGui::TreeNodeEx("App Stats", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& cam = m_scenes[m_currentScene]->GetSceneCamera();
 

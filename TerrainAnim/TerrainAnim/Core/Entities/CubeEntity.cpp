@@ -92,8 +92,8 @@ void CubeEntity::GUI()
 
 	if (ImGui::TreeNode("Cube Tessellation"))
 	{
-		ImGui::DragFloat("Edge", &m_tessellationFactors.EdgeTessFactor, 0.1f, 0.1f, HS_MAX_TESS_FACTOR);
-		ImGui::DragFloat("Inside", &m_tessellationFactors.InsideTessFactor, 0.1f, 0.1f, HS_MAX_TESS_FACTOR);
+		ImGui::DragFloat("Edge", &m_tessellationFactors.EdgeTessFactor, 0.1f, 0.01f, HS_MAX_TESS_FACTOR);
+		ImGui::DragFloat("Inside", &m_tessellationFactors.InsideTessFactor, 0.1f, 0.01f, HS_MAX_TESS_FACTOR);
 		ImGui::TreePop();
 	}
 }

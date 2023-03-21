@@ -16,7 +16,9 @@ PSInput DS(HS_CONSTANT_DATA_OUTPUT input, float3 bcCoords : SV_DomainLocation, c
                       bcCoords.y * TrianglePatch[1].Position.xyz +
                       bcCoords.z * TrianglePatch[2].Position.xyz;
     
-    output.TexCoord = bcCoords.x * TrianglePatch[0].TexCoord + bcCoords.y + TrianglePatch[1].TexCoord;
+    output.TexCoord = bcCoords.x * TrianglePatch[0].TexCoord +
+                      bcCoords.y * TrianglePatch[1].TexCoord +
+                      bcCoords.z * TrianglePatch[2].TexCoord;
     
     output.Position  = mul(float4(worldPos, 1.0f), World);
     output.PositionW = output.Position;
