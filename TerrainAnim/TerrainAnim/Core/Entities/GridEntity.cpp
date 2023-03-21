@@ -2,18 +2,18 @@
 #include "Core/Entities/GridEntity.h"
 #include "Graphics/Direct3D.h"
 
-GridEntity::GridEntity(HeightMap map)
+GridEntity::GridEntity()
 	:
+	m_texture(L"Textures/PFP.JPG"),
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
-	m_tessFactorsHS(nullptr),
 	m_indexCount(0),
-	m_texture(L"Textures/PFP.JPG"),
+	m_tessFactorsHS(nullptr),
 	m_multiplier(100)
 {
-	m_heightMap  = std::make_unique<HeightMap>(map);
-	m_gridWidth  = m_heightMap->GetWidth();
-	m_gridHeight = m_heightMap->GetHeight();
+	
+	m_gridWidth  = 513;
+	m_gridHeight = 513;
 
 	ZeroMemory(&m_tessellationFactors, sizeof(TessellationFactors));
 	m_tessellationFactors.EdgeTessFactor   = 1.0f;
@@ -39,8 +39,16 @@ GridEntity::~GridEntity()
 	COM_RELEASE(m_tessFactorsHS);
 }
 
-void GridEntity::SetHeightMap(HeightMap map)
+void GridEntity::SetHeightMap(HeightMap map) noexcept
 {
+	m_heightMap = std::make_unique<HeightMap>(map);
+	ApplyChanges();
+}
+
+void GridEntity::ClearHeightMap() noexcept
+{
+	m_heightMap.reset();
+	ApplyChanges();
 }
 
 void GridEntity::Update(float dt, const InputEvent& input)
@@ -68,14 +76,17 @@ void GridEntity::Render()
 
 void GridEntity::GUI()
 {
-	if (ImGui::TreeNode("Heightmap Data"))
+	if (m_heightMap != nullptr)
 	{
-		ImGui::Text("Heightmap File: %s", m_heightMap->GetFileName().c_str());
-		ImGui::Text("Heightmap Dimensions: %ux%u", m_heightMap->GetWidth(), m_heightMap->GetHeight());
-		ImGui::DragFloat("Multiplier", &m_multiplier, 0.1f, 0.0f);
-		if (ImGui::IsItemDeactivatedAfterEdit())
-			ApplyChanges();
-		ImGui::TreePop();
+		if (ImGui::TreeNode("Heightmap Data"))
+		{
+			ImGui::Text("Heightmap File: %s", m_heightMap->GetFileName().c_str());
+			ImGui::Text("Heightmap Dimensions: %ux%u", m_heightMap->GetWidth(), m_heightMap->GetHeight());
+			ImGui::DragFloat("Multiplier", &m_multiplier, 0.1f, 0.0f);
+			if (ImGui::IsItemDeactivatedAfterEdit())
+				ApplyChanges();
+			ImGui::TreePop();
+		}
 	}
 
 	if (ImGui::TreeNode("Grid Settings"))
@@ -104,29 +115,30 @@ void GridEntity::CreateTerrainVB()
 	UINT zSize       = m_gridHeight;
 	UINT vertexCount = xSize * zSize;
 
-	float halfWidth  = 0.5f * m_gridWidth;
-	float halfHeight = 0.5f * m_gridHeight;
+	float halfWidth  = 0.5f * (float)m_gridWidth;
+	float halfHeight = 0.5f * (float)m_gridHeight;
 
-	float dx = (float)xSize / (zSize - 1.0f);
-	float dz = (float)zSize / (zSize - 1.0f);
+	float dx = (float)xSize / ((float)zSize - 1.0f);
+	float dz = (float)zSize / ((float)zSize - 1.0f);
 
-	float du = 1.0f / (zSize - 1.0f);
-	float dv = 1.0f / (xSize - 1.0f);
+	float du = 1.0f / ((float)zSize - 1.0f);
+	float dv = 1.0f / ((float)xSize - 1.0f);
 
 	std::vector<SimpleVertex> vertices(vertexCount);
 	// Generate vertices
 	for (UINT row = 0; row < xSize; row++)
 	{
-		float z = halfHeight - row * dz;
+		float z = halfHeight - (float)row * dz;
 		for (UINT col = 0; col < zSize; col++)
 		{
-			float x      = -halfWidth + col * dx;
-			float height = m_heightMap->GetValue(m_heightMap->GetWidth() * row + col);
+			float x      = -halfWidth + (float)col * dx;
+
+			float height = (m_heightMap == nullptr) ? 0.0f : m_heightMap->GetValue(m_heightMap->GetWidth() * row + col);
 			height *= m_multiplier;
 
 			vertices[row * zSize + col] = { Vector3(x, height, z),
 											Vector3(0.0f, 1.0f, 0.0f),
-											Vector2(row * du, col * dv) };
+											Vector2((float)row * du, (float)col * dv) };
 		}
 	}
 

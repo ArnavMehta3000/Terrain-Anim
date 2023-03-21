@@ -8,12 +8,12 @@ public:
 	GridEntity();
 	~GridEntity();
 
-	void SetHeightMap(HeightMap map);
-	void ClearHeightMap();
+	void SetHeightMap(HeightMap map) noexcept;
+	void ClearHeightMap() noexcept;
 
 	void Update(float dt, const InputEvent& input) override;
 	void Render() override;
-	void GUI();
+	void GUI() override;
 
 	// Recreate the vertex and index buffers
 	void ApplyChanges();

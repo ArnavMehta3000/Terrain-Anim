@@ -13,7 +13,7 @@ void GridScene::Load()
 	m_sceneCamera.Position(Vector3(0, 10, -8));
 	D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 
-	m_grid = std::make_unique<GridEntity>(HeightMap("Assets/Textures513/coastMountain513.raw", 513, 513));
+	m_grid = std::make_unique<GridEntity>();
 	LOG("Loaded grid scene");
 }
 
@@ -40,7 +40,17 @@ void GridScene::Render()
 void GridScene::GUI()
 {
 	if (ImGui::CollapsingHeader("Grid Scene Settings"))
+	{
+		if (ImGui::Button("Set Heightmap"))
+			m_grid->SetHeightMap(HeightMap("Assets/Textures513/coastMountain513.raw", 513, 513));
+		
+		ImGui::SameLine();
+
+		if (ImGui::Button("Clear Heightmap"))
+			m_grid->ClearHeightMap();
+
 		m_grid->GUI();
+	}
 }
 
 void GridScene::Unload()
