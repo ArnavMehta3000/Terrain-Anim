@@ -9,12 +9,9 @@ GridEntity::GridEntity()
 	m_indexBuffer(nullptr),
 	m_indexCount(0),
 	m_tessFactorsHS(nullptr),
+	m_gridSize(513),
 	m_multiplier(100)
 {
-	
-	m_gridWidth  = 513;
-	m_gridHeight = 513;
-
 	ZeroMemory(&m_tessellationFactors, sizeof(TessellationFactors));
 	m_tessellationFactors.EdgeTessFactor   = 1.0f;
 	m_tessellationFactors.InsideTessFactor = 1.0f;
@@ -24,10 +21,10 @@ GridEntity::GridEntity()
 	desc.PixelShaderFile  = L"Shaders/Grid/Grid_PS.hlsl";
 	desc.HullShaderFile   = L"Shaders/Grid/Grid_HS.hlsl";
 	desc.DomainShaderFile = L"Shaders/Grid/Grid_DS.hlsl";
+	m_shader              = std::make_unique<Shader>(desc);
 
 	D3D->CreateConstantBuffer(m_tessFactorsHS, sizeof(TessellationFactors));
 
-	m_shader = std::make_unique<Shader>(desc);
 
 	ApplyChanges();
 }
@@ -108,12 +105,11 @@ void GridEntity::ApplyChanges()
 
 void GridEntity::CreateTerrainVB()
 {
-	UINT xSize       = m_gridWidth;
-	UINT zSize       = m_gridHeight;
+	UINT xSize       = m_gridSize;
+	UINT zSize       = m_gridSize;
 	UINT vertexCount = xSize * zSize;
 
-	float halfWidth  = 0.5f * (float)m_gridWidth;
-	float halfHeight = 0.5f * (float)m_gridHeight;
+	float halfSize  = 0.5f * (float)m_gridSize;
 
 	float dx = (float)xSize / ((float)zSize - 1.0f);
 	float dz = (float)zSize / ((float)zSize - 1.0f);
@@ -125,11 +121,12 @@ void GridEntity::CreateTerrainVB()
 	// Generate vertices
 	for (UINT row = 0; row < xSize; row++)
 	{
-		float z = halfHeight - (float)row * dz;
+		float z = halfSize - (float)row * dz;
 		for (UINT col = 0; col < zSize; col++)
 		{
-			float x      = -halfWidth + (float)col * dx;
+			float x = -halfSize + (float)col * dx;
 
+			// Set height value depending on availabilty of heightmap
 			float height = (m_heightMap == nullptr) ? 0.0f : m_heightMap->GetValue(m_heightMap->GetWidth() * row + col);
 			height *= m_multiplier;
 
@@ -148,18 +145,20 @@ void GridEntity::CreateTerrainVB()
 	CREATE_ZERO(D3D11_SUBRESOURCE_DATA, vsd);
 	vsd.pSysMem = vertices.data();
 
-	HR(D3D_DEVICE->CreateBuffer(&vbd, &vsd, m_vertexBuffer.ReleaseAndGetAddressOf()));
+	HR(D3D_DEVICE->CreateBuffer(&vbd, &vsd, m_vertexBuffer.ReleaseAndGetAddressOf()))
 }
 
 void GridEntity::CreateTerrainIB()
 {
-	UINT xSize     = m_gridWidth;
-	UINT zSize     = m_gridHeight;
+	UINT xSize     = m_gridSize;
+	UINT zSize     = m_gridSize;
 	UINT faceCount = (xSize - 1) * (zSize - 1) * 2;
 
 	UINT tris = 0;
+	
+	// 3 verts per face
+	std::vector<UINT> indices(faceCount * 3);  
 
-	std::vector<UINT> indices(faceCount * 3);  // 3 verts per face
 	// Generate indices
 	for (UINT row = 0; row < xSize - 1; row++)
 	{
@@ -188,5 +187,5 @@ void GridEntity::CreateTerrainIB()
 	CREATE_ZERO(D3D11_SUBRESOURCE_DATA, isd);
 	isd.pSysMem = indices.data();
 
-	HR(D3D_DEVICE->CreateBuffer(&ibd, &isd, m_indexBuffer.ReleaseAndGetAddressOf()));
+	HR(D3D_DEVICE->CreateBuffer(&ibd, &isd, m_indexBuffer.ReleaseAndGetAddressOf()))
 }

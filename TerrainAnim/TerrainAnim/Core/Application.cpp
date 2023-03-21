@@ -118,12 +118,13 @@ void Application::GUI()
 		
 		if (ImGui::TreeNodeEx("App Stats", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			auto& cam = m_scenes[m_currentScene]->GetSceneCamera();
+			const Camera& cam = m_scenes[m_currentScene]->GetSceneCamera();
 
 			ImGui::Text("Frame Time: %.4fms", m_appTimer.DeltaTime() * 1000.0f);
 			ImGui::Text("FPS: %.4f", 1.0f / m_appTimer.DeltaTime());
 			ImGui::Text("Camera Pos: (%.3f, %.3f, %.3f)", cam.Position().x, cam.Position().y, cam.Position().z);
 			ImGui::Text("Camera Speed: %.3f", cam.GetSpeed());
+
 			ImGui::TreePop();
 		}
 	}

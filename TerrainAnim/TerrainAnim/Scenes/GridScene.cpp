@@ -39,7 +39,7 @@ void GridScene::Render()
 
 void GridScene::GUI()
 {
-	if (ImGui::CollapsingHeader("Grid Scene Settings"))
+	if (ImGui::CollapsingHeader("Grid Scene Settings", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		if (ImGui::Button("Set Heightmap"))
 			m_grid->SetHeightMap(HeightMap("Assets/Textures513/coastMountain513.raw", 513, 513));

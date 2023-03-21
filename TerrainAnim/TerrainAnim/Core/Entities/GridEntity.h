@@ -6,7 +6,7 @@ class GridEntity : public Entity
 {
 public:
 	GridEntity();
-	~GridEntity();
+	virtual ~GridEntity();
 
 	void SetHeightMap(HeightMap map) noexcept;
 	void ClearHeightMap() noexcept;
@@ -32,8 +32,7 @@ private:
 	ComPtr<ID3D11Buffer>       m_tessFactorsHS;
 	TessellationFactors        m_tessellationFactors;
 							   
-	UINT                       m_gridWidth;
-	UINT                       m_gridHeight;
+	UINT                       m_gridSize;
 	float                      m_multiplier;
 
 	std::unique_ptr<HeightMap> m_heightMap;
