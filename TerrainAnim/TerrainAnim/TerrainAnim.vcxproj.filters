@@ -39,9 +39,6 @@
     <ClCompile Include="Core\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scenes\TestScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -84,7 +81,7 @@
     <ClCompile Include="Graphics\HeightMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\DiamondSqrGrid.cpp">
+    <ClCompile Include="Scenes\TestScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scenes\TerrainScene.cpp">
@@ -171,9 +168,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\HeightMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\DiamondSqrGrid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\TerrainScene.h">

@@ -12,7 +12,6 @@ GridScene::GridScene(UINT width, UINT height)
 void GridScene::Load()
 {
 	m_sceneCamera.Position(Vector3(0, 10, -8));
-	D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 
 	m_grid = std::make_unique<GridEntity>();
 	LOG("Loaded grid scene");
@@ -24,10 +23,12 @@ void GridScene::Update(float dt, const InputEvent& input)
 
 	m_sceneCamera.Update(dt, input.KeyboardState, input.MouseState);
 
-	WVPBuffer wvp;
-	wvp.World      = Matrix::Identity;
-	wvp.View       = m_sceneCamera.GetView().Transpose();
-	wvp.Projection = m_sceneCamera.GetProjection().Transpose();
+	WVPBuffer wvp
+	{
+		.World      = Matrix::Identity,
+		.View       = m_sceneCamera.GetView().Transpose(),
+		.Projection = m_sceneCamera.GetProjection().Transpose()
+	};
 
 	D3D_CONTEXT->UpdateSubresource(m_wvpBuffer.Get(), 0, nullptr, &wvp, 0, 0);
 }

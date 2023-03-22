@@ -91,7 +91,6 @@
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Entities\CubeEntity.cpp" />
-    <ClCompile Include="Entities\DiamondSqrGrid.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
     <ClCompile Include="Entities\GridEntity.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
@@ -145,7 +144,6 @@
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="Entities\CubeEntity.h" />
-    <ClInclude Include="Entities\DiamondSqrGrid.h" />
     <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\GridEntity.h" />
     <ClInclude Include="Core\Object.h" />

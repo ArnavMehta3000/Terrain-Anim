@@ -18,6 +18,5 @@ public:
 
 private:
 	HeightMap                   m_heightmap;
-	ComPtr<ID3D11Buffer>        m_wvpBuffer;
 	std::unique_ptr<GridEntity> m_grid;
 };

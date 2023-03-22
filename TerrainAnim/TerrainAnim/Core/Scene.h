@@ -19,6 +19,7 @@ public:
 	const Camera& GetSceneCamera() const noexcept { return m_sceneCamera; }
 
 protected:
-	Camera m_sceneCamera;
-	UINT   m_sceneWidth, m_sceneHeight;
+	ComPtr<ID3D11Buffer> m_wvpBuffer;
+	Camera               m_sceneCamera;
+	UINT                 m_sceneWidth, m_sceneHeight;
 };

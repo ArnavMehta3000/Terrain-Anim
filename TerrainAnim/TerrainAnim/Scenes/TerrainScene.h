@@ -1,14 +1,12 @@
 #pragma once
 #include "Core/Scene.h"
-#include "Entities/DiamondSqrGrid.h"
-
-class DiamondSqrGrid;
+#include "Entities/GridEntity.h"
 
 class TerrainScene : public Scene
 {
 public:
 	TerrainScene(UINT width, UINT height);
-	~TerrainScene() = default;
+	virtual ~TerrainScene() = default;
 
 	virtual void Load() override;
 	virtual void Update(float dt, const InputEvent& input) override;
@@ -17,6 +15,6 @@ public:
 	virtual void Unload() override;
 
 private:
-	ComPtr<ID3D11Buffer> m_wvpBuffer;
-	std::unique_ptr<DiamondSqrGrid> m_dsTerrain;
+	ComPtr<ID3D11Buffer>        m_wvpBuffer;
+	std::unique_ptr<GridEntity> m_terrain;
 };

@@ -10,20 +10,23 @@ TestScene::TestScene(UINT width, UINT height)
 void TestScene::Load()
 {	
 	m_sceneCamera.Position(Vector3(0, 0, -8));
-	D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
-
 	m_cube = std::make_unique<CubeEntity>(L"Textures/PFP.JPG");
+	if (m_wvpBuffer == nullptr)
+		D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 	LOG("Loaded test scene");
 }
 
 void TestScene::Update(float dt, const InputEvent& input)
 {
 	m_sceneCamera.Update(dt, input.KeyboardState, input.MouseState);
+	
 
-	WVPBuffer wvp;
-	wvp.World      = m_cube->GetWorldMatrix().Transpose();
-	wvp.View       = m_sceneCamera.GetView().Transpose();
-	wvp.Projection = m_sceneCamera.GetProjection().Transpose();
+	WVPBuffer wvp
+	{
+		.World      = m_cube->GetWorldMatrix().Transpose(),
+		.View       = m_sceneCamera.GetView().Transpose(),
+		.Projection = m_sceneCamera.GetProjection().Transpose()
+	};
 
 	D3D_CONTEXT->UpdateSubresource(m_wvpBuffer.Get(), 0, nullptr, &wvp, 0, 0);
 
