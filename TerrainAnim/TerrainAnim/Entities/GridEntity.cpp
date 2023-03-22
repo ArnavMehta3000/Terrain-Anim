@@ -141,6 +141,9 @@ void GridEntity::GUI()
 
 void GridEntity::CreateFlatGrid()
 {
+	Timer timer;
+	timer.Reset();
+	timer.Start();
 	m_vertices.clear();
 
 	auto size = (UINT)GetGridSize();
@@ -168,6 +171,18 @@ void GridEntity::CreateFlatGrid()
 										     Vector2((float)row * du, (float)col * dv) };  // TexCoord
 		}
 	}
+	timer.Stop();
+	LOG("Time taken to create flat grid plane: " << timer.TotalTime() * 1000.0f << "ms");
+}
+
+void GridEntity::SetHeight(UINT i, UINT j, float height)
+{
+	m_vertices[i * GetGridSize() + j].Pos.y = height;
+}
+
+void GridEntity::SetHeight(UINT index, float height)
+{
+	m_vertices[index].Pos.y = height;
 }
 
 

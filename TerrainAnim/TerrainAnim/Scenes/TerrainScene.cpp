@@ -13,7 +13,7 @@ TerrainScene::TerrainScene(UINT width, UINT height)
 void TerrainScene::Load()
 {
 	m_sceneCamera.Position(Vector3(0, 10, -8));
-	m_terrain = std::make_unique<GridEntity>();
+	m_terrain = std::make_unique<DiamondSquare>();
 	LOG("Loaded terrain scene");
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Scene.h"
-#include "Entities/GridEntity.h"
+#include "Entities/DiamondSquare.h"
 
 class TerrainScene : public Scene
 {
@@ -16,5 +16,5 @@ public:
 
 private:
 	ComPtr<ID3D11Buffer>        m_wvpBuffer;
-	std::unique_ptr<GridEntity> m_terrain;
+	std::unique_ptr<DiamondSquare> m_terrain;
 };
