@@ -13,8 +13,7 @@ Texture2D::Texture2D(const wchar_t* fileName)
     }
 
     ID3D11Resource* res = nullptr;
-    DirectX::CreateWICTextureFromFile(D3D_DEVICE,
-        fileName, &res, nullptr);
+    HR(DirectX::CreateWICTextureFromFile(D3D_DEVICE, fileName, &res, nullptr));
 
     HR(res->QueryInterface(IID_ID3D11Texture2D, (void**)m_texture.ReleaseAndGetAddressOf()));
     

@@ -4,7 +4,7 @@
 
 GridEntity::GridEntity(int resolution)
 	:
-	m_texture(L"Textures/PFP.JPG"),
+	m_texture(L"Assets/PFP.JPG"),
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
 	m_indexCount(0),

@@ -88,6 +88,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation\FBX.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Entities\CubeEntity.cpp" />
@@ -96,6 +97,14 @@
     <ClCompile Include="Entities\GridEntity.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
+    <ClCompile Include="External\openfbx\miniz.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="External\openfbx\ofbx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Graphics\Direct3D.cpp" />
     <ClCompile Include="Graphics\HeightMap.cpp" />
     <ClCompile Include="Graphics\Shaders.cpp" />
@@ -136,11 +145,13 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Core\Window.cpp" />
+    <ClCompile Include="Scenes\AnimScene.cpp" />
     <ClCompile Include="Scenes\GridScene.cpp" />
     <ClCompile Include="Scenes\TerrainScene.cpp" />
     <ClCompile Include="Scenes\TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation\FBX.h" />
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core.h" />
@@ -151,6 +162,8 @@
     <ClInclude Include="Core\Object.h" />
     <ClInclude Include="Core\Structures.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="External\openfbx\miniz.h" />
+    <ClInclude Include="External\openfbx\ofbx.h" />
     <ClInclude Include="Graphics\Direct3D.h" />
     <ClInclude Include="Core\Primitives.h" />
     <ClInclude Include="Graphics\HeightMap.h" />
@@ -167,6 +180,7 @@
     <ClInclude Include="Core\Window.h" />
     <ClInclude Include="Graphics\Shaders.h" />
     <ClInclude Include="Core\Scene.h" />
+    <ClInclude Include="Scenes\AnimScene.h" />
     <ClInclude Include="Scenes\GridScene.h" />
     <ClInclude Include="Scenes\TerrainScene.h" />
     <ClInclude Include="Scenes\TestScene.h" />

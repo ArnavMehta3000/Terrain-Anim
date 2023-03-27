@@ -3,6 +3,7 @@
 #include "Scenes/TestScene.h"
 #include "Scenes/GridScene.h"
 #include "Scenes/TerrainScene.h"
+#include "Scenes/AnimScene.h"
 #include <algorithm>
 #include <execution>
 
@@ -13,7 +14,7 @@ Application::Application(HWND window, UINT width, UINT height)
 	m_width(width),
 	m_height(height),
 	m_appTimer(Timer()),
-	m_currentScene(0)
+	m_currentScene(3)  // TODO: Starts on anim scene
 {
 	// For WIC Texture loader
 	HR(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
@@ -36,10 +37,8 @@ bool Application::Init()
 	m_scenes.push_back(new TestScene(m_width, m_height));
 	m_scenes.push_back(new GridScene(m_width, m_height));
 	m_scenes.push_back(new TerrainScene(m_width, m_height));
+	m_scenes.push_back(new AnimScene(m_width, m_height));
 	
-	Timer totalTime; 
-	totalTime.Start();
-
 	// Load all scenes sequentially
 	std::for_each(std::execution::seq, m_scenes.begin(), m_scenes.end(), 
 		[](Scene* scene)
@@ -47,8 +46,6 @@ bool Application::Init()
 			scene->Load();
 		});
 
-		totalTime.Stop();
-	LOG("Total load time: " << totalTime.TotalTime() * 1000.0f << "ms");
 	
 	m_appTimer.Reset();
 	m_appTimer.Start();
@@ -117,6 +114,9 @@ void Application::GUI()
 
 			if (ImGui::Selectable("Terrain Scene"))
 				m_currentScene = 2;
+
+			if (ImGui::Selectable("Animation Scene"))
+				m_currentScene = 3;
 
 			ImGui::EndCombo();
 		}
