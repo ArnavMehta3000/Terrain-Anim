@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Camera.h"
 
-constexpr auto SPEED_GAIN = 0.00001f;
+constexpr auto SPEED_GAIN = 0.0001f;
 constexpr auto MAX_SPEED = 1.5f;
 
 Camera::Camera(float angle, float clientWidth, float clientHeight, float nearPlane, float farPlane)

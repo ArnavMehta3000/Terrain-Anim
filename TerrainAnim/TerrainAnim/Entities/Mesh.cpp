@@ -39,7 +39,7 @@ void Mesh::Render()
 	};
 
 	D3D_CONTEXT->UpdateSubresource(m_materialBuffer.Get(), 0, nullptr, &mat, 0, 0);
-	D3D_CONTEXT->PSSetConstantBuffers(0, 0, m_materialBuffer.GetAddressOf());
+	D3D_CONTEXT->PSSetConstantBuffers(0, 1, m_materialBuffer.GetAddressOf());
 
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
@@ -56,6 +56,7 @@ void Mesh::GUI()
 		
 		ImGui::Spacing();
 
+		ImGui::DragFloat3("Rotation", &m_rotation.x, 0.1f);
 		ImGui::DragFloat("Scale", &scaleFactor, 0.1f, 0.001f);
 		if (ImGui::IsItemEdited())
 		{

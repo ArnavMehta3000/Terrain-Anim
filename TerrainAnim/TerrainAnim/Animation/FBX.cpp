@@ -33,6 +33,7 @@ bool FBX::LoadFBX(const char* filename)
 	{
 		m_meshes.erase(m_meshes.begin(), m_meshes.end());
 		m_meshes.clear();
+		m_scene->destroy();
 		m_scene = nullptr;
 	}
 
