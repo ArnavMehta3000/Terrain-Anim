@@ -97,6 +97,7 @@
     <ClCompile Include="Entities\GridEntity.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
+    <ClCompile Include="Entities\Mesh.cpp" />
     <ClCompile Include="External\openfbx\miniz.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -162,6 +163,7 @@
     <ClInclude Include="Core\Object.h" />
     <ClInclude Include="Core\Structures.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Entities\Mesh.h" />
     <ClInclude Include="External\openfbx\miniz.h" />
     <ClInclude Include="External\openfbx\ofbx.h" />
     <ClInclude Include="Graphics\Direct3D.h" />

@@ -2,10 +2,19 @@
 #include "FBX.h"
 #include <Core/Timer.h>
 
+Vector3& operator<<(Vector3& myVec, const ofbx::Vec3& vec)
+{
+	myVec.x = static_cast<float>(vec.x);
+	myVec.y = static_cast<float>(vec.y);
+	myVec.z = static_cast<float>(vec.z);
+	return myVec;
+}
+
+
 bool FBX::LoadFBX(const char* filename)
 {
-	if (m_fbxScene)
-		m_fbxScene = nullptr;
+	if (m_scene)
+		m_scene = nullptr;
 
 	// Check if file exists
 	FILE* fp;
@@ -45,11 +54,11 @@ bool FBX::LoadFBX(const char* filename)
 		//ofbx::LoadFlags::IGNORE_MESHES     |
 		ofbx::LoadFlags::IGNORE_VIDEOS;
 
-	m_fbxScene= ofbx::load((ofbx::u8*)content, fileSize, (ofbx::u16)flags);
+	m_scene= ofbx::load((ofbx::u8*)content, fileSize, (ofbx::u16)flags);
 
 	timer.Stop();
 
-	if (!m_fbxScene)
+	if (!m_scene)
 	{
 		LOG("Failed to load FBX: " << ofbx::getError());
 		return false;
@@ -61,4 +70,48 @@ bool FBX::LoadFBX(const char* filename)
 	}
 
 	fclose(fp);
+}
+
+bool FBX::GenerateMesh()
+{ 
+	Timer timer;
+	const int meshCount = m_scene->getMeshCount();
+	for (int i = 0; i < meshCount; i++)
+	{
+		Mesh myMesh;
+
+		const auto mesh = m_scene->getMesh(i);
+		GenerateMeshData(myMesh, mesh);
+
+
+		m_meshes.push_back(std::make_unique<Mesh>(myMesh));
+	}
+	timer.Stop();
+	LOG("Mesh extraction took " << timer.TotalTime() * 1000.0f << "ms");
+	return true;
+}
+
+void FBX::GenerateMeshData(Mesh& myMesh, const ofbx::Mesh* mesh)
+{
+	auto geo = mesh->getGeometry();
+	
+	auto vertexCount = geo->getVertexCount();
+	auto indexCount = geo->getIndexCount();
+
+	auto vertices = geo->getVertices();
+	
+	myMesh.m_vertices.resize(vertexCount * sizeof(SimpleVertex));
+	
+	// Get vertex position
+	for (int i = 0; i < vertexCount; i++)
+	{
+		myMesh.m_vertices[i].Pos << vertices[i];
+		//LOG("Vertex: " << LOG_VEC(myMesh.m_vertices[i].Pos));
+	}
+
+	// Get normals
+	for (int i = 0; i < indexCount; i++)
+	{
+
+	}
 }

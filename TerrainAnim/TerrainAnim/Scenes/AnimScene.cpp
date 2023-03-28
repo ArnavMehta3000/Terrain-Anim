@@ -21,7 +21,8 @@ void AnimScene::Render()
 }
 
 static const char* message = "No FBX loaded";
-static bool flag = true;
+static bool loadFlag = true;
+static bool meshFlag = true;
 void AnimScene::GUI()
 {
     static char buf[128] = "./Assets/Idle.fbx";
@@ -32,9 +33,9 @@ void AnimScene::GUI()
         ImGui::InputText("File", buf, 128, ImGuiInputTextFlags_CharsNoBlank);
     
         if (ImGui::Button("Load FBX"))
-            flag = m_fbx->LoadFBX(buf);
+            loadFlag = m_fbx->LoadFBX(buf);
         
-        if (!flag)
+        if (!loadFlag)
         {
             ImGui::Text("Failed to load FBX. Check filename");
         }
@@ -45,6 +46,17 @@ void AnimScene::GUI()
             ImGui::Text("No FBX scene loaded");
             return;
         }
+
+        if (ImGui::Button("Generate Mesh"))
+            meshFlag = m_fbx->GenerateMesh();
+
+        if (!meshFlag)
+        {
+            ImGui::Text("No FBX mesh structure loaded");
+        }
+
+
+        ImGui::Spacing();
 
         const int meshCount = scene->getMeshCount();
         for (int i = 0; i < meshCount; ++i)
