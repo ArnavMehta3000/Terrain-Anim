@@ -52,6 +52,10 @@ void Mesh::GUI()
 {
 	if (ImGui::TreeNodeEx(m_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		ImGui::Text("Material: %s", m_material.Name.c_str());
+		
+		ImGui::Spacing();
+
 		ImGui::DragFloat("Scale", &scaleFactor, 0.1f, 0.001f);
 		if (ImGui::IsItemEdited())
 		{
