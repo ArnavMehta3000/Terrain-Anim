@@ -13,12 +13,13 @@ public:
 
 	const ofbx::IScene* GetScene() const noexcept { return m_scene; }
 
-	void DrawMeshes() const noexcept;
+	const std::vector<std::unique_ptr<Mesh>>& GetMeshList() const noexcept { return m_meshes; };
 
 private:
-	void GenerateMeshData(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh);
-	void GenerateMeshTransform(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh);
-
+	void ExtractMeshData(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh);
+	void ExtractMeshTransform(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh);
+	void ExtractMeshMaterials(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh);
+	
 
 private:
 	ofbx::IScene*                      m_scene;

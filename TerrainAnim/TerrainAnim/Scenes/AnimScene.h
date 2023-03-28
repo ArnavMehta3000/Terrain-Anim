@@ -14,5 +14,9 @@ public:
 	virtual void Unload() override;
 
 private:
+	void DrawFBXInfo();
+	void DrawMeshInfo();
+
+private:
 	std::unique_ptr<FBX> m_fbx;
 };

@@ -30,3 +30,8 @@ struct TessellationFactors
 	float InsideTessFactor = 8.0f;
 	Vector2 _pad1;
 };
+
+struct Material
+{
+	Color Diffuse;
+};

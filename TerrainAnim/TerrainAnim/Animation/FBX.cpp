@@ -17,11 +17,24 @@ Vector2& operator<<(Vector2& myVec, const ofbx::Vec2& vec)
 	return myVec;
 }
 
+Color& operator<<(Color& myCol, const ofbx::Color col)
+{
+	myCol.x = col.r;
+	myCol.y = col.g;
+	myCol.z = col.b;
+	myCol.w = 1.0f;
+
+	return myCol;
+}
 
 bool FBX::LoadFBX(const char* filename)
 {
 	if (m_scene)
+	{
+		m_meshes.erase(m_meshes.begin(), m_meshes.end());
+		m_meshes.clear();
 		m_scene = nullptr;
+	}
 
 	// Check if file exists
 	FILE* fp;
@@ -79,20 +92,17 @@ bool FBX::LoadFBX(const char* filename)
 	fclose(fp);
 }
 
-void FBX::DrawMeshes() const noexcept
-{
-	std::for_each(m_meshes.begin(), m_meshes.end(),
-		[](const std::unique_ptr<Mesh>& mesh)
-		{
-			mesh->Render();
-		});
-}
-
 bool FBX::GenerateMesh()
 { 
 	LOG("\n----- EXTRACTING MESH FROM FBX ------");
 
-
+	// Delete old mesh data
+	if (m_meshes.size() > 0)
+	{
+		m_meshes.erase(m_meshes.begin(), m_meshes.end());
+		m_meshes.clear();
+	}
+	
 	Timer timer;
 	const int meshCount = m_scene->getMeshCount();
 	for (int i = 0; i < meshCount; i++)
@@ -103,8 +113,9 @@ bool FBX::GenerateMesh()
 		std::unique_ptr<Mesh> myMesh = std::make_unique<Mesh>();
 		myMesh->m_name = mesh->name;
 
-		GenerateMeshData(myMesh, mesh);
-		GenerateMeshTransform(myMesh, mesh);
+		ExtractMeshData(myMesh, mesh);
+		ExtractMeshTransform(myMesh, mesh);
+		ExtractMeshMaterials(myMesh, mesh);
 
 
 		myMesh->GenBuffers();
@@ -116,7 +127,7 @@ bool FBX::GenerateMesh()
 	return true;
 }
 
-void FBX::GenerateMeshData(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh)
+void FBX::ExtractMeshData(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh)
 {
 	auto geo = mesh->getGeometry();
 
@@ -124,17 +135,7 @@ void FBX::GenerateMeshData(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh
 	auto indexCount = geo->getIndexCount();
 
 	myMesh->m_vertices.resize(vertexCount * sizeof(SimpleVertex));
-	myMesh->m_indices.resize(indexCount * sizeof(int));
-
-	auto indices = geo->getFaceIndices();
-	std::vector<int> ind;
-	for (int i = 0; i < indexCount; i++)
-	{
-		ind.push_back((indices[i] < 0) ? -indices[i] : (indices[i] + 1));
-		//LOG("Index: " << ind[i]);
-	}
-	myMesh->m_indicesCount = indexCount;
-
+	myMesh->m_indexCount = indexCount;
 	// Get vertex position
 	auto vertices = geo->getVertices();
 	for (int i = 0; i < vertexCount; i++)
@@ -168,9 +169,21 @@ void FBX::GenerateMeshData(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh
 
 }
 
-void FBX::GenerateMeshTransform(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh)
+void FBX::ExtractMeshTransform(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh)
 {
 	myMesh->m_position << mesh->getLocalTranslation();
 	myMesh->m_rotation << mesh->getLocalRotation();
 	myMesh->m_scale << mesh->getLocalScaling();
+}
+
+void FBX::ExtractMeshMaterials(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh)
+{
+	auto materialCount = mesh->getMaterialCount();
+
+	for (int i = 0; i < materialCount; i++)
+	{
+		auto material = mesh->getMaterial(i);
+		myMesh->m_material.Name = material->name;
+		myMesh->m_material.Diffuse << material->getDiffuseColor();
+	}
 }

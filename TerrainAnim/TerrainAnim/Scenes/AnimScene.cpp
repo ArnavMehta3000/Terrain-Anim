@@ -10,6 +10,7 @@ AnimScene::AnimScene(UINT width, UINT height)
 
 void AnimScene::Load()
 {
+    m_sceneCamera.Position(Vector3(20.0f, 85.0f, 140.0f));
 	m_fbx = std::make_unique<FBX>();
     if (m_wvpBuffer == nullptr)
         D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
@@ -19,13 +20,18 @@ void AnimScene::Update(float dt, const InputEvent& input)
 {
     m_sceneCamera.Update(dt, input.KeyboardState, input.MouseState);
 
-
     WVPBuffer wvp
     {
-        .World = Matrix::Identity.Transpose(),
         .View = m_sceneCamera.GetView().Transpose(),
         .Projection = m_sceneCamera.GetProjection().Transpose()
     };
+
+    std::for_each(m_fbx->GetMeshList().cbegin(), m_fbx->GetMeshList().cend(),
+        [&, dt, input](const std::unique_ptr<Mesh>& mesh)
+        {
+            mesh->Update(dt, input);
+            wvp.World = mesh->GetWorldMatrix().Transpose();
+        });
 
     D3D_CONTEXT->UpdateSubresource(m_wvpBuffer.Get(), 0, nullptr, &wvp, 0, 0);
 }
@@ -33,7 +39,17 @@ void AnimScene::Update(float dt, const InputEvent& input)
 void AnimScene::Render()
 {
     D3D_CONTEXT->VSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
-    m_fbx->DrawMeshes();
+    
+    std::for_each(m_fbx->GetMeshList().cbegin(), m_fbx->GetMeshList().cend(),
+        [](const std::unique_ptr<Mesh>& mesh)
+        {
+            mesh->Render();
+        });
+
+}
+
+void AnimScene::Unload()
+{
 }
 
 static const char* message = "No FBX loaded";
@@ -41,25 +57,42 @@ static bool loadFlag = true;
 static bool meshFlag = true;
 void AnimScene::GUI()
 {
-    static char buf[128] = "./Assets/Idle.fbx";
     
 	if (ImGui::CollapsingHeader("Animation Scene Settings"))
 	{
 
+        DrawFBXInfo();
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        DrawMeshInfo();
+
+        
+	}
+}
+
+void AnimScene::DrawFBXInfo()
+{
+    if (ImGui::TreeNodeEx("FBX Data", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        static char buf[128] = "./Assets/Idle.fbx";
+
         ImGui::InputText("File", buf, 128, ImGuiInputTextFlags_CharsNoBlank);
-    
+
         if (ImGui::Button("Load FBX"))
             loadFlag = m_fbx->LoadFBX(buf);
-        
+
         if (!loadFlag)
         {
             ImGui::Text("Failed to load FBX. Check filename");
+
         }
 
         auto scene = m_fbx->GetScene();
         if (!scene)
         {
             ImGui::Text("No FBX scene loaded");
+            ImGui::TreePop();
             return;
         }
 
@@ -70,52 +103,23 @@ void AnimScene::GUI()
         {
             ImGui::Text("No FBX mesh structure loaded");
         }
-
-
-        ImGui::Spacing();
-
-        const int meshCount = scene->getMeshCount();
-        for (int i = 0; i < meshCount; ++i)
-        {
-            const ofbx::Mesh* mesh = scene->getMesh(i);
-            ImGui::Text("Mesh: %s", mesh->name);
-            if (mesh)
-            {
-                // Access the mesh data
-                const int vertexCount      = mesh->getGeometry()->getVertexCount();
-                const ofbx::Vec3* vertices = mesh->getGeometry()->getVertices();
-                const ofbx::Vec3* normals  = mesh->getGeometry()->getNormals();
-                const int indexCount       = mesh->getGeometry()->getIndexCount();
-                const int* indices         = mesh->getGeometry()->getFaceIndices();
-
-                // Process the mesh materials and textures
-                const int material_count = mesh->getMaterialCount();
-                for (int j = 0; j < material_count; ++j)
-                {
-                    const ofbx::Material* material = mesh->getMaterial(j);
-                    if (material)
-                    {
-                        // Access the material data
-                        const char* materialName     = material->name;
-                        const ofbx::Texture* texture = material->getTexture(ofbx::Texture::DIFFUSE);
-                        if (texture)
-                        {
-                            // Access the texture data
-                            const auto texFilename = texture->getFileName();                        
-                        }
-                        ImGui::Text("Material: %s", materialName);
-                    }
-                }
-
-                ImGui::Text("Vertex Count: %u", vertexCount);
-                ImGui::Text("Index Count: %u", indexCount);
-
-                ImGui::Separator();
-            }
-        }
-	}
+        ImGui::TreePop();
+    }
 }
 
-void AnimScene::Unload()
+void AnimScene::DrawMeshInfo()
 {
+    if (ImGui::TreeNodeEx("Mesh Data", ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        if (m_fbx->GetMeshList().size() == 0)
+            ImGui::TextColored({ 1, 1, 0, 1 }, "Mesh Not extracted from FBX");
+
+        std::for_each(m_fbx->GetMeshList().cbegin(), m_fbx->GetMeshList().cend(),
+            [](const std::unique_ptr<Mesh>& mesh)
+            {
+                mesh->GUI();
+            });
+
+        ImGui::TreePop();
+     }
 }
