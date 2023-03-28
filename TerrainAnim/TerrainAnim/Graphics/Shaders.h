@@ -76,11 +76,14 @@ struct Shader
 	void BindDS();
 	void BindAll(bool applyInputLayout = true);
 
+	inline const InitInfo& GetInitInfo() const noexcept { return m_initInfo; }
+
 	std::shared_ptr<VertexShader> m_VertexShader;
 	std::shared_ptr<PixelShader>  m_PixelShader;
 	std::shared_ptr<HullShader>   m_HullShader;
 	std::shared_ptr<DomainShader> m_DomainShader;
 
 private:
+	InitInfo m_initInfo;
 	bool m_isCompleteShader = false;  // A complete shader contains all 4 shaders
 };

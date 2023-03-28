@@ -33,6 +33,7 @@ Shader::Shader(const InitInfo& desc)
 	m_PixelShader(std::make_shared<PixelShader>()),
 	m_HullShader(std::make_shared<HullShader>()),
 	m_DomainShader(std::make_shared<DomainShader>()),
+	m_initInfo(desc),
 	m_isCompleteShader(true)
 {
 	D3D->CreateVertexShader(m_VertexShader, desc.VertexShaderFile, "vs_5_0", desc.vsEntry);

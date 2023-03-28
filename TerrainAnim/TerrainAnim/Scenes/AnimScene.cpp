@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Scenes/AnimScene.h"
+#include "Graphics/Direct3D.h"
 
 AnimScene::AnimScene(UINT width, UINT height)
 	:
@@ -10,14 +11,29 @@ AnimScene::AnimScene(UINT width, UINT height)
 void AnimScene::Load()
 {
 	m_fbx = std::make_unique<FBX>();
+    if (m_wvpBuffer == nullptr)
+        D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 }
 
 void AnimScene::Update(float dt, const InputEvent& input)
 {
+    m_sceneCamera.Update(dt, input.KeyboardState, input.MouseState);
+
+
+    WVPBuffer wvp
+    {
+        .World = Matrix::Identity.Transpose(),
+        .View = m_sceneCamera.GetView().Transpose(),
+        .Projection = m_sceneCamera.GetProjection().Transpose()
+    };
+
+    D3D_CONTEXT->UpdateSubresource(m_wvpBuffer.Get(), 0, nullptr, &wvp, 0, 0);
 }
 
 void AnimScene::Render()
 {
+    D3D_CONTEXT->VSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
+    m_fbx->DrawMeshes();
 }
 
 static const char* message = "No FBX loaded";

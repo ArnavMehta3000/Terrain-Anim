@@ -17,6 +17,11 @@ private:
 	void GenBuffers();
 
 private:
+	std::string               m_name;
+	std::unique_ptr<Shader>   m_shader;
 	std::vector<SimpleVertex> m_vertices;
-	ComPtr<ID3D11Buffer> m_vertexBuffer;
+	std::vector<int>          m_indices;
+
+	ComPtr<ID3D11Buffer>      m_vertexBuffer;
+	ComPtr<ID3D11Buffer>      m_indexBuffer;
 };

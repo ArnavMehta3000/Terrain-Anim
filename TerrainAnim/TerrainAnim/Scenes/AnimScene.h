@@ -15,5 +15,4 @@ public:
 
 private:
 	std::unique_ptr<FBX> m_fbx;
-
 };
