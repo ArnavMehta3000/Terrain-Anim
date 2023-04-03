@@ -123,8 +123,15 @@ bool FBX::GenerateMesh()
 		m_meshes.push_back(std::move(myMesh));
 	}
 	timer.Stop();
+	timer.Reset();
+	LOG("\n----- MESH EXTRACTION TIME: " << timer.TotalTime() * 1000.0f << "ms -----");
 
-	LOG("\n----- EXTRACTION TIME: " << timer.TotalTime() * 1000.0f << "ms -----");
+	timer.Start();
+	LOG("\n----- EXTRACTING BONE DATA FROM FBX ------");
+	ExtractBoneData();
+	timer.Stop();
+	LOG("\n----- BONE DATA EXTRACTION TIME: " << timer.TotalTime() * 1000.0f << "ms -----");
+
 	return true;
 }
 
@@ -187,4 +194,27 @@ void FBX::ExtractMeshMaterials(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* 
 		myMesh->m_material.Name = material->name;
 		myMesh->m_material.Diffuse << material->getDiffuseColor();
 	}
+}
+
+void FBX::ExtractBoneData()
+{
+	for (int i = 0; i < m_scene->getAnimationStackCount(); i++)
+	{
+		auto animStack = m_scene->getAnimationStack(i);
+		for (int j = 0; animStack->getLayer(j); j++)
+		{
+			auto stackLayer = animStack->getLayer(j);
+			for (int k = 0; stackLayer->getCurveNode(k); k++)
+			{
+				auto curveNode = stackLayer->getCurveNode(k);
+				auto bone = curveNode->getBone();
+				if (bone)
+				{
+					
+					LOG("Found bone " << bone->name << " at --- [" << i << ", " << j << ", " << k << "]\tIs Node:" << (bone->isNode()) ? "TRUE" : "FALSE");
+				}
+			}
+		}
+	}
+
 }

@@ -11,9 +11,8 @@ AnimScene::AnimScene(UINT width, UINT height)
 void AnimScene::Load()
 {
     m_sceneCamera.Position(Vector3(20.0f, 85.0f, -140.0f));
+
 	m_fbx = std::make_unique<FBX>();
-    if (m_wvpBuffer == nullptr)
-        D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 }
 
 void AnimScene::Update(float dt, const InputEvent& input)
@@ -103,6 +102,7 @@ void AnimScene::DrawFBXInfo()
         {
             ImGui::Text("No FBX mesh structure loaded");
         }
+
         ImGui::TreePop();
     }
 }

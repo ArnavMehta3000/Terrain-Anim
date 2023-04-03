@@ -7,7 +7,8 @@ Mesh::Mesh()
 	Entity(),
 	m_name(),
 	m_vertexBuffer(nullptr),
-	m_shader(nullptr)
+	m_shader(nullptr),
+	m_Enabled(true)
 {
 	m_shader = std::make_unique<Shader>(L"Shaders/Anim/Anim_VS.hlsl", L"Shaders/Anim/Anim_PS.hlsl");
 
@@ -23,11 +24,17 @@ Mesh::~Mesh()
 
 void Mesh::Update(float dt, const InputEvent& input)
 {
+	if (!m_Enabled)
+		return;
+
 	Entity::Update(dt, input);
 }
 
 void Mesh::Render()
 {
+	if (!m_Enabled)
+		return;
+
 	Entity::Render();
 	m_shader->BindVS(true);
 	m_shader->BindPS();
@@ -47,23 +54,16 @@ void Mesh::Render()
 	D3D_CONTEXT->Draw(GetVertexCount(), 0);
 }
 
-float scaleFactor = 1.0f;
 void Mesh::GUI()
 {
 	if (ImGui::TreeNodeEx(m_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		ImGui::Checkbox("Draw", &m_Enabled);
+
 		ImGui::Text("Material: %s", m_material.Name.c_str());
 		
 		ImGui::Spacing();
 
-		ImGui::DragFloat3("Rotation", &m_rotation.x, 0.1f);
-		ImGui::DragFloat("Scale", &scaleFactor, 0.1f, 0.001f);
-		if (ImGui::IsItemEdited())
-		{
-			m_scale.x = scaleFactor;
-			m_scale.y = scaleFactor;
-			m_scale.z = scaleFactor;
-		}
 		ImGui::Text("Vertex Count: %u", GetVertexCount());
 		ImGui::Text("Index Count: %u", GetIndexCount());
 

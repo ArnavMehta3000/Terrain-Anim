@@ -19,6 +19,8 @@ private:
 	void ExtractMeshData(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh);
 	void ExtractMeshTransform(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh);
 	void ExtractMeshMaterials(std::unique_ptr<Mesh>& myMesh, const ofbx::Mesh* mesh);
+
+	void ExtractBoneData();
 	
 
 private:

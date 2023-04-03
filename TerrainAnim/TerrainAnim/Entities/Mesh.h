@@ -38,4 +38,7 @@ private:
 
 	ComPtr<ID3D11Buffer>      m_materialBuffer;
 	ComPtr<ID3D11Buffer>      m_vertexBuffer;
+
+public:
+	bool m_Enabled;
 };
