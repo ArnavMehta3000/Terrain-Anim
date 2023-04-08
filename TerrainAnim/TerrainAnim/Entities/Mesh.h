@@ -3,7 +3,7 @@
 
 class Mesh : public Entity
 {
-	friend class FBX;
+	friend class GLTF;
 
 public:
 	struct FBXMaterial
@@ -16,6 +16,7 @@ public:
 public:
 	Mesh();
 	~Mesh();
+	Mesh(const Mesh& other);
 
 	void Update(float dt, const InputEvent& input) override;
 	void Render() override;
@@ -32,10 +33,13 @@ private:
 private:
 	std::string               m_name;
 	std::unique_ptr<Shader>   m_shader;
-	std::vector<SimpleVertex> m_vertices;
-	UINT                      m_indexCount;
-	FBXMaterial m_material;
+	std::vector<GLTFVertex> m_vertices;
+	std::vector<int>         m_indices;
 
+	UINT                      m_indexCount;
+	FBXMaterial               m_material;
+	int                       m_indexType;
 	ComPtr<ID3D11Buffer>      m_materialBuffer;
 	ComPtr<ID3D11Buffer>      m_vertexBuffer;
+	ComPtr<ID3D11Buffer>      m_indexBuffer;
 };

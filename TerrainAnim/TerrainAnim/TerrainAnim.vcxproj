@@ -55,16 +55,17 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)External/fbxsdk/%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -73,22 +74,23 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);NOMINMAX;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)External/fbxsdk/%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Animation\FBX.cpp" />
+    <ClCompile Include="Animation\GLTF.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Entities\CubeEntity.cpp" />
@@ -98,14 +100,6 @@
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Entities\Mesh.cpp" />
-    <ClCompile Include="External\openfbx\miniz.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="External\openfbx\ofbx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Graphics\Direct3D.cpp" />
     <ClCompile Include="Graphics\HeightMap.cpp" />
     <ClCompile Include="Graphics\Shaders.cpp" />
@@ -152,7 +146,7 @@
     <ClCompile Include="Scenes\TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Animation\FBX.h" />
+    <ClInclude Include="Animation\GLTF.h" />
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core.h" />
@@ -164,8 +158,10 @@
     <ClInclude Include="Core\Structures.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Entities\Mesh.h" />
-    <ClInclude Include="External\openfbx\miniz.h" />
-    <ClInclude Include="External\openfbx\ofbx.h" />
+    <ClInclude Include="External\tinygltf\json.hpp" />
+    <ClInclude Include="External\tinygltf\stb_image.h" />
+    <ClInclude Include="External\tinygltf\stb_image_write.h" />
+    <ClInclude Include="External\tinygltf\tiny_gltf.h" />
     <ClInclude Include="Graphics\Direct3D.h" />
     <ClInclude Include="Core\Primitives.h" />
     <ClInclude Include="Graphics\HeightMap.h" />

@@ -5,6 +5,11 @@ struct VSInput
     float2 TexCoord : TEXCOORD0;
 };
 
+struct GLTFInput
+{
+    float3 Position : POSITION;
+};
+
 struct PSInput
 {
     float4 Position  : SV_POSITION;

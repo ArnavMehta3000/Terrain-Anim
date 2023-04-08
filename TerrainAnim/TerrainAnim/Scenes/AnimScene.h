@@ -18,5 +18,5 @@ private:
 	void DrawMeshInfo();
 
 private:
-	std::unique_ptr<FBX> m_fbx;
+	std::unique_ptr<GLTF> m_gltf;
 };

@@ -11,7 +11,7 @@ AnimScene::AnimScene(UINT width, UINT height)
 void AnimScene::Load()
 {
     m_sceneCamera.Position(Vector3(20.0f, 85.0f, -140.0f));
-	m_fbx = std::make_unique<FBX>();
+	m_gltf = std::make_unique<GLTF>();
     if (m_wvpBuffer == nullptr)
         D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 }
@@ -26,12 +26,12 @@ void AnimScene::Update(float dt, const InputEvent& input)
         .Projection = m_sceneCamera.GetProjection().Transpose()
     };
 
-    std::for_each(m_fbx->GetMeshList().cbegin(), m_fbx->GetMeshList().cend(),
+  /*  std::for_each(m_gltf->GetMeshList().cbegin(), m_gltf->GetMeshList().cend(),
         [&, dt, input](const std::unique_ptr<Mesh>& mesh)
         {
             mesh->Update(dt, input);
             wvp.World = mesh->GetWorldMatrix().Transpose();
-        });
+        });*/
 
     D3D_CONTEXT->UpdateSubresource(m_wvpBuffer.Get(), 0, nullptr, &wvp, 0, 0);
 }
@@ -40,11 +40,10 @@ void AnimScene::Render()
 {
     D3D_CONTEXT->VSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
     
-    std::for_each(m_fbx->GetMeshList().cbegin(), m_fbx->GetMeshList().cend(),
-        [](const std::unique_ptr<Mesh>& mesh)
-        {
-            mesh->Render();
-        });
+    for (auto& mesh : m_gltf->GetMeshList())
+    {
+        mesh->Render();
+    }
 
 }
 
@@ -52,7 +51,7 @@ void AnimScene::Unload()
 {
 }
 
-static const char* message = "No FBX loaded";
+static const char* message = "No GLTF loaded";
 static bool loadFlag = true;
 static bool meshFlag = true;
 void AnimScene::GUI()
@@ -73,35 +72,24 @@ void AnimScene::GUI()
 
 void AnimScene::DrawFBXInfo()
 {
-    if (ImGui::TreeNodeEx("FBX Data", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::TreeNodeEx("GLTF Data", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        static char buf[128] = "./Assets/Idle.fbx";
+        static char buf[128] = "./Assets/Idle.gltf";
 
         ImGui::InputText("File", buf, 128, ImGuiInputTextFlags_CharsNoBlank);
 
-        if (ImGui::Button("Load FBX"))
-            loadFlag = m_fbx->LoadFBX(buf);
+        if (ImGui::Button("Load GLTF"))
+            loadFlag = m_gltf->Load(buf);
 
         if (!loadFlag)
         {
-            ImGui::Text("Failed to load FBX. Check filename");
+            ImGui::Text("Failed to load GLTF. Check filename");
 
         }
-
-        auto scene = m_fbx->GetScene();
-        if (!scene)
-        {
-            ImGui::Text("No FBX scene loaded");
-            ImGui::TreePop();
-            return;
-        }
-
-        if (ImGui::Button("Generate Mesh"))
-            meshFlag = m_fbx->GenerateMesh();
 
         if (!meshFlag)
         {
-            ImGui::Text("No FBX mesh structure loaded");
+            ImGui::Text("No GLTF mesh structure loaded");
         }
         ImGui::TreePop();
     }
@@ -113,14 +101,13 @@ void AnimScene::DrawMeshInfo()
 {
     if (ImGui::TreeNodeEx("Mesh Data", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (m_fbx->GetMeshList().size() == 0)
-            ImGui::TextColored({ 1, 1, 0, 1 }, "Mesh Not extracted from FBX");
+        if (m_gltf->GetMeshList().size() == 0)
+            ImGui::TextColored({ 1, 1, 0, 1 }, "Mesh Not extracted from GLTF");
 
-        std::for_each(m_fbx->GetMeshList().cbegin(), m_fbx->GetMeshList().cend(),
-            [](const std::unique_ptr<Mesh>& mesh)
-            {
-                mesh->GUI();
-            });
+        for (auto& mesh : m_gltf->GetMeshList())
+        {
+            mesh->GUI();
+        }
 
         ImGui::TreePop();
      }
