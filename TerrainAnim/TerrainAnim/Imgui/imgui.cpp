@@ -14059,7 +14059,7 @@ namespace ImGui
 //-----------------------------------------------------------------------------
 // Docking: ImGuiDockContext
 //-----------------------------------------------------------------------------
-// The lifetime model is different from the one of regular windows: we always create a ImGuiDockNode for each ImGuiDockNodeSettings,
+// The lifetime m_model is different from the one of regular windows: we always create a ImGuiDockNode for each ImGuiDockNodeSettings,
 // or we always hold the entire docking node tree. Nodes are frequently hidden, e.g. if the window(s) or child nodes they host are not active.
 // At boot time only, we run a simple GC to remove nodes that have no references.
 // Because dock node settings (which are small, contiguous structures) are always mirrored by their corresponding dock nodes (more complete structures),

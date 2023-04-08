@@ -1,14 +1,14 @@
 #include "pch.h"
 #include "Entities/Mesh.h"
 #include "Graphics/Direct3D.h"
+#include <External/tinygltf/tiny_gltf.h>
 
 Mesh::Mesh()
 	:
 	Entity(),
 	m_name(),
 	m_vertexBuffer(nullptr),
-	m_shader(nullptr),
-	m_Enabled(true)
+	m_shader(nullptr)
 {
 	m_shader = std::make_unique<Shader>(L"Shaders/Anim/Anim_VS.hlsl", L"Shaders/Anim/Anim_PS.hlsl");
 
@@ -19,22 +19,29 @@ Mesh::Mesh()
 Mesh::~Mesh()
 {
 	COM_RELEASE(m_vertexBuffer);
+	COM_RELEASE(m_indexBuffer);
 	m_name.clear();
+}
+
+Mesh::Mesh(const Mesh& other)
+{
+	m_name           = other.m_name;
+	m_shader.reset(other.m_shader.get());
+	m_vertices       = other.m_vertices;
+	m_indices        = other.m_indices;
+	m_indexCount     = other.m_indexCount;
+	m_material       = other.m_material;
+	m_materialBuffer = other.m_materialBuffer;
+	m_vertexBuffer   = other.m_vertexBuffer;
 }
 
 void Mesh::Update(float dt, const InputEvent& input)
 {
-	if (!m_Enabled)
-		return;
-
 	Entity::Update(dt, input);
 }
 
 void Mesh::Render()
 {
-	if (!m_Enabled)
-		return;
-
 	Entity::Render();
 	m_shader->BindVS(true);
 	m_shader->BindPS();
@@ -48,22 +55,31 @@ void Mesh::Render()
 	D3D_CONTEXT->UpdateSubresource(m_materialBuffer.Get(), 0, nullptr, &mat, 0, 0);
 	D3D_CONTEXT->PSSetConstantBuffers(0, 1, m_materialBuffer.GetAddressOf());
 
-	UINT stride = sizeof(SimpleVertex);
+	UINT stride = sizeof(GLTFVertex);
 	UINT offset = 0;
 	D3D_CONTEXT->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-	D3D_CONTEXT->Draw(GetVertexCount(), 0);
+	D3D_CONTEXT->IASetIndexBuffer(m_indexBuffer.Get(), m_indexType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT, 0);
+	D3D_CONTEXT->DrawIndexed(m_indexCount, 0, 0);
 }
 
+float scaleFactor = 1.0f;
 void Mesh::GUI()
 {
 	if (ImGui::TreeNodeEx(m_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::Checkbox("Draw", &m_Enabled);
-
 		ImGui::Text("Material: %s", m_material.Name.c_str());
 		
 		ImGui::Spacing();
-
+		std::string rotName = "Rotation" + m_name;
+		std::string scaleName = "Scale" + m_name;
+		ImGui::DragFloat3(rotName.c_str(), &m_rotation.x, 0.1f);
+		ImGui::DragFloat(scaleName.c_str(), &scaleFactor, 0.1f, 0.001f);
+		if (ImGui::IsItemEdited())
+		{
+			m_scale.x = scaleFactor;
+			m_scale.y = scaleFactor;
+			m_scale.z = scaleFactor;
+		}
 		ImGui::Text("Vertex Count: %u", GetVertexCount());
 		ImGui::Text("Index Count: %u", GetIndexCount());
 
@@ -76,7 +92,7 @@ void Mesh::GenBuffers()
 	// Create vertex buffer
 	CREATE_ZERO(D3D11_BUFFER_DESC, vbd);
 	vbd.Usage = D3D11_USAGE_DEFAULT;
-	vbd.ByteWidth = sizeof(SimpleVertex) * (UINT)m_vertices.size();
+	vbd.ByteWidth = sizeof(GLTFVertex) * (UINT)m_vertices.size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 

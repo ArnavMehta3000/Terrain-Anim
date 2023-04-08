@@ -90,13 +90,7 @@
     <ClCompile Include="Entities\DiamondSquare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Animation\FBX.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="External\openfbx\miniz.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="External\openfbx\ofbx.cpp">
+    <ClCompile Include="Animation\GLTF.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scenes\AnimScene.cpp">
@@ -194,19 +188,25 @@
     <ClInclude Include="Entities\DiamondSquare.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Animation\FBX.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="External\openfbx\miniz.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="External\openfbx\ofbx.h">
+    <ClInclude Include="Animation\GLTF.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\AnimScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Entities\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="External\tinygltf\tiny_gltf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="External\tinygltf\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="External\tinygltf\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="External\tinygltf\stb_image_write.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

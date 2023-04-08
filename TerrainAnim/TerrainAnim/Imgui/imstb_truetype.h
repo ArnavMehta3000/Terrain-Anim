@@ -171,7 +171,7 @@
 //      Current Point
 //         As you draw text to the screen, you keep track of a "current point"
 //         which is the origin of each character. The current point's vertical
-//         position is the baseline. Even "baked fonts" use this model.
+//         position is the baseline. Even "baked fonts" use this m_model.
 //
 //      Vertical Font Metrics
 //         The vertical qualities of the font, used to vertically position

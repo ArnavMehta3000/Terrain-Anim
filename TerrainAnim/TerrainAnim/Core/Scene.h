@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Camera.h"
 #include "Core/Structures.h"
-#include "Animation/FBX.h"
+#include "Animation/GLTF.h"
 
 struct Shader;
 

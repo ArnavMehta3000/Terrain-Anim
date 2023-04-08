@@ -5,7 +5,7 @@
 
 class Entity : public Object
 {
-	friend class FBX;
+	friend class GLTF;
 public:
 	Entity();
 	~Entity();

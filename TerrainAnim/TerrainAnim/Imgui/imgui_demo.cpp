@@ -7986,7 +7986,7 @@ void ShowExampleAppDockSpace(bool* p_open)
 // [SECTION] Example App: Documents Handling / ShowExampleAppDocuments()
 //-----------------------------------------------------------------------------
 
-// Simplified structure to mimic a Document model
+// Simplified structure to mimic a Document m_model
 struct MyDocument
 {
     const char* Name;       // Document title
