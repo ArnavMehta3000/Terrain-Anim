@@ -54,8 +54,7 @@ bool GLTF::Load(const char* filename)
     }
     
     ProcessMesh();
-    ProcessAnimations();
-    ProcessJoints();
+    ProcessSkeleton();
 
     loadTime.Stop();
     LOG("Loaded file [" << filename << "] in " << loadTime.TotalTime() * 1000.0f << "ms");
@@ -150,122 +149,66 @@ void GLTF::ProcessMesh()
                 }
             }
         }
+
         myMesh->GenBuffers();
         m_meshes.push_back(myMesh);
+
         LOG("\n");
     }
 }
 
-void GLTF::ProcessAnimations()
+void GLTF::ProcessSkeleton()
 {
-    const auto& animations = m_model.animations;
-    
-    LOG("Animation Count: " << animations.size());
+    // Parent index - children indices
+    std::unordered_map<int, std::vector<int>> parentMap;
+    GetJointParentMap(parentMap);    
 
-    for (const auto& anim : animations)
-    {
-        Animation myAnim{};
-        myAnim.Name = anim.name;
 
-        for (const auto& channel : anim.channels)
+    for (auto& pair : parentMap)
+    {        
+        const auto& rootNode = m_model.nodes[pair.first];
+
+        LOG("Root: " << rootNode.name);
+        for (auto& child : pair.second)
         {
-            AnimationSampler mySampler{};
-
-            // Node index that the animation is targetting
-            const int nodeIndex = channel.target_node;
-
-            // Animation sampler contains the keyframe data
-            const int samplerIndex = channel.sampler;
-            const auto& sampler = anim.samplers[samplerIndex];
-
-            
-            if (sampler.interpolation == "LINEAR")
-                mySampler.Interpolation = AnimationSampler::InterpolationType::LINEAR;
-            if (sampler.interpolation == "STEP")
-                mySampler.Interpolation = AnimationSampler::InterpolationType::STEP;
-            if (sampler.interpolation == "CUBICSPLINE")
-                mySampler.Interpolation = AnimationSampler::InterpolationType::CUBICSPLINE;
-
-
-
-            // Input and output accessors contain the time and value data of the animation
-            const int inputIndex       = sampler.input;
-            const int outputIndex      = sampler.output;
-            const auto& inputAccessor  = m_model.accessors[inputIndex];
-            const auto& outputAccessor = m_model.accessors[outputIndex];
-
-            // Get buffer views and buffer that contain the actual keyframe data
-            const int inputBufferViewIndex  = inputAccessor.bufferView;
-            const int outputBufferViewIndex = outputAccessor.bufferView;
-            const auto& inputBufferView     = m_model.bufferViews[inputBufferViewIndex];
-            const auto& outputBufferView    = m_model.bufferViews[outputBufferViewIndex];
-            const auto& inputBuffer         = m_model.buffers[inputBufferView.buffer];
-            const auto& outputBuffer        = m_model.buffers[outputBufferView.buffer];
-
-            // Get type and component type of the keyframe data
-            const int inputType           = inputAccessor.type;
-            const int outputType          = outputAccessor.type;
-            const int inputComponentType  = inputAccessor.componentType;
-            const int outputComponentType = outputAccessor.componentType;
-
-            const float* inputBufferPtr = reinterpret_cast<const float*>(&inputBuffer.data[inputBufferView.byteOffset + inputAccessor.byteOffset]);
-            const void* outputBufferPtr = &outputBuffer.data[outputBufferView.byteOffset + outputAccessor.byteOffset];
-
-            // Read sampler inputs (time)
-            for (size_t i = 0; i < inputAccessor.count; i++)
-                mySampler.Inputs.push_back(inputBufferPtr[i]);
-
-            // Read sampler values (value)
-            switch (outputAccessor.type)
-            {
-            case TINYGLTF_TYPE_VEC3:
-            {
-                const Vector3* buffer = static_cast<const Vector3*>(outputBufferPtr);
-                for (size_t i = 0; i < outputAccessor.count; i++)
-                {
-                    auto v3 = buffer[i];
-                    mySampler.Outputs.push_back(Vector4(v3.x, v3.y, v3.z, 0.0f));
-                }
-            }
-            break;
-
-            case TINYGLTF_TYPE_VEC4:
-            {
-                const Vector4* buffer = static_cast<const Vector4*>(outputBufferPtr);
-                for (size_t i = 0; i < outputAccessor.count; i++)
-                    mySampler.Outputs.push_back(buffer[i]);
-            }
-            break;
-            }
-
-            for (auto& input : mySampler.Inputs)
-            {
-                if (input < myAnim.Start)
-                    myAnim.Start = input;
-                if (input > myAnim.End)
-                    myAnim.End = input;
-            }
-
-            // Read channel data
-            AnimationChannel myChannel{};
-            myChannel.SamplerIndex = samplerIndex;
-
-            if (channel.target_path == "rotation")
-                myChannel.Path = AnimationChannel::PathType::ROTATION;
-            if (channel.target_path == "translation")
-                myChannel.Path = AnimationChannel::PathType::TRANSLATION;
-            if (channel.target_path == "scale")
-                myChannel.Path = AnimationChannel::PathType::SCALE;
-            if (channel.target_path == "weights")
-                myChannel.Path = AnimationChannel::PathType::WEIGHT;
-
-            myAnim.Samplers.push_back(mySampler);
+            const auto& childNode = m_model.nodes[child];
+            LOG("\tChild: " << childNode.name);
         }
-        m_animations.push_back(myAnim);
     }
+
+
+
+    return;
 }
 
-void GLTF::ProcessJoints()
+void GLTF::GetJointParentMap(std::unordered_map<int, std::vector<int>>& parentMap)
 {
-    
+    std::vector<int> rootJoints;
+    for (auto& skin : m_model.skins)
+    {
+        for (auto& jointIndex : skin.joints)
+        {
+            const auto& jointNode = m_model.nodes[jointIndex];
+
+            //LOG("Joint: " << jointNode.name);
+
+            if (jointNode.children.size() != 0)
+                rootJoints.push_back(jointIndex);
+
+            for (auto& child : jointNode.children)
+            {
+                //LOG("\tChild: " << m_model.nodes[child].name);
+            }
+            //LOG("\n")
+        }
+    }
+
+    for (auto& rootIndex : rootJoints)
+    {
+        const auto& node = m_model.nodes[rootIndex];
+        for (auto& child : node.children)
+        {
+            parentMap[rootIndex].push_back(child);
+        }
+    }
 }
