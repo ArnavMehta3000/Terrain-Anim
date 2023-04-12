@@ -4,7 +4,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define TINYGLTF_USE_CPP14
 #include "GLTF.h"
-#include "Animation/Animation.h"
 #include "Core/Timer.h"
 #include <assert.h>
 #include "Graphics/Direct3D.h"
@@ -160,25 +159,33 @@ void GLTF::ProcessMesh()
 void GLTF::ProcessSkeleton()
 {
     // Parent index - children indices
-    std::unordered_map<int, std::vector<int>> parentMap;
-    GetJointParentMap(parentMap);    
+    GetJointParentMap(m_parentMap);    
 
-
-    for (auto& pair : parentMap)
+    
+    for (auto& pair : m_parentMap)
     {        
         const auto& rootNode = m_model.nodes[pair.first];
 
-        LOG("Root: " << rootNode.name);
+        Joint* parentJoint  = new Joint;
+        parentJoint->Name   = rootNode.name;
+        parentJoint->NodeId = pair.first;
+        parentJoint->Parent = nullptr;
+
+        //LOG("Root: " << rootNode.name);
+
         for (auto& child : pair.second)
         {
             const auto& childNode = m_model.nodes[child];
-            LOG("\tChild: " << childNode.name);
+
+            Joint childJoint;
+            childJoint.Name = childNode.name;
+            childJoint.NodeId = child;
+            childJoint.Parent = parentJoint;
+            m_joints.push_back(childJoint);
+
+            //LOG("\tChild: " << childNode.name);
         }
     }
-
-
-
-    return;
 }
 
 void GLTF::GetJointParentMap(std::unordered_map<int, std::vector<int>>& parentMap)
