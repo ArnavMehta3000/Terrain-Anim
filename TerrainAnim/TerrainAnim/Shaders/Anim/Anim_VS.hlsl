@@ -7,7 +7,7 @@ cbuffer WVPBuffer : register(b0)
     matrix Projection;
 };
 
-PSInput VS(GLTFInput input)
+PSInput VS(VSInput input)
 {
     PSInput output = (PSInput)0;
 
@@ -20,7 +20,7 @@ PSInput VS(GLTFInput input)
     output.Position = mul(output.Position, View);
     output.Position = mul(output.Position, Projection);
     output.TexCoord = float2(0, 0);
-    //output.TexCoord = input.TexCoord;
+    output.TexCoord = input.TexCoord;
 
     return output;
 }

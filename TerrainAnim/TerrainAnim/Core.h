@@ -46,4 +46,6 @@ void SafeRelease(T** ppT)
     }\
 } 
 
-#define LOG_VEC(v) v.x << ", " << v.y << ", " << v.z
+#define LOG_VEC2(v) v.x << ", " << v.y
+#define LOG_VEC3(v) v.x << ", " << v.y << ", " << v.z
+#define LOG_VEC4(v) v.x << ", " << v.y << ", " << v.z << ", " << v.w

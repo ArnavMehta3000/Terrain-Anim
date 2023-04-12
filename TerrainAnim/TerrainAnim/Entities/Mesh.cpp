@@ -55,10 +55,10 @@ void Mesh::Render()
 	D3D_CONTEXT->UpdateSubresource(m_materialBuffer.Get(), 0, nullptr, &mat, 0, 0);
 	D3D_CONTEXT->PSSetConstantBuffers(0, 1, m_materialBuffer.GetAddressOf());
 
-	UINT stride = sizeof(GLTFVertex);
+	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
 	D3D_CONTEXT->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-	D3D_CONTEXT->IASetIndexBuffer(m_indexBuffer.Get(), m_indexType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT, 0);
+	D3D_CONTEXT->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
 	D3D_CONTEXT->DrawIndexed(m_indexCount, 0, 0);
 }
 
@@ -67,7 +67,7 @@ void Mesh::GUI()
 {
 	if (ImGui::TreeNodeEx(m_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::Text("Material: %s", m_material.Name.c_str());
+		//ImGui::Text("Material: %s", m_material.Name.c_str());
 		
 		ImGui::Spacing();
 		std::string rotName = "Rotation" + m_name;
@@ -92,13 +92,25 @@ void Mesh::GenBuffers()
 	// Create vertex buffer
 	CREATE_ZERO(D3D11_BUFFER_DESC, vbd);
 	vbd.Usage = D3D11_USAGE_DEFAULT;
-	vbd.ByteWidth = sizeof(GLTFVertex) * (UINT)m_vertices.size();
+	vbd.ByteWidth = sizeof(SimpleVertex) * (UINT)m_vertices.size();
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 
 	CREATE_ZERO(D3D11_SUBRESOURCE_DATA, vertexInitData);
 	vertexInitData.pSysMem = m_vertices.data();
 	HR(D3D_DEVICE->CreateBuffer(&vbd, &vertexInitData, m_vertexBuffer.ReleaseAndGetAddressOf()));
-	LOG("Created " << m_name << " vertex buffer");
+
+
+	// Create index buffer
+	CREATE_ZERO(D3D11_BUFFER_DESC, ibd);
+	ibd.ByteWidth      = sizeof(int) * (UINT)(m_indices.size());
+	ibd.Usage          = D3D11_USAGE_DEFAULT;
+	ibd.BindFlags      = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags      = 0;
+
+	D3D11_SUBRESOURCE_DATA indexInitData = {};
+	indexInitData.pSysMem = m_indices.data();
+	HR(D3D_DEVICE->CreateBuffer(&ibd, &indexInitData, m_indexBuffer.ReleaseAndGetAddressOf()));
 
 }

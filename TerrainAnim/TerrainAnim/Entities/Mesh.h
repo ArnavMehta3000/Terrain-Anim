@@ -6,12 +6,10 @@ class Mesh : public Entity
 	friend class GLTF;
 
 public:
-	struct FBXMaterial
+	struct Material
 	{
-		std::string Name;
 		Color Diffuse;
 	};
-
 
 public:
 	Mesh();
@@ -33,11 +31,11 @@ private:
 private:
 	std::string               m_name;
 	std::unique_ptr<Shader>   m_shader;
-	std::vector<GLTFVertex> m_vertices;
-	std::vector<int>         m_indices;
+	std::vector<SimpleVertex> m_vertices;
+	std::vector<int>          m_indices;
 
 	UINT                      m_indexCount;
-	FBXMaterial               m_material;
+	Material               m_material;
 	int                       m_indexType;
 	ComPtr<ID3D11Buffer>      m_materialBuffer;
 	ComPtr<ID3D11Buffer>      m_vertexBuffer;

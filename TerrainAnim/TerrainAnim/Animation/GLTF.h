@@ -12,12 +12,16 @@ public:
 
 	auto GetMeshList() { return m_meshes; }
 
+
 private:
-	void ProcessNode(tinygltf::Node& node);
+	void ProcessMesh();
+	void ProcessAnimations();
+	void ProcessJoints();
 
 private:
 	tinygltf::Model m_model;
 
 	std::vector<Mesh*> m_meshes;
+	std::vector<Animation> m_animations;
 	float m_scaleFactor;
 };
