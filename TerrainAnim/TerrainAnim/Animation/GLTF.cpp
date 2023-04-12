@@ -54,6 +54,7 @@ bool GLTF::Load(const char* filename)
     
     ProcessMesh();
     ProcessSkeleton();
+    ProcessAnimation();
 
     loadTime.Stop();
     LOG("Loaded file [" << filename << "] in " << loadTime.TotalTime() * 1000.0f << "ms");
@@ -171,21 +172,33 @@ void GLTF::ProcessSkeleton()
         parentJoint->NodeId = pair.first;
         parentJoint->Parent = nullptr;
 
+
         //LOG("Root: " << rootNode.name);
 
         for (auto& child : pair.second)
         {
             const auto& childNode = m_model.nodes[child];
+            auto& mat = childNode.tr;
 
-            Joint childJoint;
-            childJoint.Name = childNode.name;
-            childJoint.NodeId = child;
-            childJoint.Parent = parentJoint;
+            Joint* childJoint = new Joint;
+            childJoint->Name = childNode.name;
+            childJoint->NodeId = child;
+            childJoint->Parent = parentJoint;
+
             m_joints.push_back(childJoint);
 
             //LOG("\tChild: " << childNode.name);
         }
     }
+
+    for (auto& joint : m_joints)
+    {
+        joint->Print();
+    }
+}
+
+void GLTF::ProcessAnimation()
+{
 }
 
 void GLTF::GetJointParentMap(std::unordered_map<int, std::vector<int>>& parentMap)

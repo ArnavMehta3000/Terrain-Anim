@@ -3,21 +3,14 @@
 
 struct Joint
 {
-	std::string Name;
-	int NodeId;
-	Joint* Parent;
+	std::string Name = "";
+	int NodeId       = -1;
+	Joint* Parent    = nullptr;
 
+	void Print();
+};
 
-	void Print()
-	{
-		LOG("Name [" << Name << "]        ID [" << NodeId << "]");
-		if (Parent == nullptr)
-		{
-			LOG("\tParent [" << "NULL" << "]");
-		}
-		else
-		{
-			LOG("\tParent [" << Parent->Name << "]        ID [" << Parent->NodeId << "]");
-		}
-	}
+struct JointTransform
+{
+
 };
