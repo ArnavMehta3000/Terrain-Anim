@@ -3,14 +3,16 @@
 
 struct Joint
 {
-	std::string Name = "";
-	int NodeId       = -1;
-	Joint* Parent    = nullptr;
+	std::string        Name               = "";
+	int                NodeId             = -1;
+	Matrix             AnimatedTransform  = Matrix::Identity;
+	Matrix             InvBindTransform   = Matrix::Identity;
+	Matrix             LocalBindTransform = Matrix::Identity;
+	std::vector<Joint> Children;
 
 	void Print();
-};
+	void CalculateInverseBindTransform(Matrix parentTransform);
 
-struct JointTransform
-{
-
+private:
+	bool m_isCalculated = false;
 };

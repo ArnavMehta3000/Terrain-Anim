@@ -3,13 +3,28 @@
 
 void Joint::Print()
 {
-	LOG("Name [" << Name << "] --- ID [" << NodeId << "]");
-	if (Parent == nullptr)
+	LOG("Name [" << Name << "]   ID [" << NodeId << "]   Children [" << Children.size() << "]");
+	
+	for (auto& child : Children)
 	{
-		LOG("\tParent [" << "NULL" << "]");
+		LOG("----- Child Name [" << child.Name << "]   Child ID [" << child.NodeId << "]");
 	}
-	else
+
+	LOG("\n")
+}
+
+void Joint::CalculateInverseBindTransform(Matrix parentTransform)
+{
+	if (m_isCalculated)
 	{
-		LOG("\tParent [" << Parent->Name << "] --- ID [" << Parent->NodeId << "]");
+		LOG(Name << " already calculated...returning");
+		return;
 	}
+
+	Matrix bindTransform = parentTransform * LocalBindTransform;
+	for (auto& child : Children)
+	{
+		child.CalculateInverseBindTransform(InvBindTransform);
+	}
+	m_isCalculated = true;
 }

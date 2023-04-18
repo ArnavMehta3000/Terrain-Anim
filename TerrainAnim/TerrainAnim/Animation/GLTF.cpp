@@ -53,8 +53,16 @@ bool GLTF::Load(const char* filename)
     }
     
     ProcessMesh();
-    ProcessSkeleton();
+    ProcessJoints();
     ProcessAnimation();
+
+    for (auto& joint : m_joints)
+    {
+        auto mat = joint.InvBindTransform;
+        joint.CalculateInverseBindTransform(Matrix::Identity);
+        auto& local = joint.LocalBindTransform;
+        int x = 0;
+    }
 
     loadTime.Stop();
     LOG("Loaded file [" << filename << "] in " << loadTime.TotalTime() * 1000.0f << "ms");
@@ -157,78 +165,91 @@ void GLTF::ProcessMesh()
     }
 }
 
-void GLTF::ProcessSkeleton()
+void GLTF::ProcessJoints()
 {
     // Parent index - children indices
-    GetJointParentMap(m_parentMap);    
-
-    
-    for (auto& pair : m_parentMap)
-    {        
-        const auto& rootNode = m_model.nodes[pair.first];
-
-        Joint* parentJoint  = new Joint;
-        parentJoint->Name   = rootNode.name;
-        parentJoint->NodeId = pair.first;
-        parentJoint->Parent = nullptr;
-
-
-        //LOG("Root: " << rootNode.name);
-
-        for (auto& child : pair.second)
-        {
-            const auto& childNode = m_model.nodes[child];
-            auto& mat = childNode.tr;
-
-            Joint* childJoint = new Joint;
-            childJoint->Name = childNode.name;
-            childJoint->NodeId = child;
-            childJoint->Parent = parentJoint;
-
-            m_joints.push_back(childJoint);
-
-            //LOG("\tChild: " << childNode.name);
-        }
-    }
-
-    for (auto& joint : m_joints)
-    {
-        joint->Print();
-    }
-}
-
-void GLTF::ProcessAnimation()
-{
-}
-
-void GLTF::GetJointParentMap(std::unordered_map<int, std::vector<int>>& parentMap)
-{
-    std::vector<int> rootJoints;
+    std::unordered_map<int, std::vector<int>> parentMap;
     for (auto& skin : m_model.skins)
     {
         for (auto& jointIndex : skin.joints)
         {
             const auto& jointNode = m_model.nodes[jointIndex];
 
-            //LOG("Joint: " << jointNode.name);
-
-            if (jointNode.children.size() != 0)
-                rootJoints.push_back(jointIndex);
-
+            // Loop over all children of current joint
             for (auto& child : jointNode.children)
             {
-                //LOG("\tChild: " << m_model.nodes[child].name);
+                parentMap[jointIndex].push_back(child);
             }
-            //LOG("\n")
         }
     }
+    
+    for (auto& pair : parentMap)
+    {        
+        const auto& rootNode = m_model.nodes[pair.first];
 
-    for (auto& rootIndex : rootJoints)
-    {
-        const auto& node = m_model.nodes[rootIndex];
-        for (auto& child : node.children)
+        Joint parentJoint{};
+        parentJoint.Name   = rootNode.name;
+        parentJoint.NodeId = pair.first;
+
+        for (auto& child : pair.second)
         {
-            parentMap[rootIndex].push_back(child);
+            const auto& childNode = m_model.nodes[child];
+
+            Joint childJoint{};
+            childJoint.Name   = childNode.name;
+            childJoint.NodeId = child;
+            parentJoint.Children.push_back(childJoint);
+        }
+        m_joints.push_back(parentJoint);
+    }
+
+    for (auto& joint : m_joints)
+    {
+        joint.Print();
+    }
+}
+
+void GLTF::ProcessAnimation()
+{
+    LOG("\n\n");
+    for (auto& skin : m_model.skins)
+    {
+        for (auto& joint : m_joints)
+        {
+            const int jointIndex = joint.NodeId;
+            const auto& joints = skin.joints;
+
+            if (!(jointIndex >= 0 && jointIndex < (int)joints.size()))
+                continue;
+            
+            const auto& jointNode = m_model.nodes[jointIndex];
+            
+            // This joint is linked with this skin
+            //LOG("Joint skin found: " << jointIndex << "   Name: " << m_model.nodes[jointIndex].name);
+            
+
+            const auto& accessor           = m_model.accessors[skin.inverseBindMatrices];
+            const auto& bufferView         = m_model.bufferViews[accessor.bufferView];
+            const auto& buffer             = m_model.buffers[bufferView.buffer];
+            const uint8_t* data            = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
+            const uint32_t stride          = accessor.ByteStride(bufferView);
+            const float* inverseBindMatrix = reinterpret_cast<const float*>(data + jointIndex * stride);
+            
+            XMFLOAT4X4 inverseBindMatrixXM;
+            for (int row = 0; row < 4; ++row) 
+            {
+                for (int col = 0; col < 4; ++col) 
+                {
+                    inverseBindMatrixXM.m[row][col] = inverseBindMatrix[row * 4 + col];
+                }
+            }
+
+            const auto& translation = Vector3((float)jointNode.translation[0], (float)jointNode.translation[1], (float)jointNode.translation[2]);
+            const auto& rotation    = Quaternion((float)jointNode.rotation[0], (float)jointNode.rotation[1], (float)jointNode.rotation[2], (float)jointNode.rotation[3]);
+            const auto& scale       = (jointNode.scale.size() != 0) ? Vector3((float)jointNode.scale[0], (float)jointNode.scale[1], (float)jointNode.scale[2]) : Vector3(1.0f, 1.0f, 1.0f);
+
+            joint.LocalBindTransform = Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rotation) * Matrix::CreateTranslation(translation);
+            joint.InvBindTransform = inverseBindMatrixXM;
         }
     }
 }

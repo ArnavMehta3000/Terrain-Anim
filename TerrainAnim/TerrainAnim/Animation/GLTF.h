@@ -16,14 +16,12 @@ public:
 
 private:
 	void ProcessMesh();
-	void ProcessSkeleton();
+	void ProcessJoints();
 	void ProcessAnimation();
-	void GetJointParentMap(std::unordered_map<int, std::vector<int>>& parentMap);
 private:
 	tinygltf::Model m_model;
 	
-	std::unordered_map<int, std::vector<int>> m_parentMap;
 	std::vector<Mesh*> m_meshes;
-	std::vector<Joint*> m_joints;
+	std::vector<Joint> m_joints;
 	float m_scaleFactor;
 };
