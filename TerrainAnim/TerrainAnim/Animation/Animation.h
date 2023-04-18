@@ -1,18 +1,23 @@
 #pragma once
+#include <Core/Structures.h>
+
+struct Mesh;
+struct Primitive;
 
 
-struct Joint
+
+struct Primitive
 {
-	std::string        Name               = "";
-	int                NodeId             = -1;
-	Matrix             AnimatedTransform  = Matrix::Identity;
-	Matrix             InvBindTransform   = Matrix::Identity;
-	Matrix             LocalBindTransform = Matrix::Identity;
-	std::vector<Joint> Children;
+	Mesh* ParentMesh;
+	Color DiffuseColor;
 
-	void Print();
-	void CalculateInverseBindTransform(Matrix parentTransform);
+	std::vector<SimpleVertex> Vertices;
+	std::vector<int>          Indices;
+};
 
-private:
-	bool m_isCalculated = false;
+
+struct Mesh
+{
+	std::string            Name;
+	std::vector<Primitive> Primitives;
 };

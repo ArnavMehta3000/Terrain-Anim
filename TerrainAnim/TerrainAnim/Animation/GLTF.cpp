@@ -74,10 +74,10 @@ struct GltfAccessorWrapper
     }
 
     auto GetBufferViewId()  const { return Accessor.bufferView; }
+    auto GetByteStride(const GltfBufferViewWrapper& view) const;
     auto GetByteOffset()    const { return Accessor.byteOffset; }
     auto GetComponentType() const { return Accessor.componentType; }
     auto GetNumComponents() const { return tinygltf::GetNumComponentsInType(Accessor.type); }
-    auto GetByteStride(const GltfBufferViewWrapper& view) const;
 };
 
 struct GltfBufferViewWrapper
@@ -109,7 +109,7 @@ struct GltfAnimationSamplerWrapper
 {
     const tinygltf::AnimationSampler& Sam;
 
-    AnimationSampler::InterpolationType GetInterpolation() const
+   /* AnimationSampler::InterpolationType GetInterpolation() const
     {
         if (Sam.interpolation == "LINEAR")
             return AnimationSampler::InterpolationType::Linear;
@@ -122,7 +122,7 @@ struct GltfAnimationSamplerWrapper
             LOG("Unexpected animation interpolation type: " << Sam.interpolation);
             return AnimationSampler::InterpolationType::Linear;
         }
-    }
+    }*/
 
     auto GetInputId() const { return Sam.input; }
     auto GetOutputId() const { return Sam.output; }
@@ -132,7 +132,7 @@ struct GltfAnimationChannelWrapper
 {
     const tinygltf::AnimationChannel& Channel;
 
-    AnimationChannel::AnimPathType GetPathType() const
+    /*AnimationChannel::AnimPathType GetPathType() const
     {
         if (Channel.target_path == "rotation")
             return AnimationChannel::AnimPathType::Rotation;
@@ -147,7 +147,7 @@ struct GltfAnimationChannelWrapper
             LOG("Unsupported animation channel path " << Channel.target_path);
             return AnimationChannel::AnimPathType::Rotation;
         }
-    }
+    }*/
 
     auto GetSamplerId() const { return Channel.sampler; }
     auto GetTargetNodeId() const { return Channel.target_node; }
@@ -181,30 +181,6 @@ struct GltfModelWrapper
 };
 
 auto GltfAccessorWrapper::GetByteStride(const GltfBufferViewWrapper& View) const { return Accessor.ByteStride(View.View); }
-
-#pragma endregion
-
-
-
-
-#pragma region Helper Functions
-Matrix GetNodeMatrix(int nodeIndex, const tinygltf::Model& model)
-{
-    GltfNodeWrapper node{ model.nodes[nodeIndex] };
-    
-    const auto& posVector = node.GetTranslation();
-    const auto& rotVector = node.GetRotation();
-    const auto& scaleVector = node.GetScale();
-
-
-    return Matrix::Identity;
-}
-
-Matrix GetGlobalMatrix(int nodeIndex, const tinygltf::Model& model, std::map<int, int>& nodesParent)
-{
-    Matrix mat = GetNodeMatrix(nodeIndex, model);
-    return Matrix::Identity;
-}
 #pragma endregion
 
 
@@ -268,26 +244,116 @@ bool GLTF::Load(const char* filename)
 
 void GLTF::ProcessModel(const tinygltf::Model& model)
 {
-    int meshNode = -1;
-    int meshIndex = 0;
-    std::map<int, int> nodesParent;
-
-    for (int i = 0; i < model.nodes.size(); i++)
-        nodesParent[i] = -1;
-
+    // Loop through all the nodes and get nodes with meshes
+    std::vector<int> meshNodes;
     for (int i = 0; i < model.nodes.size(); i++)
     {
-        GltfNodeWrapper node { model.nodes[i] };
-        
-        if (node.GetMeshId() == meshIndex)
-            meshNode = i;
-
-        const auto& children = node.GetChildrenIds();
-        for (int c = 0; c < children.size(); c++)
-            nodesParent[children[c]] = i;
+        if (model.nodes[i].mesh != -1)
+            meshNodes.push_back(i);
     }
 
-    Matrix globalMat = GetGlobalMatrix(meshNode, model, nodesParent);
+    for (const auto& meshNodeIndex : meshNodes)
+    {
+        GltfNodeWrapper meshNode { model.nodes[meshNodeIndex] };
+        GltfMeshWrapper mesh { model.meshes[meshNode.GetMeshId()] };
+
+        Mesh* myMesh = new Mesh;
+        myMesh->Name = mesh.GetName();
+
+        // Loop through primitives
+        for (int i = 0; i < mesh.GetPrimitiveCount(); i++)
+        {
+            GltfPrimitiveWrapper primitive{ mesh.GetPrimitive(i) };
+            Primitive myPrimitive;
+
+            // Set parent mesh
+            myPrimitive.ParentMesh = myMesh;
+
+            // Get primitive material data
+            {
+                const auto& gltfMaterial = model.materials[primitive.GetMaterialId()];
+                const auto& pbr = gltfMaterial.pbrMetallicRoughness;
+                const auto& baseColor = pbr.baseColorFactor;  // Diffuse color
+
+                // Set diffuse color
+                myPrimitive.DiffuseColor = Color((float)baseColor[0], (float)baseColor[1], (float)baseColor[2], (float)baseColor[3]);
+            }
+
+            // Get vertex attributes
+            {
+                GltfAccessorWrapper positionAccessor { model.accessors[*primitive.GetAttribute("POSITION")] };    // TODO: Add nullptr check
+                GltfAccessorWrapper normalAccessor   { model.accessors[*primitive.GetAttribute("NORMAL")] };        // TODO: Add nullptr check
+                GltfAccessorWrapper texCoordAccessor { model.accessors[*primitive.GetAttribute("TEXCOORD_0")] };  // TODO: Add nullptr check
+
+                GltfBufferViewWrapper positionBufferView { model.bufferViews[positionAccessor.GetBufferViewId()] };
+                GltfBufferViewWrapper normalBufferView   { model.bufferViews[normalAccessor.GetBufferViewId()] };
+                GltfBufferViewWrapper texCoordBufferView { model.bufferViews[texCoordAccessor.GetBufferViewId()] };
+
+                GltfBufferWrapper positionBuffer { model.buffers[positionBufferView.GetBufferId()] };
+                GltfBufferWrapper normalBuffer   { model.buffers[normalBufferView.GetBufferId()] };
+                GltfBufferWrapper texCoordBuffer { model.buffers[texCoordBufferView.GetBufferId()] };
+
+                const float* positionData = reinterpret_cast<const float*>(positionBuffer.GetData(positionBufferView.GetByteOffset() + positionAccessor.GetByteOffset()));
+                const float* normalData   = reinterpret_cast<const float*>(normalBuffer.GetData(normalBufferView.GetByteOffset()     + normalAccessor.GetByteOffset()));
+                const float* texCoordData = reinterpret_cast<const float*>(texCoordBuffer.GetData(texCoordBufferView.GetByteOffset() + texCoordAccessor.GetByteOffset()));
+
+                // Apply data to my primitive
+                const int verticesCount = static_cast<int>(positionAccessor.GetCount());
+                for (int i = 0; i < verticesCount; i++)
+                {
+                    SimpleVertex vertex;
+
+                    vertex.Pos      = Vector3(positionData[0], positionData[1], positionData[2]) * m_scaleFactor;
+                    vertex.Normal   = Vector3(normalData[0], normalData[1], normalData[2]);
+                    vertex.TexCoord = Vector2(texCoordData[0], texCoordData[1]);
+
+                    // Move forward in vertex attributes buffers
+                    positionData += 3;  // X, Y, Z
+                    normalData   += 3;  // X, Y, Z
+                    texCoordData += 2;  // X, Y
+
+                    myPrimitive.Vertices.push_back(vertex);
+                    //LOG("Position [" << LOG_VEC3(vertex.Pos) << "]\tNormal [" << LOG_VEC3(vertex.Normal) << "]\tUV [" << LOG_VEC2(vertex.TexCoord) << "]");
+                }
+            }
+
+            // Get the index buffer
+            if (primitive.GetIndicesId() > -1)
+            {
+                GltfAccessorWrapper indexAccessor     { model.accessors[primitive.GetIndicesId()] };
+                GltfBufferViewWrapper indexBufferView { model.bufferViews[indexAccessor.GetBufferViewId()] };
+                GltfBufferWrapper indexBuffer         { model.buffers[indexBufferView.GetBufferId()] };
+                
+                const int* indexData = reinterpret_cast<const int*>(indexBuffer.GetData(indexBufferView.GetByteOffset() + indexAccessor.GetByteOffset()));
+                
+                const int indicesCount = (int)indexAccessor.GetCount();
+
+                for (int idx = 0; idx < indicesCount; idx++)
+                {
+                    int index = indexData[idx];
+
+                    // Index may be negative, this implies that the offset is from the end of the vertex buffer
+                    if (index < 0)
+                        index = static_cast<int>(myPrimitive.Vertices.size());
+
+                    myPrimitive.Indices.push_back(index);
+
+                    //LOG("Index: " << idx << " [" << index << "]");
+                }
+            }
+
+
+
+
+            myMesh->Primitives.push_back(myPrimitive);
+        }
+
+        if (meshNode.GetSkinId() == -1)
+            continue;
+
+        GltfSkinWrapper skin{ model.skins[meshNode.GetSkinId()] };
+        
+    }
 }
 
 // https://github.com/supernovaengine/supernova/blob/master/engine/core/object/Model.h
