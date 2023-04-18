@@ -17,11 +17,6 @@ struct SimpleVertex
 	Vector2 TexCoord;
 };
 
-struct GLTFVertex
-{
-	Vector3 Pos;
-};
-
 struct WVPBuffer
 {
 	Matrix World;

@@ -40,10 +40,10 @@ void AnimScene::Render()
 {
     D3D_CONTEXT->VSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
     
-    for (auto& mesh : m_gltf->GetMeshList())
+    /*for (auto& mesh : m_gltf->GetMeshList())
     {
         mesh->Render();
-    }
+    }*/
 
 }
 
@@ -101,13 +101,13 @@ void AnimScene::DrawMeshInfo()
 {
     if (ImGui::TreeNodeEx("Mesh Data", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if (m_gltf->GetMeshList().size() == 0)
+       /* if (m_gltf->GetMeshList().size() == 0)
             ImGui::TextColored({ 1, 1, 0, 1 }, "Mesh Not extracted from GLTF");
 
         for (auto& mesh : m_gltf->GetMeshList())
         {
             mesh->GUI();
-        }
+        }*/
 
         ImGui::TreePop();
      }

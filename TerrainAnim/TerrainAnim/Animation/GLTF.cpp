@@ -5,8 +5,211 @@
 #define TINYGLTF_USE_CPP14
 #include "GLTF.h"
 #include "Core/Timer.h"
-#include <assert.h>
 #include "Graphics/Direct3D.h"
+#include <assert.h>
+
+
+#pragma region TinyGLTF Wrappers
+struct GltfNodeWrapper
+{
+    const tinygltf::Node& Node;
+
+    const auto& GetName()        const { return Node.name; }
+    const auto& GetTranslation() const { return Node.translation; }
+    const auto& GetRotation()    const { return Node.rotation; }
+    const auto& GetScale()       const { return Node.scale; }
+    const auto& GetMatrix()      const { return Node.matrix; }
+    const auto& GetChildrenIds() const { return Node.children; }
+    auto        GetMeshId()      const { return Node.mesh; }
+    auto        GetSkinId()      const { return Node.skin; }
+};
+
+struct GltfPrimitiveWrapper
+{
+    const tinygltf::Primitive& Primitive;
+    
+    const int* GetAttribute(const char* name) const
+    {
+        auto iter = Primitive.attributes.find(name);
+        return (iter != std::end(Primitive.attributes)) ? &iter->second : nullptr;
+    }
+
+    const auto& Get()    const { return Primitive; }
+    auto GetIndicesId()  const { return Primitive.indices; }
+    auto GetMaterialId() const { return Primitive.material; }
+};
+
+struct GltfMeshWrapper
+{
+    const tinygltf::Mesh& Mesh;
+
+    const auto& Get()             const { return Mesh; }
+    const auto& GetName()         const { return Mesh.name; }
+    auto GetPrimitiveCount()      const { return Mesh.primitives.size(); }
+    auto GetPrimitive(size_t Idx) const { return GltfPrimitiveWrapper{ Mesh.primitives[Idx] }; };
+};
+
+struct GltfBufferViewWrapper;
+struct GltfAccessorWrapper
+{
+    const tinygltf::Accessor& Accessor;
+
+    auto GetCount() const { return Accessor.count; }
+    auto GetMinValues() const
+    {
+        return Vector3{
+            static_cast<float>(Accessor.minValues[0]),
+            static_cast<float>(Accessor.minValues[1]),
+            static_cast<float>(Accessor.minValues[2]),
+        };
+    }
+
+    auto GetMaxValues() const
+    {
+        return Vector3{
+            static_cast<float>(Accessor.maxValues[0]),
+            static_cast<float>(Accessor.maxValues[1]),
+            static_cast<float>(Accessor.maxValues[2]),
+        };
+    }
+
+    auto GetBufferViewId()  const { return Accessor.bufferView; }
+    auto GetByteOffset()    const { return Accessor.byteOffset; }
+    auto GetComponentType() const { return Accessor.componentType; }
+    auto GetNumComponents() const { return tinygltf::GetNumComponentsInType(Accessor.type); }
+    auto GetByteStride(const GltfBufferViewWrapper& view) const;
+};
+
+struct GltfBufferViewWrapper
+{
+    const tinygltf::BufferView& View;
+
+    auto GetBufferId() const { return View.buffer; }
+    auto GetByteOffset() const { return View.byteOffset; }
+};
+
+struct GltfBufferWrapper
+{
+    const tinygltf::Buffer& Buffer;
+
+    const auto* GetData(size_t Offset) const { return &Buffer.data[Offset]; }
+};
+
+struct GltfSkinWrapper
+{
+    const tinygltf::Skin& Skin;
+
+    const auto& GetName()                  const { return Skin.name; }
+    auto        GetSkeletonId()            const { return Skin.skeleton; }
+    auto        GetInverseBindMatricesId() const { return Skin.inverseBindMatrices; }
+    const auto& GetJointIds()              const { return Skin.joints; }
+};
+
+struct GltfAnimationSamplerWrapper
+{
+    const tinygltf::AnimationSampler& Sam;
+
+    AnimationSampler::InterpolationType GetInterpolation() const
+    {
+        if (Sam.interpolation == "LINEAR")
+            return AnimationSampler::InterpolationType::Linear;
+        else if (Sam.interpolation == "STEP")
+            return AnimationSampler::InterpolationType::Step;
+        else if (Sam.interpolation == "CUBICSPLINE")
+            return AnimationSampler::InterpolationType::CubicSpline;
+        else
+        {
+            LOG("Unexpected animation interpolation type: " << Sam.interpolation);
+            return AnimationSampler::InterpolationType::Linear;
+        }
+    }
+
+    auto GetInputId() const { return Sam.input; }
+    auto GetOutputId() const { return Sam.output; }
+};
+
+struct GltfAnimationChannelWrapper
+{
+    const tinygltf::AnimationChannel& Channel;
+
+    AnimationChannel::AnimPathType GetPathType() const
+    {
+        if (Channel.target_path == "rotation")
+            return AnimationChannel::AnimPathType::Rotation;
+        else if (Channel.target_path == "translation")
+            return AnimationChannel::AnimPathType::Translation;
+        else if (Channel.target_path == "scale")
+            return AnimationChannel::AnimPathType::Scale;
+        else if (Channel.target_path == "weights")
+            return AnimationChannel::AnimPathType::Weights;
+        else
+        {
+            LOG("Unsupported animation channel path " << Channel.target_path);
+            return AnimationChannel::AnimPathType::Rotation;
+        }
+    }
+
+    auto GetSamplerId() const { return Channel.sampler; }
+    auto GetTargetNodeId() const { return Channel.target_node; }
+};
+
+struct GltfAnimationWrapper
+{
+    const tinygltf::Animation& Anim;
+
+    const auto& GetName() const { return Anim.name; }
+
+    auto GetSamplerCount() const { return Anim.samplers.size(); }
+    auto GetChannelCount() const { return Anim.channels.size(); }
+    auto GetSampler(size_t Id) const { return GltfAnimationSamplerWrapper{ Anim.samplers[Id] }; }
+    auto GetChannel(size_t Id) const { return GltfAnimationChannelWrapper{ Anim.channels[Id] }; }
+};
+
+struct GltfModelWrapper
+{
+    const tinygltf::Model& Model;
+
+    auto GetNode(int idx)         const { return GltfNodeWrapper{ Model.nodes[idx] }; }
+    auto GetMesh(int idx)         const { return GltfMeshWrapper{ Model.meshes[idx] }; }
+    auto GetAccessor(int idx)     const { return GltfAccessorWrapper{ Model.accessors[idx] }; }
+    auto GetBufferView(int idx)   const { return GltfBufferViewWrapper{ Model.bufferViews[idx] }; }
+    auto GetBuffer(int idx)       const { return GltfBufferWrapper{ Model.buffers[idx] }; }
+    auto GetSkinCount()           const { return Model.skins.size(); }
+    auto GetSkin(size_t idx)      const { return GltfSkinWrapper{ Model.skins[idx] }; }
+    auto GetAnimationCount()      const { return Model.animations.size(); }
+    auto GetAnimation(size_t idx) const { return GltfAnimationWrapper{ Model.animations[idx] }; }
+};
+
+auto GltfAccessorWrapper::GetByteStride(const GltfBufferViewWrapper& View) const { return Accessor.ByteStride(View.View); }
+
+#pragma endregion
+
+
+
+
+#pragma region Helper Functions
+Matrix GetNodeMatrix(int nodeIndex, const tinygltf::Model& model)
+{
+    GltfNodeWrapper node{ model.nodes[nodeIndex] };
+    
+    const auto& posVector = node.GetTranslation();
+    const auto& rotVector = node.GetRotation();
+    const auto& scaleVector = node.GetScale();
+
+
+    return Matrix::Identity;
+}
+
+Matrix GetGlobalMatrix(int nodeIndex, const tinygltf::Model& model, std::map<int, int>& nodesParent)
+{
+    Matrix mat = GetNodeMatrix(nodeIndex, model);
+    return Matrix::Identity;
+}
+#pragma endregion
+
+
+
+
 
 GLTF::GLTF()
     :
@@ -16,7 +219,6 @@ GLTF::GLTF()
 
 GLTF::~GLTF()
 {
-    m_model.~Model();
 }
 
 bool GLTF::Load(const char* filename)
@@ -26,10 +228,11 @@ bool GLTF::Load(const char* filename)
     tinygltf::TinyGLTF loader;
 
     std::string err, warn;
-    if (!loader.LoadASCIIFromFile(&m_model, &err, &warn, filename))
+    tinygltf::Model model;
+    if (!loader.LoadASCIIFromFile(&model, &err, &warn, filename))
     {
         // Failed to load ASCII, try binary
-        if (!loader.LoadBinaryFromFile(&m_model, &err, &warn, filename))
+        if (!loader.LoadBinaryFromFile(&model, &err, &warn, filename))
         {
             // Failed to load binary as well
             LOG("Failed to load GLTF");
@@ -46,23 +249,16 @@ bool GLTF::Load(const char* filename)
 
     // ----- LOAD GLTF SCENE -----
     LOG("\n---------- BEGIN GLTF FILE PARSING ----------\n")
-    if (m_model.scenes.size() > 1)
+    if (model.scenes.size() > 1)
     {
         LOG("Parsing GLTF files with multipe scenes not supported!");
         return false;
     }
     
-    ProcessMesh();
-    ProcessJoints();
-    ProcessAnimation();
 
-    for (auto& joint : m_joints)
-    {
-        auto mat = joint.InvBindTransform;
-        joint.CalculateInverseBindTransform(Matrix::Identity);
-        auto& local = joint.LocalBindTransform;
-        int x = 0;
-    }
+    ProcessModel(model);
+
+    
 
     loadTime.Stop();
     LOG("Loaded file [" << filename << "] in " << loadTime.TotalTime() * 1000.0f << "ms");
@@ -70,186 +266,32 @@ bool GLTF::Load(const char* filename)
     return true;
 }
 
-void GLTF::ProcessMesh()
+void GLTF::ProcessModel(const tinygltf::Model& model)
 {
-    // Loop over all the meshes in the model
-    for (auto& mesh : m_model.meshes)
+    int meshNode = -1;
+    int meshIndex = 0;
+    std::map<int, int> nodesParent;
+
+    for (int i = 0; i < model.nodes.size(); i++)
+        nodesParent[i] = -1;
+
+    for (int i = 0; i < model.nodes.size(); i++)
     {
-        LOG("Mesh [" << mesh.name << "] contains " << mesh.primitives.size() << " primitives");
-        Mesh* myMesh = new Mesh();
-        myMesh->m_name = mesh.name;
-        //myMesh->m_material.Name;
+        GltfNodeWrapper node { model.nodes[i] };
         
-        // Loop over all the primitves in the mesh
-        for (auto& primitive : mesh.primitives)
-        {
-            // Get primitive material data and apply to mesh
-            const auto& materialIndex = primitive.material;
-            const auto& gltfMaterial  = m_model.materials[materialIndex];
-            const auto& pbr           = gltfMaterial.pbrMetallicRoughness;
-            const auto& baseColor     = pbr.baseColorFactor;  // Diffuse color
+        if (node.GetMeshId() == meshIndex)
+            meshNode = i;
 
-            // Apply gathered data to my mesh
-            //myMesh->m_material.Name    = gltfMaterial.name;
-            myMesh->m_material.Diffuse = Color((float)baseColor[0], (float)baseColor[1], (float)baseColor[2], (float)baseColor[3]);
-
-            // Get vertex attributes
-            const auto& positionAccessor = m_model.accessors[primitive.attributes["POSITION"]];
-            const auto& normalAccessor   = m_model.accessors[primitive.attributes["NORMAL"]];
-            const auto& uvAccessor       = m_model.accessors[primitive.attributes["TEXCOORD_0"]];
-
-            // Get the buffer view objects for each attribute
-            const auto& positionBufferView = m_model.bufferViews[positionAccessor.bufferView];
-            const auto& normalBufferView   = m_model.bufferViews[normalAccessor.bufferView];
-            const auto& uvBufferView       = m_model.bufferViews[uvAccessor.bufferView];
-
-            // Get the buffer data for each attribute
-            const float* positionData = reinterpret_cast<const float*>(&m_model.buffers[positionBufferView.buffer].data[positionBufferView.byteOffset + positionAccessor.byteOffset]);
-            const float* normalData   = reinterpret_cast<const float*>(&m_model.buffers[normalBufferView.buffer].data[normalBufferView.byteOffset + normalAccessor.byteOffset]);
-            const float* uvData       = reinterpret_cast<const float*>(&m_model.buffers[uvBufferView.buffer].data[uvBufferView.byteOffset + uvAccessor.byteOffset]);
-        
-           
-            // Convert to my vertex structure
-            const int verticesCount = static_cast<int>(positionAccessor.count);
-            for (int i = 0; i < verticesCount; i++)
-            {
-                SimpleVertex vertex;
-
-                vertex.Pos      = Vector3(positionData[0], positionData[1], positionData[2]) * m_scaleFactor;
-                vertex.Normal   = Vector3(normalData[0], normalData[1], normalData[2]);
-                vertex.TexCoord = Vector2(uvData[0], uvData[1]);
-                
-                // Move forward in vertex attributes buffers
-                positionData += 3;  // X, Y, Z
-                normalData   += 3;  // X, Y, Z
-                uvData       += 2;  // X, Y
-
-                myMesh->m_vertices.push_back(vertex);
-                //LOG("Position [" << LOG_VEC3(vertex.Pos) << "]\tNormal [" << LOG_VEC3(vertex.Normal) << "]\tUV [" << LOG_VEC2(vertex.TexCoord) << "]");
-            }
-        
-
-            // Get the index buffer from model and save indices
-            if (primitive.indices >= 0)
-            {
-                // Get index buffer accessor
-                const auto& indexAccessor = m_model.accessors[primitive.indices];
-
-                // Get view to index buffer
-                const auto& indexBufferView = m_model.bufferViews[indexAccessor.bufferView];
-
-                // Get the indices data from the buffer
-                const auto indexData = reinterpret_cast<const int*>(&m_model.buffers[indexBufferView.buffer].data[indexBufferView.byteOffset + indexAccessor.byteOffset]);
-
-                const auto indicesCount = static_cast<int>(indexAccessor.count);
-                myMesh->m_indexCount = indicesCount;
-                for (int i = 0; i < indicesCount; i++)
-                {
-                    int index = indexData[i];
-                    
-                    // Index may be negative, this implies that the offset is from the end of the vertex buffer
-                    if (index < 0)
-                        index = static_cast<int>(myMesh->m_vertices.size());
-
-                    myMesh->m_indices.push_back(index);
-
-                    //LOG("Index: " << i << "[" << index << "]");
-                }
-            }
-        }
-
-        myMesh->GenBuffers();
-        m_meshes.push_back(myMesh);
-
-        LOG("\n");
+        const auto& children = node.GetChildrenIds();
+        for (int c = 0; c < children.size(); c++)
+            nodesParent[children[c]] = i;
     }
+
+    Matrix globalMat = GetGlobalMatrix(meshNode, model, nodesParent);
 }
 
-void GLTF::ProcessJoints()
-{
-    // Parent index - children indices
-    std::unordered_map<int, std::vector<int>> parentMap;
-    for (auto& skin : m_model.skins)
-    {
-        for (auto& jointIndex : skin.joints)
-        {
-            const auto& jointNode = m_model.nodes[jointIndex];
+// https://github.com/supernovaengine/supernova/blob/master/engine/core/object/Model.h
+// https://github.com/DiligentGraphics/DiligentTools/blob/master/AssetLoader/src/GLTFBuilder.cpp
+// https://github.com/SaschaWillems/Vulkan-glTF-PBR/blob/master/base/VulkanglTFModel.h
 
-            // Loop over all children of current joint
-            for (auto& child : jointNode.children)
-            {
-                parentMap[jointIndex].push_back(child);
-            }
-        }
-    }
-    
-    for (auto& pair : parentMap)
-    {        
-        const auto& rootNode = m_model.nodes[pair.first];
-
-        Joint parentJoint{};
-        parentJoint.Name   = rootNode.name;
-        parentJoint.NodeId = pair.first;
-
-        for (auto& child : pair.second)
-        {
-            const auto& childNode = m_model.nodes[child];
-
-            Joint childJoint{};
-            childJoint.Name   = childNode.name;
-            childJoint.NodeId = child;
-            parentJoint.Children.push_back(childJoint);
-        }
-        m_joints.push_back(parentJoint);
-    }
-
-    for (auto& joint : m_joints)
-    {
-        joint.Print();
-    }
-}
-
-void GLTF::ProcessAnimation()
-{
-    LOG("\n\n");
-    for (auto& skin : m_model.skins)
-    {
-        for (auto& joint : m_joints)
-        {
-            const int jointIndex = joint.NodeId;
-            const auto& joints = skin.joints;
-
-            if (!(jointIndex >= 0 && jointIndex < (int)joints.size()))
-                continue;
-            
-            const auto& jointNode = m_model.nodes[jointIndex];
-            
-            // This joint is linked with this skin
-            //LOG("Joint skin found: " << jointIndex << "   Name: " << m_model.nodes[jointIndex].name);
-            
-
-            const auto& accessor           = m_model.accessors[skin.inverseBindMatrices];
-            const auto& bufferView         = m_model.bufferViews[accessor.bufferView];
-            const auto& buffer             = m_model.buffers[bufferView.buffer];
-            const uint8_t* data            = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
-            const uint32_t stride          = accessor.ByteStride(bufferView);
-            const float* inverseBindMatrix = reinterpret_cast<const float*>(data + jointIndex * stride);
-            
-            XMFLOAT4X4 inverseBindMatrixXM;
-            for (int row = 0; row < 4; ++row) 
-            {
-                for (int col = 0; col < 4; ++col) 
-                {
-                    inverseBindMatrixXM.m[row][col] = inverseBindMatrix[row * 4 + col];
-                }
-            }
-
-            const auto& translation = Vector3((float)jointNode.translation[0], (float)jointNode.translation[1], (float)jointNode.translation[2]);
-            const auto& rotation    = Quaternion((float)jointNode.rotation[0], (float)jointNode.rotation[1], (float)jointNode.rotation[2], (float)jointNode.rotation[3]);
-            const auto& scale       = (jointNode.scale.size() != 0) ? Vector3((float)jointNode.scale[0], (float)jointNode.scale[1], (float)jointNode.scale[2]) : Vector3(1.0f, 1.0f, 1.0f);
-
-            joint.LocalBindTransform = Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rotation) * Matrix::CreateTranslation(translation);
-            joint.InvBindTransform = inverseBindMatrixXM;
-        }
-    }
-}
+// https://github.com/supernovaengine/supernova/blob/master/engine/core/subsystem/MeshSystem.cpp#L1448
