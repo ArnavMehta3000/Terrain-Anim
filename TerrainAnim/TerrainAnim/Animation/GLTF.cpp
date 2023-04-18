@@ -272,8 +272,8 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
             // Get primitive material data
             {
                 const auto& gltfMaterial = model.materials[primitive.GetMaterialId()];
-                const auto& pbr = gltfMaterial.pbrMetallicRoughness;
-                const auto& baseColor = pbr.baseColorFactor;  // Diffuse color
+                const auto& pbr          = gltfMaterial.pbrMetallicRoughness;
+                const auto& baseColor    = pbr.baseColorFactor;  // Diffuse color
 
                 // Set diffuse color
                 myPrimitive.DiffuseColor = Color((float)baseColor[0], (float)baseColor[1], (float)baseColor[2], (float)baseColor[3]);
@@ -282,8 +282,9 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
             // Get vertex attributes
             {
                 GltfAccessorWrapper positionAccessor { model.accessors[*primitive.GetAttribute("POSITION")] };    // TODO: Add nullptr check
-                GltfAccessorWrapper normalAccessor   { model.accessors[*primitive.GetAttribute("NORMAL")] };        // TODO: Add nullptr check
+                GltfAccessorWrapper normalAccessor   { model.accessors[*primitive.GetAttribute("NORMAL")] };      // TODO: Add nullptr check
                 GltfAccessorWrapper texCoordAccessor { model.accessors[*primitive.GetAttribute("TEXCOORD_0")] };  // TODO: Add nullptr check
+                
 
                 GltfBufferViewWrapper positionBufferView { model.bufferViews[positionAccessor.GetBufferViewId()] };
                 GltfBufferViewWrapper normalBufferView   { model.bufferViews[normalAccessor.GetBufferViewId()] };
@@ -293,9 +294,10 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                 GltfBufferWrapper normalBuffer   { model.buffers[normalBufferView.GetBufferId()] };
                 GltfBufferWrapper texCoordBuffer { model.buffers[texCoordBufferView.GetBufferId()] };
 
-                const float* positionData = reinterpret_cast<const float*>(positionBuffer.GetData(positionBufferView.GetByteOffset() + positionAccessor.GetByteOffset()));
-                const float* normalData   = reinterpret_cast<const float*>(normalBuffer.GetData(normalBufferView.GetByteOffset()     + normalAccessor.GetByteOffset()));
-                const float* texCoordData = reinterpret_cast<const float*>(texCoordBuffer.GetData(texCoordBufferView.GetByteOffset() + texCoordAccessor.GetByteOffset()));
+
+                const float* positionData       = reinterpret_cast<const float*>(positionBuffer.GetData(positionBufferView.GetByteOffset() + positionAccessor.GetByteOffset()));
+                const float* normalData         = reinterpret_cast<const float*>(normalBuffer.GetData(normalBufferView.GetByteOffset()     + normalAccessor.GetByteOffset()));
+                const float* texCoordData       = reinterpret_cast<const float*>(texCoordBuffer.GetData(texCoordBufferView.GetByteOffset() + texCoordAccessor.GetByteOffset()));
 
                 // Apply data to my primitive
                 const int verticesCount = static_cast<int>(positionAccessor.GetCount());
@@ -314,6 +316,43 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
 
                     myPrimitive.Vertices.push_back(vertex);
                     //LOG("Position [" << LOG_VEC3(vertex.Pos) << "]\tNormal [" << LOG_VEC3(vertex.Normal) << "]\tUV [" << LOG_VEC2(vertex.TexCoord) << "]");
+                }
+
+                
+                auto jointAttribute  = primitive.GetAttribute("JOINTS_0");
+                auto weightAttribute = primitive.GetAttribute("WEIGHTS_0");
+                if (jointAttribute != nullptr && weightAttribute != nullptr)
+                {
+                    // Get joint and weight information
+                    GltfAccessorWrapper jointAccessor     { model.accessors[*jointAttribute] };
+                    GltfAccessorWrapper weightAccessor    { model.accessors[*weightAttribute] };
+                    GltfBufferViewWrapper jointBufferView { model.bufferViews[jointAccessor.GetBufferViewId()] };
+                    GltfBufferViewWrapper weightBufferView{ model.bufferViews[weightAccessor.GetBufferViewId()] };
+                    GltfBufferWrapper jointBuffer         { model.buffers[jointBufferView.GetBufferId()] };
+                    GltfBufferWrapper weightBuffer        { model.buffers[weightBufferView.GetBufferId()] };
+
+                    const BYTE* jointData  = reinterpret_cast<const BYTE*>(jointBuffer.GetData(jointBufferView.GetByteOffset()   + jointAccessor.GetByteOffset()));
+                    const float* weightData = reinterpret_cast<const float*>(weightBuffer.GetData(weightBufferView.GetByteOffset() + weightAccessor.GetByteOffset()));
+                    
+                    const auto jointType = jointAccessor.GetComponentType();
+                    const auto weightType = weightAccessor.GetComponentType();
+
+                    
+                    const int jointsCount = static_cast<int>(jointAccessor.GetCount());
+                    for (int i = 0; i < jointsCount; i++)
+                    {
+                        Vector4 joint  = Vector4(jointData[0], jointData[1], jointData[2], jointData[3]);
+                        Vector4 weight = Vector4(weightData[0], weightData[1], weightData[2], weightData[3]);
+
+                        myPrimitive.Joints.push_back(joint);
+                        myPrimitive.Weights.push_back(weight);
+
+                        jointData  += 4;
+                        weightData += 4;
+
+                        LOG("Joint [" << LOG_VEC4(joint) << "] --- Weight [" << LOG_VEC4(weight) << "]");
+                    }
+                    //LOG("\n");
                 }
             }
 
@@ -351,29 +390,32 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
             continue;
         }
         
+
+        // ----- Extract Skininng Data -----
+
         GltfSkinWrapper skin{ model.skins[meshNode.GetSkinId()] };
         
-        // Index 0 is always the root joint
-        Joint rootJoint;
-        rootJoint.Name = model.nodes[skin.GetJointIds()[0]].name;
-
         // Loop through all the joints
-        std::map<std::string, std::vector<std::string>> parentMap;
         std::map<int, std::vector<int>> parentMapInt;
-        for (auto& jointId : skin.GetJointIds())
+
+        const std::vector<int>& jointIds = skin.GetJointIds();
+        for (auto& jointId : jointIds)
         {
             GltfNodeWrapper jointNode { model.nodes[jointId] };
             for (auto& child : jointNode.GetChildrenIds())
             {
                 GltfNodeWrapper childNode{ model.nodes[child] };
-                parentMap[jointNode.GetName()].push_back(childNode.GetName());
+
                 parentMapInt[jointId].push_back(child);
             }
         }
 
 
 
-        // Debugging only
+
+
+#if 1
+        // Print for debugging only
         for (auto& pair : parentMapInt)
         {
             GltfNodeWrapper parent{ model.nodes[pair.first] };
@@ -385,6 +427,8 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                 LOG("\t" << child.GetName());
             }
         }
+#endif // 0
+
         
 
 

@@ -2,20 +2,19 @@
 #include <Core/Structures.h>
 
 struct Mesh;
-struct Skin;
 struct Primitive;
-struct Joint;
 
 struct Joint
 {
 	std::string Name;
+	Matrix InverseBindMatrix;
+	Matrix Transform;
 };
 
 struct Skin
 {
 	std::string        Name;
 	Matrix             InvBindMatrix;
-	std::vector<Joint> Joints;
 };
 
 struct Primitive
@@ -25,11 +24,14 @@ struct Primitive
 
 	std::vector<SimpleVertex> Vertices;
 	std::vector<int>          Indices;
+	std::vector<Vector4>      Joints;
+	std::vector<Vector4>      Weights;
 };
 
 
 struct Mesh
 {
 	std::string            Name;
+	Skin                   LinkedSkin;
 	std::vector<Primitive> Primitives;
 };
