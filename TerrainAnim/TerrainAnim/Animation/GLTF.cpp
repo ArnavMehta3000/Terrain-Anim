@@ -255,7 +255,7 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
     for (const auto& meshNodeIndex : meshNodes)
     {
         GltfNodeWrapper meshNode { model.nodes[meshNodeIndex] };
-        GltfMeshWrapper mesh { model.meshes[meshNode.GetMeshId()] };
+        GltfMeshWrapper mesh { model.meshes[meshNode.GetMeshId()]};
 
         Mesh* myMesh = new Mesh;
         myMesh->Name = mesh.GetName();
@@ -317,6 +317,7 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                 }
             }
 
+
             // Get the index buffer
             if (primitive.GetIndicesId() > -1)
             {
@@ -341,18 +342,50 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                     //LOG("Index: " << idx << " [" << index << "]");
                 }
             }
-
-
-
-
             myMesh->Primitives.push_back(myPrimitive);
         }
 
         if (meshNode.GetSkinId() == -1)
+        {
+            m_meshes.push_back(myMesh);
             continue;
-
+        }
+        
         GltfSkinWrapper skin{ model.skins[meshNode.GetSkinId()] };
         
+        // Index 0 is always the root joint
+        Joint rootJoint;
+        rootJoint.Name = model.nodes[skin.GetJointIds()[0]].name;
+
+        // Loop through all the joints
+        std::map<std::string, std::vector<std::string>> parentMap;
+        std::map<int, std::vector<int>> parentMapInt;
+        for (auto& jointId : skin.GetJointIds())
+        {
+            GltfNodeWrapper jointNode { model.nodes[jointId] };
+            for (auto& child : jointNode.GetChildrenIds())
+            {
+                GltfNodeWrapper childNode{ model.nodes[child] };
+                parentMap[jointNode.GetName()].push_back(childNode.GetName());
+                parentMapInt[jointId].push_back(child);
+            }
+        }
+
+        for (auto& pair : parentMapInt)
+        {
+            GltfNodeWrapper parent{ model.nodes[pair.first] };
+            LOG(parent.GetName());
+            for (auto& childId : pair.second)
+            {
+                GltfNodeWrapper child{ model.nodes[childId] };
+
+                LOG("\t" << child.GetName());
+            }
+        }
+        
+
+
+        m_meshes.push_back(myMesh);
     }
 }
 

@@ -15,4 +15,5 @@ private:
 
 private:
 	float m_scaleFactor;
+	std::vector<Mesh*> m_meshes;
 };
