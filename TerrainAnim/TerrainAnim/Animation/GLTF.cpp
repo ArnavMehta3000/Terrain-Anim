@@ -371,6 +371,9 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
             }
         }
 
+
+
+        // Debugging only
         for (auto& pair : parentMapInt)
         {
             GltfNodeWrapper parent{ model.nodes[pair.first] };
