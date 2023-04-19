@@ -26,6 +26,8 @@ struct Skin
 
 struct Primitive
 {
+	using PrimitivePtr = std::shared_ptr<Primitive>;
+
 	Mesh* ParentMesh = nullptr;
 	Color DiffuseColor;
 
@@ -39,14 +41,25 @@ struct Primitive
 	UINT                 m_indexCount   = -1;
 	ComPtr<ID3D11Buffer> m_vertexBuffer = nullptr;
 	ComPtr<ID3D11Buffer> m_indexBuffer  = nullptr;
+
+	Primitive() = default;
+	~Primitive()
+	{
+		COM_RELEASE(m_vertexBuffer);
+		COM_RELEASE(m_indexBuffer);
+		Vertices.clear();
+		Indices.clear();
+		Joints.clear();
+		Weights.clear();
+	}
 };
 
 
 struct Mesh
 {
-	std::string            Name;
-	Skin                   LinkedSkin;
-	std::vector<Primitive> Primitives;
+	std::string                           Name;
+	Skin                                  LinkedSkin;
+	std::vector<Primitive::PrimitivePtr>  Primitives;
 	std::map<Joint*, std::vector<Joint*>> JointMap;
 	
 	void GeneratePrimitiveBuffers();

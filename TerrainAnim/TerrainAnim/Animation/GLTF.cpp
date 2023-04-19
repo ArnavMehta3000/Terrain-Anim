@@ -327,10 +327,10 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
         for (int i = 0; i < mesh.GetPrimitiveCount(); i++)
         {
             GltfPrimitiveWrapper primitive{ mesh.GetPrimitive(i) };
-            Primitive myPrimitive;
+            Primitive::PrimitivePtr myPrimitive = std::make_shared<Primitive>();
 
             // Set parent mesh
-            myPrimitive.ParentMesh = myMesh;
+            myPrimitive->ParentMesh = myMesh;
 
             // Get primitive material data
             {
@@ -339,7 +339,7 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                 const auto& baseColor    = pbr.baseColorFactor;  // Diffuse color
 
                 // Set diffuse color
-                myPrimitive.DiffuseColor = Color((float)baseColor[0], (float)baseColor[1], (float)baseColor[2], (float)baseColor[3]);
+                myPrimitive->DiffuseColor = Color((float)baseColor[0], (float)baseColor[1], (float)baseColor[2], (float)baseColor[3]);
             }
 
             // Get vertex attributes
@@ -377,7 +377,7 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                     normalData   += 3;  // X, Y, Z
                     texCoordData += 2;  // X, Y
 
-                    myPrimitive.Vertices.push_back(vertex);
+                    myPrimitive->Vertices.push_back(vertex);
                     //LOG("Position [" << LOG_VEC3(vertex.Pos) << "]\tNormal [" << LOG_VEC3(vertex.Normal) << "]\tUV [" << LOG_VEC2(vertex.TexCoord) << "]");
                 }
 
@@ -407,8 +407,8 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                         Vector4 joint  = Vector4(jointData[0], jointData[1], jointData[2], jointData[3]);
                         Vector4 weight = Vector4(weightData[0], weightData[1], weightData[2], weightData[3]);
 
-                        myPrimitive.Joints.push_back(joint);
-                        myPrimitive.Weights.push_back(weight);
+                        myPrimitive->Joints.push_back(joint);
+                        myPrimitive->Weights.push_back(weight);
 
                         jointData  += 4;
                         weightData += 4;
@@ -436,9 +436,9 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
 
                     // Index may be negative, this implies that the offset is from the end of the vertex buffer
                     if (index < 0)
-                        index = static_cast<int>(myPrimitive.Vertices.size());
+                        index = static_cast<int>(myPrimitive->Vertices.size());
 
-                    myPrimitive.Indices.push_back(index);
+                    myPrimitive->Indices.push_back(index);
 
                     //LOG("Index: " << idx << " [" << index << "]");
                 }

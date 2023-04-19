@@ -49,15 +49,15 @@ void AnimScene::Render()
         for (auto& primitive : mesh->Primitives)
         {
             // Set primitive material
-            Material mat{ .Diffuse = primitive.DiffuseColor };
+            Material mat{ .Diffuse = primitive->DiffuseColor };
             D3D_CONTEXT->UpdateSubresource(m_materialCBuffer.Get(), 0, nullptr, &mat, 0, 0);
 
 
 
-            D3D_CONTEXT->IASetVertexBuffers(0, 1, primitive.m_vertexBuffer.GetAddressOf(), &stride, &offset);
-            D3D_CONTEXT->IASetIndexBuffer(primitive.m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+            D3D_CONTEXT->IASetVertexBuffers(0, 1, primitive->m_vertexBuffer.GetAddressOf(), &stride, &offset);
+            D3D_CONTEXT->IASetIndexBuffer(primitive->m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
 
-            D3D_CONTEXT->DrawIndexed((UINT)primitive.Indices.size(), 0, 0);
+            D3D_CONTEXT->DrawIndexed((UINT)primitive->Indices.size(), 0, 0);
         }
     }
 }
@@ -110,42 +110,20 @@ void AnimScene::DrawFBXInfo()
 
 
 static float scaleFactor = 1.0f;
-static Joint* selectedJoint = nullptr;
-
-
-void DrawJointData()
-{
-    if (selectedJoint == nullptr)
-        return;
-
-    if (ImGui::TreeNodeEx((std::string("Joint Data: ").append(selectedJoint->Name)).c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        ImGui::Text("Joint Index: %u", selectedJoint->Index);
-        ImGui::Text("Joint Child Count: %u", selectedJoint->Children.size());
-        
-        ImGui::TreePop();
-    }
-}
 
 void DrawSkeleton(Joint* joint, int level = 0)
 {
     //LOG(std::string(level * 2, ' ') << " - Joint: " << joint->Name << " (id: " << joint->Index << ")");
     if (joint->Children.size() == 0)
     {
-        if (ImGui::TreeNodeEx(joint->Name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::TreeNodeEx(joint->Name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen ))
         {
-            selectedJoint = joint;
             ImGui::TreePop();
         }
     }
     else
     {
-        bool node_open = ImGui::TreeNodeEx(joint->Name.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
-        if (ImGui::IsItemClicked())
-        {
-            selectedJoint = joint;
-        }
-        if (node_open)
+        if (ImGui::TreeNodeEx(joint->Name.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap))
         {
             // Recursively draw joint data
             for (auto& childJoint : joint->Children)
@@ -163,14 +141,14 @@ void AnimScene::DrawMeshInfo()
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
+
         for (auto& mesh : m_gltf->GetMeshes())
         {
             if (ImGui::CollapsingHeader((std::string("Skeleton - ").append(mesh->Name)).c_str()))
             {
-                DrawJointData();
-                ImGui::Separator();
-
+                ImGui::BeginChild(mesh->Name.c_str(), ImVec2(0, 0), false);
                 DrawSkeleton(mesh->LinkedSkin.JointTree.get());
+                ImGui::EndChild();
             }
             ImGui::Spacing();
             ImGui::Spacing();
