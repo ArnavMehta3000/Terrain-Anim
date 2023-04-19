@@ -6,22 +6,22 @@ struct Primitive;
 
 struct Joint
 {
-	using JointPtr = std::unique_ptr<Joint>;
+	using JointPtr = std::shared_ptr<Joint>;
 
-	Joint*              Parent = nullptr;
+	JointPtr            Parent = nullptr;
 	int                 Index  = -1;
 	std::string         Name;
 	Matrix              InverseBindMatrix;
 	Matrix              Transform;
-	std::vector<Joint*> Children;
+	std::vector<JointPtr> Children;
 
 	Joint() = default;
 };
 
 struct Skin
 {
-	std::string Name;
-	Joint*      JointTree;
+	std::string     Name;
+	Joint::JointPtr JointTree;
 };
 
 struct Primitive

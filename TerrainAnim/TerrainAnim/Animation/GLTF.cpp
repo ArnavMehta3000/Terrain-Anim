@@ -217,24 +217,24 @@ Matrix GetTransformationMatrix(GltfNodeWrapper& node)
     return transform;
 }
 
-Joint* BuildJointTree(const tinygltf::Model model, const GltfSkinWrapper& skin, const std::vector<int>& jointIds, int rootJointId, Joint* parent)
+std::shared_ptr<Joint> BuildJointTree(const tinygltf::Model model, const GltfSkinWrapper& skin, const std::vector<int>& jointIds, int rootJointId, Joint::JointPtr parent)
 {
     GltfNodeWrapper jointNode{ model.nodes[rootJointId] };
 
-    Joint* rootJoint = new Joint;
-    rootJoint->Parent = parent;
-    rootJoint->Index = rootJointId;
-    rootJoint->Name = jointNode.GetName();
+    Joint::JointPtr rootJoint    = std::make_shared<Joint>();
+    rootJoint->Parent            = parent;
+    rootJoint->Index             = rootJointId;
+    rootJoint->Name              = jointNode.GetName();
     rootJoint->InverseBindMatrix = GetInvBindMatrix(model, skin.GetInverseBindMatricesId());
-    rootJoint->Transform = GetTransformationMatrix(jointNode);
+    rootJoint->Transform         = GetTransformationMatrix(jointNode);
 
 
-    std::vector<Joint*> childJoints;
+    std::vector<Joint::JointPtr> childJoints;
     for (const auto& childJointId : jointNode.GetChildrenIds())
     {
         GltfNodeWrapper childJointNode{ model.nodes[childJointId] };
 
-        Joint* child = BuildJointTree(model, skin, skin.GetJointIds(), childJointId, rootJoint);
+        Joint::JointPtr child = BuildJointTree(model, skin, skin.GetJointIds(), childJointId, rootJoint);
         childJoints.push_back(child);
     }
     rootJoint->Children = childJoints;

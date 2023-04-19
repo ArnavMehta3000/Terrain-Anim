@@ -148,8 +148,8 @@ void DrawSkeleton(Joint* joint, int level = 0)
         if (node_open)
         {
             // Recursively draw joint data
-            for (auto* childJoint : joint->Children)
-                DrawSkeleton(childJoint, level + 1);
+            for (auto& childJoint : joint->Children)
+                DrawSkeleton(childJoint.get(), level + 1);
 
             ImGui::TreePop();
         }
@@ -170,7 +170,7 @@ void AnimScene::DrawMeshInfo()
                 DrawJointData();
                 ImGui::Separator();
 
-                DrawSkeleton(mesh->LinkedSkin.JointTree);
+                DrawSkeleton(mesh->LinkedSkin.JointTree.get());
             }
             ImGui::Spacing();
             ImGui::Spacing();
