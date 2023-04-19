@@ -184,6 +184,64 @@ auto GltfAccessorWrapper::GetByteStride(const GltfBufferViewWrapper& View) const
 #pragma endregion
 
 
+#pragma region GLTF Helpers
+Matrix GetInvBindMatrix(const tinygltf::Model& model, const int matrixId)
+{
+    GltfAccessorWrapper accessor{ model.accessors[matrixId] };
+    GltfBufferViewWrapper bufferView{ model.bufferViews[accessor.GetBufferViewId()] };
+    GltfBufferWrapper buffer{ model.buffers[bufferView.GetBufferId()] };
+
+    const float* data = reinterpret_cast<const float*>(buffer.GetData(bufferView.GetByteOffset() + accessor.GetByteOffset()));
+
+    return Matrix(data);
+}
+
+Matrix GetTransformationMatrix(GltfNodeWrapper& node)
+{
+    const auto& posVector = node.GetTranslation();
+    const auto& rotVector = node.GetRotation();
+    const auto& sclVector = node.GetScale();
+    
+    Vector3 position    = Vector3::Zero;
+    Quaternion rotation = Quaternion::Identity;
+    Vector3 scale       = Vector3::One;
+
+    if (posVector.size() == 3)
+        position = Vector3((float)posVector[0], (float)posVector[1], (float)posVector[2]);
+    if (rotVector.size() == 4)
+        rotation = Quaternion((float)rotVector[0], (float)rotVector[1], (float)rotVector[2], (float)rotVector[3]);
+    if (sclVector.size() == 3)
+        scale = Vector3((float)sclVector[0], (float)sclVector[1], (float)sclVector[2]);
+
+    Matrix transform = Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rotation) * Matrix::CreateTranslation(position);
+    return transform;
+}
+
+Joint* BuildJointTree(const tinygltf::Model model, const GltfSkinWrapper& skin, const std::vector<int>& jointIds, int rootJointId, Joint* parent)
+{
+    GltfNodeWrapper jointNode{ model.nodes[rootJointId] };
+
+    Joint* rootJoint = new Joint;
+    rootJoint->Parent = parent;
+    rootJoint->Index = rootJointId;
+    rootJoint->Name = jointNode.GetName();
+    rootJoint->InverseBindMatrix = GetInvBindMatrix(model, skin.GetInverseBindMatricesId());
+    rootJoint->Transform = GetTransformationMatrix(jointNode);
+
+
+    std::vector<Joint*> childJoints;
+    for (const auto& childJointId : jointNode.GetChildrenIds())
+    {
+        GltfNodeWrapper childJointNode{ model.nodes[childJointId] };
+
+        Joint* child = BuildJointTree(model, skin, skin.GetJointIds(), childJointId, rootJoint);
+        childJoints.push_back(child);
+    }
+    rootJoint->Children = childJoints;
+    return rootJoint;
+}
+#pragma endregion
+
 
 
 
@@ -234,6 +292,11 @@ bool GLTF::Load(const char* filename)
 
     ProcessModel(model);
 
+    // Generate the D3D vertex and index buffers
+    for (auto& mesh : m_meshes)
+    {
+        mesh->GeneratePrimitiveBuffers();
+    }
     
 
     loadTime.Stop();
@@ -350,9 +413,8 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                         jointData  += 4;
                         weightData += 4;
 
-                        LOG("Joint [" << LOG_VEC4(joint) << "] --- Weight [" << LOG_VEC4(weight) << "]");
+                        //LOG("Joint [" << LOG_VEC4(joint) << "] --- Weight [" << LOG_VEC4(weight) << "]");
                     }
-                    //LOG("\n");
                 }
             }
 
@@ -394,50 +456,21 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
         // ----- Extract Skininng Data -----
 
         GltfSkinWrapper skin{ model.skins[meshNode.GetSkinId()] };
+        myMesh->LinkedSkin.Name = skin.GetName();
         
-        // Loop through all the joints
-        std::map<int, std::vector<int>> parentMapInt;
-
-        const std::vector<int>& jointIds = skin.GetJointIds();
-        for (auto& jointId : jointIds)
-        {
-            GltfNodeWrapper jointNode { model.nodes[jointId] };
-            for (auto& child : jointNode.GetChildrenIds())
-            {
-                GltfNodeWrapper childNode{ model.nodes[child] };
-
-                parentMapInt[jointId].push_back(child);
-            }
-        }
-
-
-
-
-
-#if 1
-        // Print for debugging only
-        for (auto& pair : parentMapInt)
-        {
-            GltfNodeWrapper parent{ model.nodes[pair.first] };
-            LOG(parent.GetName());
-            for (auto& childId : pair.second)
-            {
-                GltfNodeWrapper child{ model.nodes[childId] };
-
-                LOG("\t" << child.GetName());
-            }
-        }
-#endif // 0
-
+        // Loop through all the joints and create a parent child map
+        const auto& jointIdList = skin.GetJointIds();
         
+        // NOTE: This recursive function takes a lot of time
+        myMesh->LinkedSkin.JointTree = BuildJointTree(model, skin, jointIdList, jointIdList[0], nullptr);
 
 
         m_meshes.push_back(myMesh);
     }
+    meshNodes.clear();
 }
 
 // https://github.com/supernovaengine/supernova/blob/master/engine/core/object/Model.h
 // https://github.com/DiligentGraphics/DiligentTools/blob/master/AssetLoader/src/GLTFBuilder.cpp
 // https://github.com/SaschaWillems/Vulkan-glTF-PBR/blob/master/base/VulkanglTFModel.h
-
 // https://github.com/supernovaengine/supernova/blob/master/engine/core/subsystem/MeshSystem.cpp#L1448

@@ -11,7 +11,10 @@ AnimScene::AnimScene(UINT width, UINT height)
 void AnimScene::Load()
 {
     m_sceneCamera.Position(Vector3(20.0f, 85.0f, -140.0f));
-	m_gltf = std::make_unique<GLTF>();
+	m_gltf   = std::make_unique<GLTF>();
+    m_shader = std::make_unique<Shader>(L"Shaders/Anim/Anim_VS.hlsl", L"Shaders/Anim/Anim_PS.hlsl");
+    D3D->CreateConstantBuffer(m_materialCBuffer, sizeof(Material));
+    
     if (m_wvpBuffer == nullptr)
         D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
 }
@@ -22,29 +25,41 @@ void AnimScene::Update(float dt, const InputEvent& input)
 
     WVPBuffer wvp
     {
-        .View = m_sceneCamera.GetView().Transpose(),
+        .World      = Matrix::Identity.Transpose(),
+        .View       = m_sceneCamera.GetView().Transpose(),
         .Projection = m_sceneCamera.GetProjection().Transpose()
     };
-
-  /*  std::for_each(m_gltf->GetMeshList().cbegin(), m_gltf->GetMeshList().cend(),
-        [&, dt, input](const std::unique_ptr<Mesh>& mesh)
-        {
-            mesh->Update(dt, input);
-            wvp.World = mesh->GetWorldMatrix().Transpose();
-        });*/
 
     D3D_CONTEXT->UpdateSubresource(m_wvpBuffer.Get(), 0, nullptr, &wvp, 0, 0);
 }
 
 void AnimScene::Render()
 {
-    D3D_CONTEXT->VSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
-    
-    /*for (auto& mesh : m_gltf->GetMeshList())
-    {
-        mesh->Render();
-    }*/
+    m_shader->BindPS();
+    m_shader->BindVS(true);
 
+    D3D_CONTEXT->VSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
+    D3D_CONTEXT->PSSetConstantBuffers(0, 1, m_materialCBuffer.GetAddressOf());
+    
+
+    UINT stride = sizeof(SimpleVertex);
+    UINT offset = 0;
+    for (auto& mesh : m_gltf->GetMeshes())
+    {
+        for (auto& primitive : mesh->Primitives)
+        {
+            // Set primitive material
+            Material mat{ .Diffuse = primitive.DiffuseColor };
+            D3D_CONTEXT->UpdateSubresource(m_materialCBuffer.Get(), 0, nullptr, &mat, 0, 0);
+
+
+
+            D3D_CONTEXT->IASetVertexBuffers(0, 1, primitive.m_vertexBuffer.GetAddressOf(), &stride, &offset);
+            D3D_CONTEXT->IASetIndexBuffer(primitive.m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+
+            D3D_CONTEXT->DrawIndexed((UINT)primitive.Indices.size(), 0, 0);
+        }
+    }
 }
 
 void AnimScene::Unload()
@@ -64,9 +79,7 @@ void AnimScene::GUI()
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
-        DrawMeshInfo();
-
-        
+        DrawMeshInfo();        
 	}
 }
 
@@ -97,18 +110,70 @@ void AnimScene::DrawFBXInfo()
 
 
 static float scaleFactor = 1.0f;
+static Joint* selectedJoint = nullptr;
+
+
+void DrawJointData()
+{
+    if (selectedJoint == nullptr)
+        return;
+
+    if (ImGui::TreeNodeEx((std::string("Joint Data: ").append(selectedJoint->Name)).c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen))
+    {
+        ImGui::Text("Joint Index: %u", selectedJoint->Index);
+        ImGui::Text("Joint Child Count: %u", selectedJoint->Children.size());
+        
+        ImGui::TreePop();
+    }
+}
+
+void DrawSkeleton(Joint* joint, int level = 0)
+{
+    //LOG(std::string(level * 2, ' ') << " - Joint: " << joint->Name << " (id: " << joint->Index << ")");
+    if (joint->Children.size() == 0)
+    {
+        if (ImGui::TreeNodeEx(joint->Name.c_str(), ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            selectedJoint = joint;
+            ImGui::TreePop();
+        }
+    }
+    else
+    {
+        bool node_open = ImGui::TreeNodeEx(joint->Name.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
+        if (ImGui::IsItemClicked())
+        {
+            selectedJoint = joint;
+        }
+        if (node_open)
+        {
+            // Recursively draw joint data
+            for (auto* childJoint : joint->Children)
+                DrawSkeleton(childJoint, level + 1);
+
+            ImGui::TreePop();
+        }
+    }
+}
+
 void AnimScene::DrawMeshInfo()
 {
-    if (ImGui::TreeNodeEx("Mesh Data", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader("Mesh Map", ImGuiTreeNodeFlags_DefaultOpen))
     {
-       /* if (m_gltf->GetMeshList().size() == 0)
-            ImGui::TextColored({ 1, 1, 0, 1 }, "Mesh Not extracted from GLTF");
-
-        for (auto& mesh : m_gltf->GetMeshList())
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::Spacing();
+        for (auto& mesh : m_gltf->GetMeshes())
         {
-            mesh->GUI();
-        }*/
+            if (ImGui::CollapsingHeader((std::string("Skeleton - ").append(mesh->Name)).c_str()))
+            {
+                DrawJointData();
+                ImGui::Separator();
 
-        ImGui::TreePop();
-     }
+                DrawSkeleton(mesh->LinkedSkin.JointTree);
+            }
+            ImGui::Spacing();
+            ImGui::Spacing();
+        }
+    }
 }

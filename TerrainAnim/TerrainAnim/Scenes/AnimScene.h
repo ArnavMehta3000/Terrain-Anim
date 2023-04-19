@@ -18,5 +18,7 @@ private:
 	void DrawMeshInfo();
 
 private:
-	std::unique_ptr<GLTF> m_gltf;
+	std::unique_ptr<GLTF>   m_gltf;
+	std::unique_ptr<Shader> m_shader;
+	ComPtr<ID3D11Buffer>    m_materialCBuffer;
 };
