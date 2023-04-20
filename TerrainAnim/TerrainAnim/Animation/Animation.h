@@ -54,6 +54,35 @@ struct Primitive
 	}
 };
 
+struct AnimationChannel 
+{
+	enum class PathType { Translation, Rotation, Scale, Weights };
+
+	PathType        Path;
+	Joint::JointPtr LinkedJoint;
+	UINT            SamplerIndex;
+};
+
+struct AnimationSampler 
+{
+	enum class InterpolationType { Linear, Step, CubicSpline };
+
+	InterpolationType    Interpolation;
+	std::vector<float>   Input;  // Time
+	std::vector<Vector4> Output; // Value
+};
+
+struct Animation 
+{
+	std::string                   Name;
+	std::vector<AnimationSampler> Samplers;
+	std::vector<AnimationChannel> Channels;
+	
+	float Start = std::numeric_limits<float>::max();
+	float End   = std::numeric_limits<float>::min();
+};
+
+
 
 struct Mesh
 {
@@ -61,6 +90,7 @@ struct Mesh
 	Skin                                  LinkedSkin;
 	std::vector<Primitive::PrimitivePtr>  Primitives;
 	std::map<Joint*, std::vector<Joint*>> JointMap;
-	
+	std::vector<Animation>                Animations;
+
 	void GeneratePrimitiveBuffers();
 };

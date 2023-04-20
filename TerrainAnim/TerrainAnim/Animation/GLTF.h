@@ -14,7 +14,6 @@ public:
 
 private:
 	void ProcessModel(const tinygltf::Model& model);
-	void CreateMeshJointMap(Mesh* mesh);
 
 private:
 	float                           m_scaleFactor;

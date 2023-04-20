@@ -109,7 +109,7 @@ struct GltfAnimationSamplerWrapper
 {
     const tinygltf::AnimationSampler& Sam;
 
-   /* AnimationSampler::InterpolationType GetInterpolation() const
+    AnimationSampler::InterpolationType GetInterpolation() const
     {
         if (Sam.interpolation == "LINEAR")
             return AnimationSampler::InterpolationType::Linear;
@@ -122,7 +122,7 @@ struct GltfAnimationSamplerWrapper
             LOG("Unexpected animation interpolation type: " << Sam.interpolation);
             return AnimationSampler::InterpolationType::Linear;
         }
-    }*/
+    }
 
     auto GetInputId() const { return Sam.input; }
     auto GetOutputId() const { return Sam.output; }
@@ -132,22 +132,22 @@ struct GltfAnimationChannelWrapper
 {
     const tinygltf::AnimationChannel& Channel;
 
-    /*AnimationChannel::AnimPathType GetPathType() const
+    AnimationChannel::PathType GetPathType() const
     {
         if (Channel.target_path == "rotation")
-            return AnimationChannel::AnimPathType::Rotation;
+            return AnimationChannel::PathType::Rotation;
         else if (Channel.target_path == "translation")
-            return AnimationChannel::AnimPathType::Translation;
+            return AnimationChannel::PathType::Translation;
         else if (Channel.target_path == "scale")
-            return AnimationChannel::AnimPathType::Scale;
+            return AnimationChannel::PathType::Scale;
         else if (Channel.target_path == "weights")
-            return AnimationChannel::AnimPathType::Weights;
+            return AnimationChannel::PathType::Weights;
         else
         {
             LOG("Unsupported animation channel path " << Channel.target_path);
-            return AnimationChannel::AnimPathType::Rotation;
+            return AnimationChannel::PathType::Rotation;
         }
-    }*/
+    }
 
     auto GetSamplerId() const { return Channel.sampler; }
     auto GetTargetNodeId() const { return Channel.target_node; }
@@ -217,7 +217,7 @@ Matrix GetTransformationMatrix(GltfNodeWrapper& node)
     return transform;
 }
 
-std::shared_ptr<Joint> BuildJointTree(const tinygltf::Model model, const GltfSkinWrapper& skin, const std::vector<int>& jointIds, int rootJointId, Joint::JointPtr parent)
+Joint::JointPtr BuildJointTree(const tinygltf::Model model, const GltfSkinWrapper& skin, const std::vector<int>& jointIds, int rootJointId, Joint::JointPtr parent)
 {
     GltfNodeWrapper jointNode{ model.nodes[rootJointId] };
 
@@ -239,6 +239,125 @@ std::shared_ptr<Joint> BuildJointTree(const tinygltf::Model model, const GltfSki
     }
     rootJoint->Children = childJoints;
     return rootJoint;
+}
+
+const Joint::JointPtr& FindJointWithIndex(Joint::JointPtr& rootJoint, const int index)
+{
+    if (rootJoint->Index == index)
+        return rootJoint;
+
+    for (auto& child : rootJoint->Children)
+    {
+        auto& joint = FindJointWithIndex(child, index);
+        if (joint != nullptr)
+            return joint;
+    }
+
+    // Joint not found
+    return nullptr;
+}
+
+std::vector<AnimationSampler> IterateSamplers(const tinygltf::Model& model, Animation& myAnimation, GltfAnimationWrapper animWrapper)
+{
+    std::vector<AnimationSampler> samplers;
+
+    for (auto& s : animWrapper.Anim.samplers)
+    {
+        GltfAnimationSamplerWrapper sampler{ s };
+        AnimationSampler mySampler;
+
+        mySampler.Interpolation = sampler.GetInterpolation();
+
+        // Read input time values
+        {
+            GltfAccessorWrapper   inputAccessor  { model.accessors[sampler.GetInputId()] };
+            GltfBufferViewWrapper inputBufferview{ model.bufferViews[inputAccessor.GetBufferViewId()] };
+            GltfBufferWrapper     inputBuffer    { model.buffers[inputBufferview.GetBufferId()] };
+
+            const float* inputData = reinterpret_cast<const float*>(inputBuffer.GetData(inputBufferview.GetByteOffset() + inputAccessor.GetByteOffset()));
+
+            assert(inputAccessor.GetComponentType() == TINYGLTF_COMPONENT_TYPE_FLOAT);
+
+            // Save sampler input times
+            for (int i = 0; i < inputAccessor.GetCount(); i++)
+                mySampler.Input.push_back(inputData[i]);
+
+            // Get start and end time of sampler
+            for (const auto& input : mySampler.Input)
+            {
+                if (input < myAnimation.Start)
+                    myAnimation.Start = input;
+
+                if (input > myAnimation.End)
+                    myAnimation.End = input;
+            }
+        }
+
+        // Read sampler values
+        {
+            GltfAccessorWrapper   outputAccessor{ model.accessors[sampler.GetOutputId()] };
+            GltfBufferViewWrapper outputBufferview{ model.bufferViews[outputAccessor.GetBufferViewId()] };
+            GltfBufferWrapper     outputBuffer{ model.buffers[outputBufferview.GetBufferId()] };
+
+            const void* outputData = reinterpret_cast<const void*>(outputBuffer.GetData(outputBufferview.GetByteOffset() + outputAccessor.GetByteOffset()));
+
+
+            switch (outputAccessor.GetNumComponents())
+            {
+            case 3:
+            {
+                const Vector3* buffer = static_cast<const Vector3*>(outputData);
+
+                // Save sampler output value
+                for (int index = 0; index < outputAccessor.GetCount(); index++)
+                    mySampler.Output.push_back(Vector4(buffer[index].x, buffer[index].y, buffer[index].z, 0.0f));
+            }
+            break;
+
+            case 4:
+            {
+                const Vector4* buffer = static_cast<const Vector4*>(outputData);
+
+                // Save sampler output value
+                for (int index = 0; index < outputAccessor.GetCount(); index++)
+                    mySampler.Output.push_back(buffer[index]);
+            }
+            break;
+
+            default:
+            {
+                LOG("UNKNOWN TYPE");
+                assert(false);  // For debugging only
+            }
+            break;
+            };
+
+            samplers.push_back(mySampler);
+        }
+    }
+
+    return samplers;
+}
+
+std::vector<AnimationChannel> IterateChannels(const tinygltf::Model& model, Animation& myAnimation, GltfAnimationWrapper animWrapper, Joint::JointPtr rootJoint)
+{
+    std::vector<AnimationChannel> channels;
+
+    for (auto& c : animWrapper.Anim.channels)
+    {
+        GltfAnimationChannelWrapper channel{ c };
+        AnimationChannel myChannel;
+
+        myChannel.Path         = channel.GetPathType();
+        myChannel.SamplerIndex = channel.GetSamplerId();
+        myChannel.LinkedJoint  = FindJointWithIndex(rootJoint, channel.GetTargetNodeId());
+        if (myChannel.LinkedJoint == nullptr)
+            continue;
+
+        channels.push_back(myChannel);
+    }
+
+    return channels;
 }
 #pragma endregion
 
@@ -289,8 +408,9 @@ bool GLTF::Load(const char* filename)
         return false;
     }
     
-
+    //  Extract mesh data
     ProcessModel(model);
+
 
     // Generate the D3D vertex and index buffers
     for (auto& mesh : m_meshes)
@@ -465,10 +585,29 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
         myMesh->LinkedSkin.JointTree = BuildJointTree(model, skin, jointIdList, jointIdList[0], nullptr);
 
 
+
+
+
+        // ----- Extract Animation Data ----- 
+
+        for (int i = 0; i < model.animations.size(); i++)
+        {
+            GltfAnimationWrapper animation{ model.animations[i] };
+            Animation myAnim;
+
+            myAnim.Samplers = IterateSamplers(model, myAnim, animation);
+            myAnim.Channels = IterateChannels(model, myAnim, animation, myMesh->LinkedSkin.JointTree);
+
+            myMesh->Animations.push_back(myAnim);
+        }
+        
+
+
         m_meshes.push_back(myMesh);
     }
     meshNodes.clear();
 }
+
 
 // https://github.com/supernovaengine/supernova/blob/master/engine/core/object/Model.h
 // https://github.com/DiligentGraphics/DiligentTools/blob/master/AssetLoader/src/GLTFBuilder.cpp
