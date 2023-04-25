@@ -22,7 +22,7 @@ void AnimScene::Load()
 void AnimScene::Update(float dt, const InputEvent& input)
 {
     m_sceneCamera.Update(dt, input.KeyboardState, input.MouseState);
-
+    m_gltf->UpdateAnimations(dt);
     WVPBuffer wvp
     {
         .World      = Matrix::Identity.Transpose(),

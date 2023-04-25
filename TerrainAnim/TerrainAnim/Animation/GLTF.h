@@ -12,6 +12,8 @@ public:
 	const auto& GetMeshes() const noexcept { return m_meshes; }
 	const auto& GetParentMap() const noexcept { return m_parentMap; }
 
+	void UpdateAnimations(float dt);
+
 private:
 	void ProcessModel(const tinygltf::Model& model);
 

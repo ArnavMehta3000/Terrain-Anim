@@ -187,9 +187,9 @@ auto GltfAccessorWrapper::GetByteStride(const GltfBufferViewWrapper& View) const
 #pragma region GLTF Helpers
 Matrix GetInvBindMatrix(const tinygltf::Model& model, const int matrixId)
 {
-    GltfAccessorWrapper accessor{ model.accessors[matrixId] };
+    GltfAccessorWrapper accessor    { model.accessors[matrixId] };
     GltfBufferViewWrapper bufferView{ model.bufferViews[accessor.GetBufferViewId()] };
-    GltfBufferWrapper buffer{ model.buffers[bufferView.GetBufferId()] };
+    GltfBufferWrapper buffer        { model.buffers[bufferView.GetBufferId()] };
 
     const float* data = reinterpret_cast<const float*>(buffer.GetData(bufferView.GetByteOffset() + accessor.GetByteOffset()));
 
@@ -606,6 +606,61 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
         m_meshes.push_back(myMesh);
     }
     meshNodes.clear();
+}
+
+
+void GLTF::UpdateAnimations(float dt)
+{
+    for (auto& mesh : m_meshes)
+    {
+        for (auto& animation : mesh->Animations)
+        {
+            bool updated = false;
+
+            for (auto& channel : animation.Channels)
+            {
+                auto& sampler = animation.Samplers[channel.SamplerIndex];
+
+                if (sampler.Input.size() > sampler.Output.size())
+                {
+                    LOG("Sampler input-output size mismatch!");
+                    continue;
+                }
+
+                for (size_t i = 0; i < sampler.Input.size() - 1; i++) 
+                {
+                    if ((dt >= sampler.Input[i]) && (dt <= sampler.Input[i + 1]))
+                    {
+                        float u = std::max(0.0f, dt - sampler.Input[i]) / (sampler.Input[i + 1] - sampler.Input[i]);
+                        LOG("U value:" << u);
+                        if (u <= 1.0f)
+                        {
+                            switch (channel.Path)
+                            {
+                            case AnimationChannel::PathType::Translation:
+                            {
+
+                            }
+                            break;
+
+                            case AnimationChannel::PathType::Rotation:
+                            {
+
+                            }
+                            break;
+
+                            case AnimationChannel::PathType::Scale:
+                            {
+
+                            }
+                            break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 
