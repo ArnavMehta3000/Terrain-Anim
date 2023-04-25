@@ -241,7 +241,7 @@ Joint::JointPtr BuildJointTree(const tinygltf::Model model, const GltfSkinWrappe
     return rootJoint;
 }
 
-const Joint::JointPtr& FindJointWithIndex(Joint::JointPtr& rootJoint, const int index)
+const Joint::JointPtr FindJointWithIndex(Joint::JointPtr& rootJoint, const int index)
 {
     if (rootJoint->Index == index)
         return rootJoint;
@@ -478,63 +478,63 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                 GltfBufferWrapper texCoordBuffer { model.buffers[texCoordBufferView.GetBufferId()] };
 
 
-                const float* positionData       = reinterpret_cast<const float*>(positionBuffer.GetData(positionBufferView.GetByteOffset() + positionAccessor.GetByteOffset()));
-                const float* normalData         = reinterpret_cast<const float*>(normalBuffer.GetData(normalBufferView.GetByteOffset()     + normalAccessor.GetByteOffset()));
-                const float* texCoordData       = reinterpret_cast<const float*>(texCoordBuffer.GetData(texCoordBufferView.GetByteOffset() + texCoordAccessor.GetByteOffset()));
+                const float* positionData = reinterpret_cast<const float*>(positionBuffer.GetData(positionBufferView.GetByteOffset() + positionAccessor.GetByteOffset()));
+                const float* normalData   = reinterpret_cast<const float*>(normalBuffer.GetData(normalBufferView.GetByteOffset()     + normalAccessor.GetByteOffset()));
+                const float* texCoordData = reinterpret_cast<const float*>(texCoordBuffer.GetData(texCoordBufferView.GetByteOffset() + texCoordAccessor.GetByteOffset()));
 
-                // Apply data to my primitive
-                const int verticesCount = static_cast<int>(positionAccessor.GetCount());
-                for (int i = 0; i < verticesCount; i++)
-                {
-                    SimpleVertex vertex;
 
-                    vertex.Pos      = Vector3(positionData[0], positionData[1], positionData[2]) * m_scaleFactor;
-                    vertex.Normal   = Vector3(normalData[0], normalData[1], normalData[2]);
-                    vertex.TexCoord = Vector2(texCoordData[0], texCoordData[1]);
-
-                    // Move forward in vertex attributes buffers
-                    positionData += 3;  // X, Y, Z
-                    normalData   += 3;  // X, Y, Z
-                    texCoordData += 2;  // X, Y
-
-                    myPrimitive->Vertices.push_back(vertex);
-                    //LOG("Position [" << LOG_VEC3(vertex.Pos) << "]\tNormal [" << LOG_VEC3(vertex.Normal) << "]\tUV [" << LOG_VEC2(vertex.TexCoord) << "]");
-                }
-
-                
+                // Get joint and weight information
                 auto jointAttribute  = primitive.GetAttribute("JOINTS_0");
                 auto weightAttribute = primitive.GetAttribute("WEIGHTS_0");
                 if (jointAttribute != nullptr && weightAttribute != nullptr)
                 {
-                    // Get joint and weight information
-                    GltfAccessorWrapper jointAccessor     { model.accessors[*jointAttribute] };
-                    GltfAccessorWrapper weightAccessor    { model.accessors[*weightAttribute] };
-                    GltfBufferViewWrapper jointBufferView { model.bufferViews[jointAccessor.GetBufferViewId()] };
+                    GltfAccessorWrapper jointAccessor{ model.accessors[*jointAttribute] };
+                    GltfAccessorWrapper weightAccessor{ model.accessors[*weightAttribute] };
+                    GltfBufferViewWrapper jointBufferView{ model.bufferViews[jointAccessor.GetBufferViewId()] };
                     GltfBufferViewWrapper weightBufferView{ model.bufferViews[weightAccessor.GetBufferViewId()] };
-                    GltfBufferWrapper jointBuffer         { model.buffers[jointBufferView.GetBufferId()] };
-                    GltfBufferWrapper weightBuffer        { model.buffers[weightBufferView.GetBufferId()] };
+                    GltfBufferWrapper jointBuffer{ model.buffers[jointBufferView.GetBufferId()] };
+                    GltfBufferWrapper weightBuffer{ model.buffers[weightBufferView.GetBufferId()] };
 
-                    const BYTE* jointData  = reinterpret_cast<const BYTE*>(jointBuffer.GetData(jointBufferView.GetByteOffset()   + jointAccessor.GetByteOffset()));
+                    const BYTE* jointData   = reinterpret_cast<const BYTE*>(jointBuffer.GetData(jointBufferView.GetByteOffset() + jointAccessor.GetByteOffset()));
                     const float* weightData = reinterpret_cast<const float*>(weightBuffer.GetData(weightBufferView.GetByteOffset() + weightAccessor.GetByteOffset()));
-                    
-                    const auto jointType = jointAccessor.GetComponentType();
-                    const auto weightType = weightAccessor.GetComponentType();
 
-                    
-                    const int jointsCount = static_cast<int>(jointAccessor.GetCount());
+                    const int jointsCount   = static_cast<int>(jointAccessor.GetCount());
+                    const int verticesCount = static_cast<int>(positionAccessor.GetCount());
+
+                    assert(jointsCount == verticesCount);
+
                     for (int i = 0; i < jointsCount; i++)
                     {
+                        SimpleVertex vertex;
+
+                        vertex.Pos      = Vector3(positionData[0], positionData[1], positionData[2]) * m_scaleFactor;
+                        vertex.Normal   = Vector3(normalData[0], normalData[1], normalData[2]);
+                        vertex.TexCoord = Vector2(texCoordData[0], texCoordData[1]);
+
                         Vector4 joint  = Vector4(jointData[0], jointData[1], jointData[2], jointData[3]);
                         Vector4 weight = Vector4(weightData[0], weightData[1], weightData[2], weightData[3]);
 
-                        myPrimitive->Joints.push_back(joint);
-                        myPrimitive->Weights.push_back(weight);
+                        // Move forward in vertex attributes buffers
+                        jointData    += 4;  // X, Y, Z, W
+                        weightData   += 4;  // X, Y, Z, W
+                        positionData += 3;  // X, Y, Z
+                        normalData   += 3;  // X, Y, Z
+                        texCoordData += 2;  // X, Y
 
-                        jointData  += 4;
-                        weightData += 4;
-
-                        //LOG("Joint [" << LOG_VEC4(joint) << "] --- Weight [" << LOG_VEC4(weight) << "]");
+                        // Create pair
+                        SkinnedVertexData pair
+                        {
+                            .Vertex = vertex,
+                            .Joint  = joint,
+                            .Weight = weight
+                        };
+                        myPrimitive->VertexData.push_back(pair);
                     }
+                }
+                else
+                {
+                    // Should not reach here
+                    assert(false);  // vertex count and joint/weight count is not same check gltf file!
                 }
             }
 
@@ -556,7 +556,7 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
 
                     // Index may be negative, this implies that the offset is from the end of the vertex buffer
                     if (index < 0)
-                        index = static_cast<int>(myPrimitive->Vertices.size());
+                        index = static_cast<int>(myPrimitive->VertexData.size());
 
                     myPrimitive->Indices.push_back(index);
 

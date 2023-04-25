@@ -24,6 +24,13 @@ struct Skin
 	Joint::JointPtr JointTree;
 };
 
+struct SkinnedVertexData
+{
+	SimpleVertex Vertex;
+	Vector4      Joint;
+	Vector4      Weight;
+};
+
 struct Primitive
 {
 	using PrimitivePtr = std::shared_ptr<Primitive>;
@@ -31,10 +38,8 @@ struct Primitive
 	Mesh* ParentMesh = nullptr;
 	Color DiffuseColor;
 
-	std::vector<SimpleVertex> Vertices;
-	std::vector<int>          Indices;
-	std::vector<Vector4>      Joints;
-	std::vector<Vector4>      Weights;
+	std::vector<SkinnedVertexData> VertexData;
+	std::vector<int>               Indices;
 
 
 	UINT                 m_vertexCount  = -1;
@@ -47,10 +52,8 @@ struct Primitive
 	{
 		COM_RELEASE(m_vertexBuffer);
 		COM_RELEASE(m_indexBuffer);
-		Vertices.clear();
+		VertexData.clear();
 		Indices.clear();
-		Joints.clear();
-		Weights.clear();
 	}
 };
 
