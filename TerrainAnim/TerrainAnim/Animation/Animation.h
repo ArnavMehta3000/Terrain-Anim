@@ -89,11 +89,11 @@ struct Animation
 
 struct Mesh
 {
-	std::string                           Name;
-	Skin                                  LinkedSkin;
-	std::vector<Primitive::PrimitivePtr>  Primitives;
-	std::map<Joint*, std::vector<Joint*>> JointMap;
-	std::vector<Animation>                Animations;
+	std::string                              Name;
+	Skin                                     LinkedSkin;
+	std::vector<Primitive::PrimitivePtr>     Primitives;
+	std::vector<Animation>                   Animations;
+	std::unordered_map<int, Joint::JointPtr> JointIndexMap;
 
 	void GeneratePrimitiveBuffers();
 };

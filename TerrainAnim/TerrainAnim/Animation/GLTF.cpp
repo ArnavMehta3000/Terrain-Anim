@@ -359,6 +359,11 @@ std::vector<AnimationChannel> IterateChannels(const tinygltf::Model& model, Anim
 
     return channels;
 }
+
+void GenerateJointIndexMap(std::unordered_map<int, Joint::JointPtr> map)
+{
+    
+}
 #pragma endregion
 
 
@@ -577,7 +582,7 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
         
         // NOTE: This recursive function takes a lot of time
         myMesh->LinkedSkin.JointTree = BuildJointTree(model, skin, jointIdList, jointIdList[0], nullptr);
-
+        GenerateJointIndexMap(myMesh->JointIndexMap);  // Generate a map to save time
 
 
 
