@@ -478,9 +478,9 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                 GltfBufferWrapper texCoordBuffer { model.buffers[texCoordBufferView.GetBufferId()] };
 
 
-                const float* positionData = reinterpret_cast<const float*>(positionBuffer.GetData(positionBufferView.GetByteOffset() + positionAccessor.GetByteOffset()));
-                const float* normalData   = reinterpret_cast<const float*>(normalBuffer.GetData(normalBufferView.GetByteOffset()     + normalAccessor.GetByteOffset()));
-                const float* texCoordData = reinterpret_cast<const float*>(texCoordBuffer.GetData(texCoordBufferView.GetByteOffset() + texCoordAccessor.GetByteOffset()));
+                const Vector3* positionData = reinterpret_cast<const Vector3*>(positionBuffer.GetData(positionBufferView.GetByteOffset() + positionAccessor.GetByteOffset()));
+                const Vector3* normalData   = reinterpret_cast<const Vector3*>(normalBuffer.GetData(normalBufferView.GetByteOffset()     + normalAccessor.GetByteOffset()));
+                const Vector2* texCoordData = reinterpret_cast<const Vector2*>(texCoordBuffer.GetData(texCoordBufferView.GetByteOffset() + texCoordAccessor.GetByteOffset()));
 
 
                 // Get joint and weight information
@@ -496,7 +496,7 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                     GltfBufferWrapper weightBuffer{ model.buffers[weightBufferView.GetBufferId()] };
 
                     const BYTE* jointData   = reinterpret_cast<const BYTE*>(jointBuffer.GetData(jointBufferView.GetByteOffset() + jointAccessor.GetByteOffset()));
-                    const float* weightData = reinterpret_cast<const float*>(weightBuffer.GetData(weightBufferView.GetByteOffset() + weightAccessor.GetByteOffset()));
+                    const Vector4* weightData = reinterpret_cast<const Vector4*>(weightBuffer.GetData(weightBufferView.GetByteOffset() + weightAccessor.GetByteOffset()));
 
                     const int jointsCount   = static_cast<int>(jointAccessor.GetCount());
                     const int verticesCount = static_cast<int>(positionAccessor.GetCount());
@@ -505,30 +505,24 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
 
                     for (int i = 0; i < jointsCount; i++)
                     {
-                        SimpleVertex vertex;
+                        SimpleVertex vertex
+                        {
+                            .Pos      = positionData[i] * m_scaleFactor,
+                            .Normal   = normalData[i],
+                            .TexCoord = texCoordData[i]
+                        };
 
-                        vertex.Pos      = Vector3(positionData[0], positionData[1], positionData[2]) * m_scaleFactor;
-                        vertex.Normal   = Vector3(normalData[0], normalData[1], normalData[2]);
-                        vertex.TexCoord = Vector2(texCoordData[0], texCoordData[1]);
-
-                        Vector4 joint  = Vector4(jointData[0], jointData[1], jointData[2], jointData[3]);
-                        Vector4 weight = Vector4(weightData[0], weightData[1], weightData[2], weightData[3]);
-
-                        // Move forward in vertex attributes buffers
-                        jointData    += 4;  // X, Y, Z, W
-                        weightData   += 4;  // X, Y, Z, W
-                        positionData += 3;  // X, Y, Z
-                        normalData   += 3;  // X, Y, Z
-                        texCoordData += 2;  // X, Y
 
                         // Create pair
                         SkinnedVertexData pair
                         {
                             .Vertex = vertex,
-                            .Joint  = joint,
-                            .Weight = weight
+                            .Joint  = Vector4(jointData[0], jointData[1], jointData[2], jointData[3]),
+                            .Weight = weightData[i]
                         };
+                        jointData += 4;
                         myPrimitive->VertexData.push_back(pair);
+                        LOG("Joint [" << LOG_VEC4(pair.Joint) << "]" << "    Weight [" << LOG_VEC4(pair.Weight) << "]");
                     }
                 }
                 else
