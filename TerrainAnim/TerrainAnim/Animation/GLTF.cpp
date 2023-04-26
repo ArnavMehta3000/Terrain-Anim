@@ -193,7 +193,7 @@ Matrix GetInvBindMatrix(const tinygltf::Model& model, const int matrixId)
 
     const float* data = reinterpret_cast<const float*>(buffer.GetData(bufferView.GetByteOffset() + accessor.GetByteOffset()));
 
-    return Matrix(data);
+    return Matrix(data); 
 }
 
 Matrix GetTransformationMatrix(GltfNodeWrapper& node)
@@ -217,7 +217,7 @@ Matrix GetTransformationMatrix(GltfNodeWrapper& node)
     return transform;
 }
 
-Joint::JointPtr BuildJointTree(const tinygltf::Model model, const GltfSkinWrapper& skin, const std::vector<int>& jointIds, int rootJointId, Joint::JointPtr parent)
+Joint::JointPtr BuildJointTree(const tinygltf::Model& model, const GltfSkinWrapper& skin, const std::vector<int>& jointIds, int rootJointId, Joint::JointPtr parent)
 {
     GltfNodeWrapper jointNode{ model.nodes[rootJointId] };
 
@@ -241,7 +241,7 @@ Joint::JointPtr BuildJointTree(const tinygltf::Model model, const GltfSkinWrappe
     return rootJoint;
 }
 
-const Joint::JointPtr FindJointWithIndex(Joint::JointPtr& rootJoint, const int index)
+const Joint::JointPtr FindJointWithIndex(const Joint::JointPtr& rootJoint, const int index)
 {
     if (rootJoint->Index == index)
         return rootJoint;
@@ -527,7 +527,7 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
                         };
                         jointData += 4;
                         myPrimitive->VertexData.push_back(pair);
-                        LOG("Joint [" << LOG_VEC4(pair.Joint) << "]" << "    Weight [" << LOG_VEC4(pair.Weight) << "]");
+                        //LOG("Joint [" << LOG_VEC4(pair.Joint) << "]" << "    Weight [" << LOG_VEC4(pair.Weight) << "]");
                     }
                 }
                 else

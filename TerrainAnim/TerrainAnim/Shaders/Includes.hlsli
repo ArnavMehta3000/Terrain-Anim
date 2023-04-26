@@ -24,3 +24,13 @@ struct HS_CONSTANT_DATA_OUTPUT
     float Edges[3] : SV_TessFactor;
     float Inside   : SV_InsideTessFactor;
 };
+
+struct TerrainGradients
+{
+    float Dirt0Height;
+    float Dirt1Height;
+    float StoneHeight;
+    float GrassHeight;
+    float SnowHeight;
+    float3 _padding;
+};

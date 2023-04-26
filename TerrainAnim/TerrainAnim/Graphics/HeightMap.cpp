@@ -3,7 +3,7 @@
 #include "Graphics/HeightMap.h"
 
 
-HeightMap::HeightMap(const char* fileName, UINT w, UINT h)
+HeightMap::HeightMap(const char* fileName, int w, int h)
 	:
 	m_file(fileName),
 	m_width(w),
@@ -25,7 +25,7 @@ HeightMap::HeightMap(const char* fileName, UINT w, UINT h)
 
 	m_heightMap.resize((size_t)w * (size_t)h);
 
-	for (UINT i = 0; i < w * h; i++)
+	for (int i = 0; i < w * h; i++)
 	{
 		// Cnnvert 0 - 255 to 0.0 - 1.0 range
 		m_heightMap[i] = (in[i] / 255.0f);
@@ -34,8 +34,32 @@ HeightMap::HeightMap(const char* fileName, UINT w, UINT h)
 	LOG("Loaded heightmap file: " << fileName);
 }
 
-
 HeightMap::~HeightMap()
 {
 	m_heightMap.clear();
+}
+
+std::vector<std::vector<float>> HeightMap::GetAs2DArray() const
+{
+	if (m_heightMap.size() == 0)
+	{
+		// Should not be requesting heightmap if not initialized		
+		assert(false);
+	}
+
+	std::vector<std::vector<float>> map;
+
+	// Resize vectors
+	map.resize(m_width);
+	for (int i = 0; i < m_width; i++)
+		map[i].resize(m_height);
+
+	for (int i = 0; i < map.size(); i++)
+	{
+		int row = i / m_width;
+		int col = i % m_height;
+		map[row][col] = m_heightMap[i];
+	}
+
+	return map;
 }

@@ -95,5 +95,5 @@ struct Mesh
 	std::vector<Animation>                   Animations;
 	std::unordered_map<int, Joint::JointPtr> JointIndexMap;
 
-	void GeneratePrimitiveBuffers();
+	void GeneratePrimitiveBuffers() const;
 };

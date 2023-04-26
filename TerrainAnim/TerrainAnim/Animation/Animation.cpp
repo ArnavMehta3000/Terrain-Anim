@@ -2,19 +2,17 @@
 #include "Animation/Animation.h"
 #include "Graphics/Direct3D.h"
 
-void Mesh::GeneratePrimitiveBuffers()
+void Mesh::GeneratePrimitiveBuffers() const
 {
-	for (auto& primitive : Primitives)
+	for (const auto& primitive : Primitives)
 	{
 		// Create vertex buffer
 		{
-			// Get vertices list
+			// Set vertices list
 			std::vector<SimpleVertex> verts;
-			std::for_each(primitive->VertexData.begin(), primitive->VertexData.end(),
-				[&verts](SkinnedVertexData data)
-				{
-					verts.push_back(data.Vertex);
-				});
+
+			std::ranges::transform(primitive->VertexData, std::back_inserter(verts),
+				[](const SkinnedVertexData& data) { return data.Vertex; });
 
 			CREATE_ZERO(D3D11_BUFFER_DESC, vbd);
 			vbd.Usage = D3D11_USAGE_DYNAMIC;

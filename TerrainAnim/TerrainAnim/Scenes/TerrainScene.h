@@ -1,20 +1,20 @@
 #pragma once
 #include "Core/Scene.h"
-#include "Entities/DiamondSquare.h"
+#include "Entities/Terrain.h"
 
 class TerrainScene : public Scene
 {
 public:
 	TerrainScene(UINT width, UINT height);
-	virtual ~TerrainScene() = default;
+	~TerrainScene() final = default;
 
-	virtual void Load() override;
-	virtual void Update(float dt, const InputEvent& input) override;
-	virtual void Render() override;
-	virtual void GUI() override;
-	virtual void Unload() override;
+	void Load() override;
+	void Update(float dt, const InputEvent& input) override;
+	void Render() override;
+	void GUI() override;
+	void Unload() override;
 
 private:
-	ComPtr<ID3D11Buffer>        m_wvpBuffer;
-	std::unique_ptr<DiamondSquare> m_terrain;
+	ComPtr<ID3D11Buffer>           m_wvpBuffer;
+	std::unique_ptr<Terrain>       m_betterTerrain;
 };

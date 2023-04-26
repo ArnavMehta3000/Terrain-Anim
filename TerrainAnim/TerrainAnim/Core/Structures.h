@@ -24,6 +24,16 @@ struct WVPBuffer
 	Matrix Projection;
 };
 
+struct TerrainGradients
+{
+	float Dirt0Height = 10.0f;
+	float Dirt1Height = 25.0f;
+	float StoneHeight = 30.0f;
+	float GrassHeight = 60.0f;
+	float SnowHeight  = 100.0f;
+	Vector3 _padding;
+};
+
 struct TessellationFactors
 {
 	float EdgeTessFactor = 8.0f;

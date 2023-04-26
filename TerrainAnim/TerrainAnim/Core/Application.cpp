@@ -14,7 +14,7 @@ Application::Application(HWND window, UINT width, UINT height)
 	m_width(width),
 	m_height(height),
 	m_appTimer(Timer()),
-	m_currentScene(3)  // TODO: Starts on anim scene
+	m_currentScene(2)  // TODO: Starts on anim scene
 {
 	// For WIC Texture loader
 	HR(CoInitializeEx(nullptr, COINIT_MULTITHREADED));

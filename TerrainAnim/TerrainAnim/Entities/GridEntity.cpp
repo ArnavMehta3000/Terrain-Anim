@@ -4,13 +4,13 @@
 
 GridEntity::GridEntity(int resolution)
 	:
+	m_resolution(resolution),
+	m_multiplier(100),
 	m_texture(L"Assets/PFP.JPG"),
 	m_vertexBuffer(nullptr),
 	m_indexBuffer(nullptr),
 	m_indexCount(0),
-	m_tessFactorsHS(nullptr),
-	m_multiplier(100),
-	m_resolution(resolution)
+	m_tessFactorsHS(nullptr)
 {
 	ZeroMemory(&m_tessellationFactors, sizeof(TessellationFactors));
 	m_tessellationFactors.EdgeTessFactor   = 1.0f;

@@ -100,6 +100,7 @@
     <ClCompile Include="Entities\GridEntity.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
+    <ClCompile Include="Entities\Terrain.cpp" />
     <ClCompile Include="Graphics\Direct3D.cpp" />
     <ClCompile Include="Graphics\HeightMap.cpp" />
     <ClCompile Include="Graphics\Shaders.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="Core\Object.h" />
     <ClInclude Include="Core\Structures.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Entities\Terrain.h" />
     <ClInclude Include="External\tinygltf\json.hpp" />
     <ClInclude Include="External\tinygltf\stb_image.h" />
     <ClInclude Include="External\tinygltf\stb_image_write.h" />

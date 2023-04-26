@@ -526,6 +526,6 @@ void Direct3D::CreateConstantBuffer(ComPtr<ID3D11Buffer>& buf, UINT size, D3D11_
 	cbd.ByteWidth      = size;
 	cbd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
 	cbd.CPUAccessFlags = cpuAccess;
-	HR(m_device->CreateBuffer(&cbd, nullptr, buf.ReleaseAndGetAddressOf()));
-	LOG("Created constant buffer of size: " << size);
+	HR(m_device->CreateBuffer(&cbd, nullptr, buf.ReleaseAndGetAddressOf()))
+	LOG("Created constant buffer of size: " << size)
 }
