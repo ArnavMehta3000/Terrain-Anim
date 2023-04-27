@@ -12,6 +12,7 @@ public:
 	const std::string& GetFileName() const noexcept { return m_file; }
 
 	float GetValue(UINT i) const noexcept { return m_heightMap[i]; }
+	auto GetData() const noexcept { return m_heightMap.data(); }
 	
 	std::vector<std::vector<float>> GetAs2DArray() const;
 

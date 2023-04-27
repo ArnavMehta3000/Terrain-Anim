@@ -131,6 +131,20 @@ void Terrain::GUI()
 		TerrainGenerator::DiamondSquare(this, 100.0f, 0.15f, 0.85f);
 	}
 
+	if (ImGui::Button("Voxelize"))
+	{
+		TerrainGenerator::Voxelize(this, 10.0f);
+	}
+
+	if (ImGui::Button("Particle Deposition"))
+	{
+		Flatten();
+		TerrainGenerator::ParticleDeposition(this, 50);
+		//TerrainGenerator::NormalizeHeight(this, 0.0f, 300.0f);
+		//TerrainGenerator::RecaluclateNormals(this);
+		UpdateBuffers();
+	}
+
 	ImGui::Separator();
 
 	ImGui::DragInt("Smoothing Iterations", &smoothingIterations);
