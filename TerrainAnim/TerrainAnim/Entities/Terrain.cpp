@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Entities/Terrain.h"
 #include "Graphics/Direct3D.h"
-
+#include "Core/TerrainGenerator.h"
 
 Terrain::Terrain()
 	:
@@ -102,6 +102,8 @@ void Terrain::Render()
 	D3D_CONTEXT->DrawIndexed(m_indexCount, 0, 0);
 }
 
+static int smoothingIterations = 2;
+
 void Terrain::GUI()
 {
 	if (m_heightMap == nullptr)
@@ -116,6 +118,26 @@ void Terrain::GUI()
 		ApplyHeightmap();
 
 	ImGui::Separator();
+
+	if (ImGui::Button("Fault Generation"))
+	{
+		Flatten();
+		TerrainGenerator::FaultFormation(this, 500, 0.0f, 100.0f);
+	}
+
+	ImGui::Separator();
+
+	ImGui::DragInt("Smoothing Iterations", &smoothingIterations);
+	if (ImGui::Button("Smooth FIR"))
+	{
+		for (int i = 0; i < smoothingIterations; i++)
+		{
+			TerrainGenerator::DoSmoothFIR(this, 0.5f);
+		}
+	}
+
+	ImGui::Separator();
+
 
 	ImGui::DragFloat("Low Dirt", &m_gradients.Dirt0Height);
 	ImGui::DragFloat("High Dirt", &m_gradients.Dirt1Height);

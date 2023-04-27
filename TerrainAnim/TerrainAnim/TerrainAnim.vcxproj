@@ -94,6 +94,7 @@
     <ClCompile Include="Animation\GLTF.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
+    <ClCompile Include="Core\TerrainGenerator.cpp" />
     <ClCompile Include="Entities\CubeEntity.cpp" />
     <ClCompile Include="Entities\DiamondSquare.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core.h" />
+    <ClInclude Include="Core\TerrainGenerator.h" />
     <ClInclude Include="Entities\CubeEntity.h" />
     <ClInclude Include="Entities\DiamondSquare.h" />
     <ClInclude Include="Entities\Entity.h" />

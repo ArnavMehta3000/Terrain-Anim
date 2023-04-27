@@ -6,8 +6,8 @@ public:
 	HeightMap(const char* fileName, int width, int height);
 	~HeightMap();
 	
-	UINT GetWidth() const noexcept { return m_width; }
-	UINT GetHeight() const noexcept { return m_height; }
+	int GetWidth() const noexcept { return m_width; }
+	int GetHeight() const noexcept { return m_height; }
 
 	const std::string& GetFileName() const noexcept { return m_file; }
 

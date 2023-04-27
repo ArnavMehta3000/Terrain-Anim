@@ -5,6 +5,8 @@
 
 class Terrain : public Entity
 {
+	friend class TerrainGenerator;
+
 public:
 	Terrain();
 	virtual ~Terrain();
@@ -19,7 +21,11 @@ public:
 	void Flatten();
 	// Applies the saved heightmap
 	void ApplyHeightmap();
+
+	std::vector<SimpleVertex>& GetVertices() { return m_terrainVertices; }
+
 private:
+
 	void GenerateBuffers();
 	void UpdateBuffers();
 
