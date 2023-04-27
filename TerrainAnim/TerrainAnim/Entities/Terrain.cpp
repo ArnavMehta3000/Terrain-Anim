@@ -128,7 +128,7 @@ void Terrain::GUI()
 	if (ImGui::Button("Diamond Square"))
 	{
 		Flatten();
-		TerrainGenerator::DiamondSquare(this, 100.0f, 1.0f, 0.5f);
+		TerrainGenerator::DiamondSquare(this, 100.0f, 0.15f, 0.85f);
 	}
 
 	ImGui::Separator();
@@ -139,6 +139,14 @@ void Terrain::GUI()
 		for (int i = 0; i < smoothingIterations; i++)
 		{
 			TerrainGenerator::DoSmoothFIR(this, 0.5f);
+		}
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Smooth Gaussain"))
+	{
+		for (int i = 0; i < smoothingIterations; i++)
+		{
+			TerrainGenerator::DoSmoothGaussian(this, 1.5f);
 		}
 	}
 
@@ -230,19 +238,19 @@ void Terrain::GenerateBuffers()
 		}
 	}
 
-	std::vector<UINT> indices(m_indexCount);  // 3 vertices per face
+	m_terrainIndices.resize(m_indexCount);  // 3 vertices per face
 
 	int tris = 0;
 	for (int x = 0; x < width - 1; x++)
 	{
 		for (int z = 0; z < height - 1; z++)
 		{
-			indices[tris]     = x * height + z;
-			indices[tris + 1] = x * height + z + 1;
-			indices[tris + 2] = (x + 1) * height + z;
-			indices[tris + 3] = (x + 1) * height + z;
-			indices[tris + 4] = x * height + z + 1;
-			indices[tris + 5] = (x + 1) * height + z + 1;
+			m_terrainIndices[tris]     = x * height + z;
+			m_terrainIndices[tris + 1] = x * height + z + 1;
+			m_terrainIndices[tris + 2] = (x + 1) * height + z;
+			m_terrainIndices[tris + 3] = (x + 1) * height + z;
+			m_terrainIndices[tris + 4] = x * height + z + 1;
+			m_terrainIndices[tris + 5] = (x + 1) * height + z + 1;
 
 			// Next quad
 			tris += 6;
@@ -269,7 +277,7 @@ void Terrain::GenerateBuffers()
 	ibd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	CREATE_ZERO(D3D11_SUBRESOURCE_DATA, isd);
-	isd.pSysMem = indices.data();
+	isd.pSysMem = m_terrainIndices.data();
 
 	HR(D3D_DEVICE->CreateBuffer(&ibd, &isd, m_indexBuffer.ReleaseAndGetAddressOf()))	
 	// ----- CREATE D3D BUFFERS -----

@@ -32,6 +32,7 @@ private:
 	std::unique_ptr<HeightMap> m_heightMap;
 	std::unique_ptr<Shader>    m_shader;
 	std::vector<SimpleVertex>  m_terrainVertices;
+	std::vector<UINT>          m_terrainIndices;
 	Texture2D                  m_texDirt0;
 	Texture2D                  m_texDirt1;
 	Texture2D                  m_texStone;

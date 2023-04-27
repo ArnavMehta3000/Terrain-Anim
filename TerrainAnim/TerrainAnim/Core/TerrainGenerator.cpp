@@ -99,8 +99,114 @@ void TerrainGenerator::DoSmoothFIR(Terrain* terrain, float filterSize)
 			terrain->GetVertices()[x + z * width].Pos.y = newHeight;
 		}
 	}
+	// Sweep the FIR algorithm in other directions
+//#define MULTI_SWEEP
 
-	
+#ifdef MULTI_SWEEP
+	for (int z = 0; z < height; z++)
+	{
+		for (int x = width - 1; x >= 0; x--)
+		{
+			float newHeight = 0.0f;
+
+			for (int i = 0; i < kernelSize; i++)
+			{
+				int index = std::clamp(x + i - kernelSize / 2, 0, width - 1) +
+					std::clamp(z + i - kernelSize / 2, 0, height - 1) * width;
+
+				newHeight += kernel[i] * terrain->GetVertices()[index].Pos.y;
+			}
+			terrain->GetVertices()[x + z * width].Pos.y = newHeight;
+		}
+	}
+
+	for (int z = height - 1; z >= 0; z--)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			float newHeight = 0.0f;
+
+			for (int i = 0; i < kernelSize; i++)
+			{
+				int index = std::clamp(x + i - kernelSize / 2, 0, width - 1) +
+					std::clamp(z + i - kernelSize / 2, 0, height - 1) * width;
+
+				newHeight += kernel[i] * terrain->GetVertices()[index].Pos.y;
+			}
+			terrain->GetVertices()[x + z * width].Pos.y = newHeight;
+		}
+	}
+
+	for (int z = height - 1; z >= 0; z--)
+	{
+		for (int x = width - 1; x >= 0; x--)
+		{
+			float newHeight = 0.0f;
+
+			for (int i = 0; i < kernelSize; i++)
+			{
+				int index = std::clamp(x + i - kernelSize / 2, 0, width - 1) +
+					std::clamp(z + i - kernelSize / 2, 0, height - 1) * width;
+
+				newHeight += kernel[i] * terrain->GetVertices()[index].Pos.y;
+			}
+			terrain->GetVertices()[x + z * width].Pos.y = newHeight;
+		}
+	}
+#endif // MULTI_SWEEP
+
+
+	terrain->UpdateBuffers();
+}
+
+void TerrainGenerator::DoSmoothGaussian(Terrain* terrain, float strength)
+{
+	int width = terrain->m_heightMap->GetWidth();
+	int height = terrain->m_heightMap->GetHeight();
+
+	// Create a copy of the heightmap to use as a buffer
+	std::vector<float> newHeights(width * height);
+
+	// Apply filter
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			float sum = 0.0f;
+			float count = 0.0f;
+
+			// Calculate the sum of heights in the 3x3 neighborhood
+			for (int dx = -1; dx <= 1; dx++)
+			{
+				for (int dy = -1; dy <= 1; dy++)
+				{
+					int nx = x + dx;
+					int ny = y + dy;
+
+					if (nx >= 0 && nx < width && ny >= 0 && ny < height)
+					{
+						sum += terrain->GetVertices()[nx * width + ny].Pos.y;
+						count += 1.0f;
+					}
+				}
+			}
+
+			// Calculate the average height and set the new height value in the newHeights vector
+			float avg = sum / count;
+			int index = x * width + y;
+			newHeights[index] = terrain->GetVertices()[index].Pos.y * (1.0f - strength) + avg * strength;
+		}
+	}
+
+	for (int i = 0; i < width * height; i++)
+	{
+		terrain->GetVertices()[i].Pos.y = newHeights[i];
+	}
+
+	newHeights.clear();
+
+	// Update the terrain
+	NormalizeHeight(terrain, 0.0f, 100.0f);
 	terrain->UpdateBuffers();
 }
 
@@ -115,6 +221,31 @@ void TerrainGenerator::NormalizeHeight(Terrain* terrain, float minHeight, float 
 	for (int i = 0; i < terrain->GetVertices().size(); i++)
 	{
 		terrain->GetVertices()[i].Pos.y = ((terrain->GetVertices()[i].Pos.y - minY) / delta) * range + minHeight;
+	}
+}
+
+void TerrainGenerator::RecaluclateNormals(Terrain* terrain)
+{
+	for (int i = 0; i < terrain->m_indexCount; i += 3)
+	{
+		auto index0 = terrain->m_terrainIndices[i];
+		auto index1 = terrain->m_terrainIndices[i + 1];
+		auto index2 = terrain->m_terrainIndices[i + 2];
+
+		auto v1 = terrain->GetVertices()[index1].Pos - terrain->GetVertices()[index0].Pos;
+		auto v2 = terrain->GetVertices()[index2].Pos - terrain->GetVertices()[index0].Pos;
+
+		auto normal = v1.Cross(v2);
+		normal.Normalize();
+
+		terrain->GetVertices()[index0].Normal += normal;
+		terrain->GetVertices()[index1].Normal += normal;
+		terrain->GetVertices()[index2].Normal += normal;
+	}
+
+	for (int i = 0; i < terrain->GetVertices().size(); i++)
+	{
+		terrain->GetVertices()[i].Normal.Normalize();
 	}
 }
 
@@ -156,6 +287,7 @@ void TerrainGenerator::FaultFormation(Terrain* terrain, int iterations, float mi
 	}
 
 	NormalizeHeight(terrain, minHeight, maxHeight);
+	RecaluclateNormals(terrain);
 	terrain->UpdateBuffers();
 }
 
@@ -217,5 +349,6 @@ void TerrainGenerator::DiamondSquare(Terrain* terrain, float heightMultiplier, f
 		roughness *= roughnessDemultiplier;
 	}
 	NormalizeHeight(terrain, 0.0f, 100.0f);
+	RecaluclateNormals(terrain);
 	terrain->UpdateBuffers();
 }

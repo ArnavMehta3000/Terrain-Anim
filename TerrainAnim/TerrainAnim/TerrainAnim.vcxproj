@@ -96,9 +96,7 @@
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\TerrainGenerator.cpp" />
     <ClCompile Include="Entities\CubeEntity.cpp" />
-    <ClCompile Include="Entities\DiamondSquare.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
-    <ClCompile Include="Entities\GridEntity.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Entities\Terrain.cpp" />
@@ -143,7 +141,6 @@
     </ClCompile>
     <ClCompile Include="Core\Window.cpp" />
     <ClCompile Include="Scenes\AnimScene.cpp" />
-    <ClCompile Include="Scenes\GridScene.cpp" />
     <ClCompile Include="Scenes\TerrainScene.cpp" />
     <ClCompile Include="Scenes\TestScene.cpp" />
   </ItemGroup>
@@ -155,9 +152,7 @@
     <ClInclude Include="Core.h" />
     <ClInclude Include="Core\TerrainGenerator.h" />
     <ClInclude Include="Entities\CubeEntity.h" />
-    <ClInclude Include="Entities\DiamondSquare.h" />
     <ClInclude Include="Entities\Entity.h" />
-    <ClInclude Include="Entities\GridEntity.h" />
     <ClInclude Include="Core\Object.h" />
     <ClInclude Include="Core\Structures.h" />
     <ClInclude Include="Core\Timer.h" />
@@ -183,7 +178,6 @@
     <ClInclude Include="Graphics\Shaders.h" />
     <ClInclude Include="Core\Scene.h" />
     <ClInclude Include="Scenes\AnimScene.h" />
-    <ClInclude Include="Scenes\GridScene.h" />
     <ClInclude Include="Scenes\TerrainScene.h" />
     <ClInclude Include="Scenes\TestScene.h" />
   </ItemGroup>

@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Application.h"
 #include "Scenes/TestScene.h"
-#include "Scenes/GridScene.h"
 #include "Scenes/TerrainScene.h"
 #include "Scenes/AnimScene.h"
 #include <algorithm>
@@ -14,7 +13,7 @@ Application::Application(HWND window, UINT width, UINT height)
 	m_width(width),
 	m_height(height),
 	m_appTimer(Timer()),
-	m_currentScene(2)  // TODO: Starts on anim scene
+	m_currentScene(1)  // TODO: Starts on anim scene
 {
 	// For WIC Texture loader
 	HR(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
@@ -35,7 +34,6 @@ bool Application::Init()
 	ImGui::StyleColorsDark();
 
 	m_scenes.push_back(new TestScene(m_width, m_height));
-	m_scenes.push_back(new GridScene(m_width, m_height));
 	m_scenes.push_back(new TerrainScene(m_width, m_height));
 	m_scenes.push_back(new AnimScene(m_width, m_height));
 	
@@ -109,14 +107,11 @@ void Application::GUI()
 			if (ImGui::Selectable("Test Scene"))
 				m_currentScene = 0;
 
-			if (ImGui::Selectable("Grid Scene"))
+			if (ImGui::Selectable("Terrain Scene"))
 				m_currentScene = 1;
 
-			if (ImGui::Selectable("Terrain Scene"))
-				m_currentScene = 2;
-
 			if (ImGui::Selectable("Animation Scene"))
-				m_currentScene = 3;
+				m_currentScene = 2;
 
 			ImGui::EndCombo();
 		}
