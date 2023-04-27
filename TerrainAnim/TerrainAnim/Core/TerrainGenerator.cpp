@@ -4,7 +4,7 @@
 #include <random>
 #include <numbers>
 
-static float GetRandomFloat(float min, float max)
+static float GetRandomFloat(float min = -1.0f, float max = 1.0f)
 {
 	static std::random_device rd;
 	static std::mt19937 gen(rd());
@@ -156,5 +156,66 @@ void TerrainGenerator::FaultFormation(Terrain* terrain, int iterations, float mi
 	}
 
 	NormalizeHeight(terrain, minHeight, maxHeight);
+	terrain->UpdateBuffers();
+}
+
+void TerrainGenerator::DiamondSquare(Terrain* terrain, float heightMultiplier, float roughness, float roughnessDemultiplier)
+{
+	int gridSize = terrain->m_heightMap->GetWidth();
+
+	// Set the four corners with starting values
+	terrain->GetVertices()[0].Pos.y                         = GetRandomFloat() * roughness;
+	terrain->GetVertices()[gridSize - 1].Pos.y              = GetRandomFloat() * roughness;
+	terrain->GetVertices()[gridSize * (gridSize - 1)].Pos.y = GetRandomFloat() * roughness;
+	terrain->GetVertices()[gridSize * gridSize - 1].Pos.y   = GetRandomFloat() * roughness;
+
+
+	for (int sideLength = gridSize - 1; sideLength >= 2; sideLength /= 2)
+	{
+		int halfSide = sideLength / 2;
+		float scale = sideLength * roughness;
+
+		// Diamond Step
+		for (int x = 0; x < gridSize - 1; x += sideLength)
+		{
+			for (int y = 0; y < gridSize - 1; y += sideLength)
+			{
+				float h1 = terrain->GetVertices()[x + y * gridSize].Pos.y;                                // Top left
+				float h2 = terrain->GetVertices()[x + (y + sideLength) * gridSize].Pos.y;                 // Top right
+				float h3 = terrain->GetVertices()[x + (y + sideLength) * gridSize].Pos.y;                 // Bottom left
+				float h4 = terrain->GetVertices()[(x + sideLength) + (y + sideLength) * gridSize].Pos.y;  // Bottom right
+
+				float avg = (h1 + h2 + h3 + h4) / 4.0f;
+
+				// Set middle value
+				int index = x + halfSide + (y + halfSide) * gridSize;
+				float randFloat = GetRandomFloat(-scale, scale);
+				terrain->GetVertices()[index].Pos.y = avg + randFloat * heightMultiplier;
+			}
+		}
+
+
+		// Square Step
+		for (int x = 0; x < gridSize - 1; x += halfSide)
+		{
+			for (int y = 0; y < gridSize - 1; y += halfSide)
+			{
+				float h1 = terrain->GetVertices()[x + y * gridSize].Pos.y;                           // Top left
+				float h2 = terrain->GetVertices()[x + (y + halfSide) * gridSize].Pos.y;              // Bottom left
+				float h3 = terrain->GetVertices()[(x + halfSide) + y * gridSize].Pos.y;              // Top right
+				float h4 = terrain->GetVertices()[(x + halfSide) + (y + halfSide) * gridSize].Pos.y; // Bottom right
+
+				float avg = (h1 + h2 + h3 + h4) / 4.0f;
+
+				// Set middle value
+				int index = x + halfSide + (y + halfSide) * gridSize;
+				float randValue = GetRandomFloat(-scale, scale);
+				terrain->GetVertices()[index].Pos.y = avg + randValue * heightMultiplier;
+			}
+		}
+
+		roughness *= roughnessDemultiplier;
+	}
+	NormalizeHeight(terrain, 0.0f, 100.0f);
 	terrain->UpdateBuffers();
 }

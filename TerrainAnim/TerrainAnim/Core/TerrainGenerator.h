@@ -10,5 +10,7 @@ public:
 	static void DoSmoothFIR(Terrain* terrain, float filterSize);
 	
 	static void NormalizeHeight(Terrain* terrain, float minHeight, float maxHeight);
+
 	static void FaultFormation(Terrain* terrain, int iterations, float minHeight, float maxHeight);
+	static void DiamondSquare(Terrain* terrain, float heightMultiplier, float roughness, float roughnessDemultiplier);
 };

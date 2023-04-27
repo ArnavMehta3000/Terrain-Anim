@@ -119,10 +119,16 @@ void Terrain::GUI()
 
 	ImGui::Separator();
 
-	if (ImGui::Button("Fault Generation"))
+	if (ImGui::Button("Fault Formation"))
 	{
 		Flatten();
 		TerrainGenerator::FaultFormation(this, 500, 0.0f, 100.0f);
+	}
+
+	if (ImGui::Button("Diamond Square"))
+	{
+		Flatten();
+		TerrainGenerator::DiamondSquare(this, 100.0f, 1.0f, 0.5f);
 	}
 
 	ImGui::Separator();
@@ -189,10 +195,10 @@ void Terrain::ApplyHeightmap()
 
 void Terrain::GenerateBuffers()
 {
-	auto CreateVertex = [](float x, float y, float z, float width, float height)
+	auto CreateVertex = [](float x, float y, float z, float width, float height, float textureScale)
 	{
-		float texU = x / width;
-		float texV = z / height;
+		float texU = textureScale * x / width;
+		float texV = textureScale * z / height;
 		SimpleVertex vert
 		{
 			vert.Pos      = Vector3(x, y, z),
@@ -218,7 +224,7 @@ void Terrain::GenerateBuffers()
 
 			float y = m_heightMap->GetValue(width * x + z) * 100.0f;
 			
-			m_terrainVertices[index] = CreateVertex((float)x, y, (float)z, (float)width, (float)height);
+			m_terrainVertices[index] = CreateVertex((float)x, y, (float)z, (float)width, (float)height, 10.0f);
 			
 			index++;
 		}
