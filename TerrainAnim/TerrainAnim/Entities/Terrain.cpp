@@ -138,10 +138,10 @@ void Terrain::GUI()
 
 	if (ImGui::Button("Particle Deposition"))
 	{
-		Flatten();
-		TerrainGenerator::ParticleDeposition(this, 50);
+		// Terrain should not be flattened
+		TerrainGenerator::ParticleDeposition(this, 10);
 		//TerrainGenerator::NormalizeHeight(this, 0.0f, 300.0f);
-		//TerrainGenerator::RecaluclateNormals(this);
+		//TerrainGenerator::RecalculateNormals(this);
 		UpdateBuffers();
 	}
 
@@ -177,11 +177,17 @@ void Terrain::GUI()
 
 void Terrain::Flatten()
 {
-	std::ranges::for_each(m_terrainVertices,
-		[](SimpleVertex& vertex)
+
+	int index = 0;
+	for (int x = 0; x < m_heightMap->GetWidth(); x++)
+	{
+		for (int z = 0; z < m_heightMap->GetHeight(); z++)
 		{
-			vertex.Pos.y = 0.0f;
-		});
+			m_terrainVertices[index].Pos = Vector3((float)x, 0.0f, (float)z);
+			index++;
+		}
+	}
+
 
 	UpdateBuffers();
 	m_isHeightMapApplied = false;
@@ -191,6 +197,8 @@ void Terrain::ApplyHeightmap()
 {
 	if (m_isHeightMapApplied)
 		return;  // Already applied, no need to waste resources
+
+	Flatten();
 
 	int width = m_heightMap->GetWidth();
 	int height = m_heightMap->GetHeight();

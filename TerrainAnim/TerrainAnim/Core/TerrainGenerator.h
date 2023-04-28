@@ -11,7 +11,7 @@ public:
 	static void DoSmoothGaussian(Terrain* terrain, float strength);
 	
 	static void NormalizeHeight(Terrain* terrain, float minHeight, float maxHeight);
-	static void RecaluclateNormals(Terrain* terrain);
+	static void RecalculateNormals(Terrain* terrain);
 
 	static void FaultFormation(Terrain* terrain, int iterations, float minHeight, float maxHeight);
 	static void DiamondSquare(Terrain* terrain, float heightMultiplier, float roughness, float roughnessDemultiplier);

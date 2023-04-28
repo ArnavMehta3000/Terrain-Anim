@@ -224,7 +224,7 @@ void TerrainGenerator::NormalizeHeight(Terrain* terrain, float minHeight, float 
 	}
 }
 
-void TerrainGenerator::RecaluclateNormals(Terrain* terrain)
+void TerrainGenerator::RecalculateNormals(Terrain* terrain)
 {
 	for (int i = 0; i < terrain->m_indexCount; i += 3)
 	{
@@ -287,7 +287,7 @@ void TerrainGenerator::FaultFormation(Terrain* terrain, int iterations, float mi
 	}
 
 	NormalizeHeight(terrain, minHeight, maxHeight);
-	RecaluclateNormals(terrain);
+	RecalculateNormals(terrain);
 	terrain->UpdateBuffers();
 }
 
@@ -349,7 +349,7 @@ void TerrainGenerator::DiamondSquare(Terrain* terrain, float heightMultiplier, f
 		roughness *= roughnessDemultiplier;
 	}
 	NormalizeHeight(terrain, 0.0f, 100.0f);
-	RecaluclateNormals(terrain);
+	RecalculateNormals(terrain);
 	terrain->UpdateBuffers();
 }
 
@@ -358,9 +358,9 @@ void TerrainGenerator::Voxelize(Terrain* terrain, float voxelSize)
 	for (int i = 0; i < terrain->m_terrainVertices.size(); i++)
 	{
 		// Round the vertex position to the nearest multiple of the voxel size
-		terrain->GetVertices()[i].Pos.x = std::round(terrain->GetVertices()[i].Pos.x / voxelSize) * voxelSize;
-		terrain->GetVertices()[i].Pos.y = std::round(terrain->GetVertices()[i].Pos.y / voxelSize) * voxelSize;
-		terrain->GetVertices()[i].Pos.z = std::round(terrain->GetVertices()[i].Pos.z / voxelSize) * voxelSize;
+		terrain->GetVertices()[i].Pos.x = std::floorf(terrain->GetVertices()[i].Pos.x / voxelSize) * voxelSize;
+		terrain->GetVertices()[i].Pos.y = std::floorf(terrain->GetVertices()[i].Pos.y / voxelSize) * voxelSize;
+		terrain->GetVertices()[i].Pos.z = std::floorf(terrain->GetVertices()[i].Pos.z / voxelSize) * voxelSize;
 	}
 	
 	terrain->UpdateBuffers();
@@ -368,232 +368,125 @@ void TerrainGenerator::Voxelize(Terrain* terrain, float voxelSize)
 
 void TerrainGenerator::ParticleDeposition(Terrain* terrain, int iterations)
 {
-	// Assumes the grid is already flattened
-
 	auto width  = terrain->m_heightMap->GetWidth();
 	auto height = terrain->m_heightMap->GetHeight();
 
-	constexpr int erosionRadius  = 3;
-	float inertia                = 0.05f;  // Should be between 0-1
-	float sedimentCapacityFactor = 4;
-	float minSedimentCapacity    = 0.01f;
+	float currentHeight = 0.0f;
 
-	float erodeSpeed             = 0.3f;   // Should be between 0-1
-	float depositSpeed            = 0.3f;   // Should be between 0-1
-	float evaporateSpeed         = 0.01f;  // Should be between 0-1
-	float gravity                = 4.0f;
-	
-	int maxDropletLifeTime       = 30;
-	float initialWaterVolume     = 1;
-	float initialSpeed            = 1;
+	int currentX;
+	int currentZ;
+	int dropX     = currentX = (int)GetRandomFloat(0.0f, width);
+	int dropZ     = currentZ = (int)GetRandomFloat(0.0f, height);
+	int radius    = 20;
+	float angle   = 0;
 
-	std::vector<std::vector<int>> erosionBrushIndices;
-	std::vector<std::vector<float>> erosionBrushWeights;
 
-	int currentErosionRadius;
-
-	struct HeightAndGradient
+	auto IsValidIndex = [width, height](int index)
 	{
-		float height;
-		float gradientX;
-		float gradientY;
+		return index > 0 && index < width * height;
 	};
 
 
-	// Helper Lambdas
-	auto InitBrushIndices = [&]()
+	auto Stable = [&](float deltaHeight, std::vector<int>& lowerList)
 	{
-		erosionBrushIndices.resize(width * height);
-		erosionBrushWeights.resize(width * height);
+		int index[9];
+		int heightArr[9];
 
-		std::array<int, erosionRadius * erosionRadius * 4> xOffsets;
-		std::array<int, erosionRadius * erosionRadius * 4> yOffsets;
-		std::array<int, erosionRadius* erosionRadius * 4> weights;
+		int currentIndex = height * currentZ + currentX;
 
-		float weightSum = 0.0f;
-		int addIndex = 0;
+		index[0] = currentIndex;                                                                                                            // the current index
+		index[1] = IsValidIndex(currentIndex + 1) && (currentIndex + 1) % height != 0 ? currentIndex + 1 : -1;                              // if the index to the right is valid index set index[] to index else set index[] to -1
+		index[2] = IsValidIndex(currentIndex - 1) && currentIndex % height != 0 ? currentIndex - 1 : -1;                                    // to the left
+		index[3] = IsValidIndex(currentIndex + height) ? currentIndex + height : -1;                                                        // above
+		index[4] = IsValidIndex(currentIndex - height) ? currentIndex - height : -1;                                                        // below
+		index[5] = IsValidIndex(currentIndex + height + 1) && (currentIndex + height + 1) % height != 0 ? currentIndex + height + 1 : -1;   // above to the right
+		index[6] = IsValidIndex(currentIndex - height + 1) && (currentIndex - height + 1) % height != 0 ? currentIndex - height + 1 : -1;   // below to the right
+		index[7] = IsValidIndex(currentIndex + height - 1) && currentIndex % height != 0 ? currentIndex + height - 1 : -1;                  // above to the left
+		index[8] = IsValidIndex(currentIndex - height - 1) && (currentIndex - height) % height != 0 ? currentIndex - height - 1 : -1;       // below to the left
 
-		for (int i = 0; i < erosionBrushIndices[0].size(); i++)
+		for (int i = 0; i < 9; i++)
+			heightArr[i] = (index[i] != -1) ? terrain->GetVertices()[index[i]].Pos.y : -1;
+
+		lowerList.clear();
+
+		for (int i = 1; i < 9; i++)
 		{
-			int centreX = i % width;
-			int centreY = i / height;
-
-			if (centreY <= erosionRadius || 
-				centreY >= width - erosionRadius ||
-				centreX <= erosionRadius + 1 || 
-				centreX >= height - erosionRadius)
-			{
-				weightSum = 0;
-
-				addIndex = 0;
-				for (int y = -erosionRadius; y <= erosionRadius; y++)
-				{
-					for (int x = -erosionRadius; x <= erosionRadius; x++) 
-					{
-						float sqrDst = (float)(x * x + y * y);
-						if (sqrDst < erosionRadius * erosionRadius)
-						{
-							int coordX = centreX + x;
-							int coordY = centreY + y;
-
-							if (coordX >= 0 && coordX < width && coordY >= 0 && coordY < height)
-							{								
-								float weight = 1 - std::sqrtf(sqrDst) / erosionRadius;
-								weightSum += weight;
-
-								weights[addIndex]  = weight;
-								xOffsets[addIndex] = x;
-								yOffsets[addIndex] = y;
-								addIndex++;
-							}
-						}
-					}
-				}
-			}
-
-			int numEntries = addIndex;
-			erosionBrushIndices[i].resize(numEntries);
-			erosionBrushWeights[i].resize(numEntries);
-
-			for (int j = 0; j < numEntries; j++)
-			{
-				erosionBrushIndices[i][j] = (yOffsets[j] + centreY) * width + xOffsets[j] + centreX;
-				erosionBrushWeights[i][j] = weights[j] / weightSum;
-			}
+			if (heightArr[i] != -1 && (heightArr[i] < heightArr[0] - deltaHeight))
+				lowerList.push_back(index[i]);
 		}
+
+		return lowerList.empty();
 	};
 
-	auto CalculateHeightAndGradient = [&](float posX, float posY)
+
+
+	for (int i = 0; i < iterations; i++)
 	{
-		int coordX = (int)posX;
-		int coordY = (int)posY;
+		currentX = dropX + radius * (int)std::cosf(angle);
+		currentZ = dropZ + radius * (int)std::sinf(angle);
 
-		// Calculate droplet's offset inside the cell (0,0) = at NW node, (1,1) = at SE node
-		float x = posX - coordX;
-		float y = posY - coordY;
+		angle += (360.0f / (float)iterations);
 
-		// Calculate heights of the four nodes of the droplet's cell
-		int nodeIndexNW = coordY * width + coordX;
-		float heightNW = terrain->GetVertices()[nodeIndexNW].Pos.y;
-		float heightNE = terrain->GetVertices()[nodeIndexNW + 1].Pos.y;
-		float heightSW = terrain->GetVertices()[nodeIndexNW + width].Pos.y;
-		float heightSE = terrain->GetVertices()[nodeIndexNW + width+ 1].Pos.y;
+		// The height value to alter the vertex height by
+		float increaseDelta = (1 - (2.0f / (float)iterations) * i);
+		increaseDelta = (increaseDelta < 0.0f) ? 0.0f : increaseDelta;
 
-		// Calculate droplet's direction of flow with bilinear interpolation of height difference along the edges
-		float gradientX = (heightNE - heightNW) * (1 - y) + (heightSE - heightSW) * y;
-		float gradientY = (heightSW - heightNW) * (1 - x) + (heightSE - heightNE) * x;
+		
+		// Deposit particle
+		bool posFound = false;
+		std::vector<int> lowerList;
 
-		// Calculate height with bilinear interpolation of the heights of the nodes of the cell
-		float newHeight = heightNW * (1 - x) * (1 - y) + heightNE * x * (1 - y) + heightSW * (1 - x) * y + heightSE * x * y;
-
-
-		HeightAndGradient output
+		while (!posFound)
 		{
-			.height = newHeight,
-			.gradientX = gradientX,
-			.gradientY = gradientY
-		};
-		return output;
-	};
-	// Helper Lambdas
+			bool stable = false;
 
-	
+			// Check neighbours
+			std::array<int, 9> index;
+			std::array<int, 9> heightArr;
 
-	// Initialize
-	currentErosionRadius = erosionRadius;
-	InitBrushIndices();
+			int currentIndex = height * currentZ + currentX;
 
+			index[0] = currentIndex;                                                                                                            // the current index
+			index[1] = IsValidIndex(currentIndex + 1) && (currentIndex + 1) % height != 0 ? currentIndex + 1 : -1;                              // if the index to the right is valid index set index[] to index else set index[] to -1
+			index[2] = IsValidIndex(currentIndex - 1) && currentIndex % height != 0 ? currentIndex - 1 : -1;                                    // to the left
+			index[3] = IsValidIndex(currentIndex + height) ? currentIndex + height : -1;                                                        // above
+			index[4] = IsValidIndex(currentIndex - height) ? currentIndex - height : -1;                                                        // below
+			index[5] = IsValidIndex(currentIndex + height + 1) && (currentIndex + height + 1) % height != 0 ? currentIndex + height + 1 : -1;   // above to the right
+			index[6] = IsValidIndex(currentIndex - height + 1) && (currentIndex - height + 1) % height != 0 ? currentIndex - height + 1 : -1;   // below to the right
+			index[7] = IsValidIndex(currentIndex + height - 1) && currentIndex % height != 0 ? currentIndex + height - 1 : -1;                  // above to the left
+			index[8] = IsValidIndex(currentIndex - height - 1) && (currentIndex - height) % height != 0 ? currentIndex - height - 1 : -1;       // below to the left
 
-	// Do erosion
+			for (int i = 0; i < 9; i++)
+				heightArr[i] = (index[i] != -1) ? terrain->GetVertices()[index[i]].Pos.y : -1;
 
-	for (int iteration = 0; iteration < iterations; iteration++) 
-	{
-		// Create water droplet at random point on map
-		float posX = GetRandomFloat(0, width - 1);
-		float posY = GetRandomFloat(0, height  - 1);
-		float dirX = 0;
-		float dirY = 0;
-		float speed = initialSpeed;
-		float water = initialWaterVolume;
-		float sediment = 0;
+			lowerList.clear();
 
-		for (int lifetime = 0; lifetime < maxDropletLifeTime; lifetime++)
-		{
-			auto nodeX = (int)posX;
-			auto nodeY = (int)posY;
-
-			// Calculate droplet's offset inside the cell (0,0) = at NW node, (1,1) = at SE node
-			int dropletIndex  = nodeY * width + nodeX;
-			float cellOffsetX = posX - nodeX;
-			float cellOffsetY = posY - nodeY;
-
-			// Calculate droplet's height and direction of flow with bilinear interpolation of surrounding heights
-			HeightAndGradient heightAndGradient = CalculateHeightAndGradient(posX, posY);
-
-			// Update the droplet's direction and position (move position 1 unit regardless of speed)
-			dirX = (dirX * inertia - heightAndGradient.gradientX * (1 - inertia));
-			dirY = (dirY * inertia - heightAndGradient.gradientY * (1 - inertia));
-			// Normalize direction
-			float len = std::sqrtf(dirX * dirX + dirY * dirY);
-			if (len != 0) 
+			for (int i = 1; i < 9; i++)
 			{
-				dirX /= len;
-				dirY /= len;
-			}
-			posX += dirX;
-			posY += dirY;
-
-			// Stop simulating droplet if it's not moving or has flowed over edge of map
-			if ((dirX == 0 && dirY == 0) || 
-				posX < 0 || 
-				posX >= width - 1 || 
-				posY < 0 || 
-				posY >= height - 1) 
-				break;
-
-			// Find the droplet's new height and calculate the deltaHeight
-			float newHeight   = CalculateHeightAndGradient(posX, posY).height;
-			float deltaHeight = newHeight - heightAndGradient.height;
-
-			// Calculate the droplet's sediment capacity (higher when moving fast down a slope and contains lots of water)
-			float sedimentCapacity = std::max(-deltaHeight * speed * water * sedimentCapacityFactor, minSedimentCapacity);
-
-			// If carrying more sediment than capacity, or if flowing uphill:
-			if (sediment > sedimentCapacity || deltaHeight > 0)
-			{
-				// If moving uphill (deltaHeight > 0) try fill up to the current height, otherwise deposit a fraction of the excess sediment
-				float amountToDeposit = (deltaHeight > 0) ? std::min(deltaHeight, sediment) : (sediment - sedimentCapacity) * depositSpeed;
-				sediment -= amountToDeposit;
-
-				// Add the sediment to the four nodes of the current cell using bilinear interpolation
-				// Deposition is not distributed over a radius (like erosion) so that it can fill small pits
-				terrain->GetVertices()[dropletIndex].Pos.y               += amountToDeposit * (1 - cellOffsetX) * (1 - cellOffsetY);
-				terrain->GetVertices()[dropletIndex + 1].Pos.y           += amountToDeposit * cellOffsetX * (1 - cellOffsetY);
-				terrain->GetVertices()[dropletIndex + width].Pos.y       += amountToDeposit * (1 - cellOffsetX) * cellOffsetY;
-				terrain->GetVertices()[dropletIndex + width + 1].Pos.y   += amountToDeposit * cellOffsetX * cellOffsetY;
-
-			}
-			else
-			{
-				// Erode a fraction of the droplet's current carry capacity.
-				// Clamp the erosion to the change in height so that it doesn't dig a hole in the terrain behind the droplet
-				float amountToErode = std::min((sedimentCapacity - sediment) * erodeSpeed, -deltaHeight);
-
-				// Use erosion brush to erode from all nodes inside the droplet's erosion radius
-				for (int brushPointIndex     = 0; brushPointIndex < erosionBrushIndices[dropletIndex].size(); brushPointIndex++) {
-					int nodeIndex            = erosionBrushIndices[dropletIndex][brushPointIndex];
-					float weighedErodeAmount = amountToErode * erosionBrushWeights[dropletIndex][brushPointIndex];
-					float deltaSediment      = (terrain->GetVertices()[nodeIndex].Pos.y < weighedErodeAmount) ? terrain->GetVertices()[nodeIndex].Pos.y : weighedErodeAmount;
-					
-					terrain->GetVertices()[nodeIndex].Pos.y -= deltaSediment;
-					sediment       += deltaSediment;
-				}
+				if (heightArr[i] != -1 && ((float)heightArr[i] < (float)heightArr[0] - 1.0f))
+					lowerList.push_back(index[i]);
 			}
 
-			// Update droplet's speed and water content
-			speed = std::sqrtf(speed * speed + deltaHeight * gravity);
-			water *= (1 - evaporateSpeed);
+			stable =  lowerList.empty();
+			
+
+			if (stable)
+			{
+				terrain->GetVertices()[currentZ * height + currentX].Pos.y += increaseDelta;
+				posFound = true;
+			}
+			else if (!lowerList.empty())
+			{
+				int element = (int)GetRandomFloat(0.0f,(float) lowerList.size() - 1.5f);
+				int lowerIndex = lowerList[element];
+				
+				// Move
+				currentX = lowerIndex % width;
+				currentZ = lowerIndex / height;
+			}
+			
 		}
 	}
 
+	NormalizeHeight(terrain, 0.0f, 100.0f);
 }
