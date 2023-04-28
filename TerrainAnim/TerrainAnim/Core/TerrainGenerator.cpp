@@ -366,127 +366,46 @@ void TerrainGenerator::Voxelize(Terrain* terrain, float voxelSize)
 	terrain->UpdateBuffers();
 }
 
-void TerrainGenerator::ParticleDeposition(Terrain* terrain, int iterations)
+void TerrainGenerator::ParticleDeposition(Terrain* terrain, int iterations, float radius, float depositAmount)
 {
 	auto width  = terrain->m_heightMap->GetWidth();
 	auto height = terrain->m_heightMap->GetHeight();
-
-	float currentHeight = 0.0f;
-
-	int currentX;
-	int currentZ;
-	int dropX     = currentX = (int)GetRandomFloat(0.0f, width);
-	int dropZ     = currentZ = (int)GetRandomFloat(0.0f, height);
-	int radius    = 20;
-	float angle   = 0;
-
-
-	auto IsValidIndex = [width, height](int index)
-	{
-		return index > 0 && index < width * height;
-	};
-
-
-	auto Stable = [&](float deltaHeight, std::vector<int>& lowerList)
-	{
-		int index[9];
-		int heightArr[9];
-
-		int currentIndex = height * currentZ + currentX;
-
-		index[0] = currentIndex;                                                                                                            // the current index
-		index[1] = IsValidIndex(currentIndex + 1) && (currentIndex + 1) % height != 0 ? currentIndex + 1 : -1;                              // if the index to the right is valid index set index[] to index else set index[] to -1
-		index[2] = IsValidIndex(currentIndex - 1) && currentIndex % height != 0 ? currentIndex - 1 : -1;                                    // to the left
-		index[3] = IsValidIndex(currentIndex + height) ? currentIndex + height : -1;                                                        // above
-		index[4] = IsValidIndex(currentIndex - height) ? currentIndex - height : -1;                                                        // below
-		index[5] = IsValidIndex(currentIndex + height + 1) && (currentIndex + height + 1) % height != 0 ? currentIndex + height + 1 : -1;   // above to the right
-		index[6] = IsValidIndex(currentIndex - height + 1) && (currentIndex - height + 1) % height != 0 ? currentIndex - height + 1 : -1;   // below to the right
-		index[7] = IsValidIndex(currentIndex + height - 1) && currentIndex % height != 0 ? currentIndex + height - 1 : -1;                  // above to the left
-		index[8] = IsValidIndex(currentIndex - height - 1) && (currentIndex - height) % height != 0 ? currentIndex - height - 1 : -1;       // below to the left
-
-		for (int i = 0; i < 9; i++)
-			heightArr[i] = (index[i] != -1) ? terrain->GetVertices()[index[i]].Pos.y : -1;
-
-		lowerList.clear();
-
-		for (int i = 1; i < 9; i++)
-		{
-			if (heightArr[i] != -1 && (heightArr[i] < heightArr[0] - deltaHeight))
-				lowerList.push_back(index[i]);
-		}
-
-		return lowerList.empty();
-	};
 
 
 
 	for (int i = 0; i < iterations; i++)
 	{
-		currentX = dropX + radius * (int)std::cosf(angle);
-		currentZ = dropZ + radius * (int)std::sinf(angle);
-
-		angle += (360.0f / (float)iterations);
-
-		// The height value to alter the vertex height by
-		float increaseDelta = (1 - (2.0f / (float)iterations) * i);
-		increaseDelta = (increaseDelta < 0.0f) ? 0.0f : increaseDelta;
-
+		// Choose a random position on the terrain grid
+		float xPos = GetRandomFloat(0.0f, (float)width);
+		float yPos = GetRandomFloat(0.0f, (float)height);
 		
-		// Deposit particle
-		bool posFound = false;
-		std::vector<int> lowerList;
+		// Create a new particle with a random direction
+		float direction = GetRandomFloat();
+		float xDir = std::cosf(direction);
+		float yDir = std::sinf(direction);
 
-		while (!posFound)
+		// Loop through all vertices and update their heights based on the particle's position
+		for (int j = 0; j < terrain->m_vertexCount; j++) 
 		{
-			bool stable = false;
+			float dist = std::sqrtf(
+				std::powf(terrain->GetVertices()[j].Pos.x - xPos, 2.0f) + 
+				std::powf(terrain->GetVertices()[j].Pos.z - yPos, 2.0f));
 
-			// Check neighbours
-			std::array<int, 9> index;
-			std::array<int, 9> heightArr;
-
-			int currentIndex = height * currentZ + currentX;
-
-			index[0] = currentIndex;                                                                                                            // the current index
-			index[1] = IsValidIndex(currentIndex + 1) && (currentIndex + 1) % height != 0 ? currentIndex + 1 : -1;                              // if the index to the right is valid index set index[] to index else set index[] to -1
-			index[2] = IsValidIndex(currentIndex - 1) && currentIndex % height != 0 ? currentIndex - 1 : -1;                                    // to the left
-			index[3] = IsValidIndex(currentIndex + height) ? currentIndex + height : -1;                                                        // above
-			index[4] = IsValidIndex(currentIndex - height) ? currentIndex - height : -1;                                                        // below
-			index[5] = IsValidIndex(currentIndex + height + 1) && (currentIndex + height + 1) % height != 0 ? currentIndex + height + 1 : -1;   // above to the right
-			index[6] = IsValidIndex(currentIndex - height + 1) && (currentIndex - height + 1) % height != 0 ? currentIndex - height + 1 : -1;   // below to the right
-			index[7] = IsValidIndex(currentIndex + height - 1) && currentIndex % height != 0 ? currentIndex + height - 1 : -1;                  // above to the left
-			index[8] = IsValidIndex(currentIndex - height - 1) && (currentIndex - height) % height != 0 ? currentIndex - height - 1 : -1;       // below to the left
-
-			for (int i = 0; i < 9; i++)
-				heightArr[i] = (index[i] != -1) ? terrain->GetVertices()[index[i]].Pos.y : -1;
-
-			lowerList.clear();
-
-			for (int i = 1; i < 9; i++)
+			// If the vertex is within the particle's radius, update its height
+			if (dist < radius)
 			{
-				if (heightArr[i] != -1 && ((float)heightArr[i] < (float)heightArr[0] - 1.0f))
-					lowerList.push_back(index[i]);
+				float deposit = depositAmount * (1 - dist / radius);
+				terrain->GetVertices()[j].Pos.y += deposit;
 			}
-
-			stable =  lowerList.empty();
-			
-
-			if (stable)
-			{
-				terrain->GetVertices()[currentZ * height + currentX].Pos.y += increaseDelta;
-				posFound = true;
-			}
-			else if (!lowerList.empty())
-			{
-				int element = (int)GetRandomFloat(0.0f,(float) lowerList.size() - 1.5f);
-				int lowerIndex = lowerList[element];
-				
-				// Move
-				currentX = lowerIndex % width;
-				currentZ = lowerIndex / height;
-			}
-			
 		}
+
+		// Move the particle in its direction
+		xPos += xDir;
+		yPos += yDir;
 	}
 
+
+	RecalculateNormals(terrain);
 	NormalizeHeight(terrain, 0.0f, 100.0f);
+	terrain->UpdateBuffers();
 }

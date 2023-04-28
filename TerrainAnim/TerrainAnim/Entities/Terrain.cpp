@@ -138,10 +138,8 @@ void Terrain::GUI()
 
 	if (ImGui::Button("Particle Deposition"))
 	{
-		// Terrain should not be flattened
-		TerrainGenerator::ParticleDeposition(this, 10);
-		//TerrainGenerator::NormalizeHeight(this, 0.0f, 300.0f);
-		//TerrainGenerator::RecalculateNormals(this);
+		Flatten();
+		TerrainGenerator::ParticleDeposition(this, 100, 50, 1.0f);
 		UpdateBuffers();
 	}
 
@@ -167,11 +165,11 @@ void Terrain::GUI()
 	ImGui::Separator();
 
 
-	ImGui::DragFloat("Low Dirt", &m_gradients.Dirt0Height);
+	ImGui::DragFloat("Low Dirt" , &m_gradients.Dirt0Height);
 	ImGui::DragFloat("High Dirt", &m_gradients.Dirt1Height);
-	ImGui::DragFloat("Stone", &m_gradients.StoneHeight);
-	ImGui::DragFloat("Grass", &m_gradients.GrassHeight);
-	ImGui::DragFloat("Snow", &m_gradients.SnowHeight);
+	ImGui::DragFloat("Stone"    , &m_gradients.StoneHeight);
+	ImGui::DragFloat("Grass"    , &m_gradients.GrassHeight);
+	ImGui::DragFloat("Snow"     , &m_gradients.SnowHeight);
 }
 
 

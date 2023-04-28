@@ -16,5 +16,5 @@ public:
 	static void FaultFormation(Terrain* terrain, int iterations, float minHeight, float maxHeight);
 	static void DiamondSquare(Terrain* terrain, float heightMultiplier, float roughness, float roughnessDemultiplier);
 	static void Voxelize(Terrain* terrain, float voxelSize);
-	static void ParticleDeposition(Terrain* terrain, int iterations);
+	static void ParticleDeposition(Terrain* terrain, int iterations, float radius, float depositAmount);
 };
