@@ -97,3 +97,6 @@ struct Mesh
 
 	void GeneratePrimitiveBuffers() const;
 };
+
+
+const Joint::JointPtr FindJointWithIndex(const Joint::JointPtr& rootJoint, const int index);

@@ -3,6 +3,7 @@
 #include "Keyboard.h"
 
 constexpr float HS_MAX_TESS_FACTOR = 64.0f;
+constexpr int MAX_JOINTS = 128;
 
 struct InputEvent
 {
@@ -15,6 +16,20 @@ struct SimpleVertex
 	Vector3 Pos;
 	Vector3 Normal;
 	Vector2 TexCoord;
+};
+
+struct VSAnimInput
+{
+	Vector3 Pos;
+	Vector3 Normal;
+	Vector2 TexCoord;
+	Vector4 JointWeights;
+	Vector4 JointIndices;
+};
+
+struct AnimData
+{
+	Matrix JointMatrices[MAX_JOINTS];
 };
 
 struct WVPBuffer

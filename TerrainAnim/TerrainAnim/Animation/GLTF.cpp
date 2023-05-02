@@ -7,6 +7,7 @@
 #include "Core/Timer.h"
 #include "Graphics/Direct3D.h"
 #include <assert.h>
+#include <stack>
 
 
 #pragma region TinyGLTF Wrappers
@@ -241,21 +242,6 @@ Joint::JointPtr BuildJointTree(const tinygltf::Model& model, const GltfSkinWrapp
     return rootJoint;
 }
 
-const Joint::JointPtr FindJointWithIndex(const Joint::JointPtr& rootJoint, const int index)
-{
-    if (rootJoint->Index == index)
-        return rootJoint;
-
-    for (auto& child : rootJoint->Children)
-    {
-        auto& joint = FindJointWithIndex(child, index);
-        if (joint != nullptr)
-            return joint;
-    }
-
-    // Joint not found
-    return nullptr;
-}
 
 std::vector<AnimationSampler> IterateSamplers(const tinygltf::Model& model, Animation& myAnimation, GltfAnimationWrapper animWrapper)
 {
@@ -360,9 +346,27 @@ std::vector<AnimationChannel> IterateChannels(const tinygltf::Model& model, Anim
     return channels;
 }
 
-void GenerateJointIndexMap(std::unordered_map<int, Joint::JointPtr> map)
+std::unordered_map<int, Joint::JointPtr> GenerateJointIndexMap(Joint::JointPtr rootJoint)
 {
-    
+    std::unordered_map<int, Joint::JointPtr> joints;
+    std::stack<Joint::JointPtr> jointStack;
+
+    jointStack.push(rootJoint);
+
+    while (!jointStack.empty())
+    {
+        auto& currentJoint = jointStack.top();
+        jointStack.pop();
+
+        joints[currentJoint->Index] = currentJoint;
+
+        for (auto& childJoint : currentJoint->Children)
+        {
+            jointStack.push(childJoint);
+        }
+    }
+
+    return joints;
 }
 #pragma endregion
 
@@ -582,7 +586,7 @@ void GLTF::ProcessModel(const tinygltf::Model& model)
         
         // NOTE: This recursive function takes a lot of time
         myMesh->LinkedSkin.JointTree = BuildJointTree(model, skin, jointIdList, jointIdList[0], nullptr);
-        GenerateJointIndexMap(myMesh->JointIndexMap);  // Generate a map to save time
+        myMesh->JointIndexMap = GenerateJointIndexMap(myMesh->LinkedSkin.JointTree);  // Generate a map to save time
 
 
 
@@ -631,7 +635,7 @@ void GLTF::UpdateAnimations(float dt)
                     if ((dt >= sampler.Input[i]) && (dt <= sampler.Input[i + 1]))
                     {
                         float u = std::max(0.0f, dt - sampler.Input[i]) / (sampler.Input[i + 1] - sampler.Input[i]);
-                        LOG("U value:" << u);
+                        //LOG("U value:" << u);
                         if (u <= 1.0f)
                         {
                             switch (channel.Path)

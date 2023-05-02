@@ -14,15 +14,18 @@ void AnimScene::Load()
 	m_gltf   = std::make_unique<GLTF>();
     m_shader = std::make_unique<Shader>(L"Shaders/Anim/Anim_VS.hlsl", L"Shaders/Anim/Anim_PS.hlsl");
     D3D->CreateConstantBuffer(m_materialCBuffer, sizeof(Material));
+    D3D->CreateConstantBuffer(m_animDataCBuffer, sizeof(AnimData));
     
     if (m_wvpBuffer == nullptr)
         D3D->CreateConstantBuffer(m_wvpBuffer, sizeof(WVPBuffer));
+
+    
 }
 
 void AnimScene::Update(float dt, const InputEvent& input)
 {
     m_sceneCamera.Update(dt, input.KeyboardState, input.MouseState);
-    m_gltf->UpdateAnimations(dt);
+    //m_gltf->UpdateAnimations(dt);
     WVPBuffer wvp
     {
         .World      = Matrix::Identity.Transpose(),
@@ -31,7 +34,7 @@ void AnimScene::Update(float dt, const InputEvent& input)
     };
 
     D3D_CONTEXT->UpdateSubresource(m_wvpBuffer.Get(), 0, nullptr, &wvp, 0, 0);
-}
+    }
 
 void AnimScene::Render()
 {
@@ -40,14 +43,24 @@ void AnimScene::Render()
 
     D3D_CONTEXT->VSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
     D3D_CONTEXT->PSSetConstantBuffers(0, 1, m_materialCBuffer.GetAddressOf());
+    D3D_CONTEXT->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     
 
-    UINT stride = sizeof(SimpleVertex);
+    UINT stride = sizeof(VSAnimInput);
     UINT offset = 0;
     for (auto& mesh : m_gltf->GetMeshes())
     {
+        // Update anim data constant buffer
+        AnimData animData{};
+        for (auto& [index, jointPtr] : mesh->JointIndexMap)
+        {
+            animData.JointMatrices[index] = jointPtr->InverseBindMatrix;
+        }
+        D3D_CONTEXT->UpdateSubresource(m_animDataCBuffer.Get(), 0, nullptr, &animData, 0, 0);
+
         for (auto& primitive : mesh->Primitives)
         {
+
             // Set primitive material
             Material mat{ .Diffuse = primitive->DiffuseColor };
             D3D_CONTEXT->UpdateSubresource(m_materialCBuffer.Get(), 0, nullptr, &mat, 0, 0);
