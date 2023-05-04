@@ -5,6 +5,7 @@ class Terrain;
 class TerrainGenerator
 {
 public:
+	static float GetRandomFloat(float min = -1.0f, float max = 1.0f);
 	static void GenerateRandomPointOnTerrain(Terrain* terrain, Vector2& a, Vector2& b);
 
 	static void DoSmoothFIR(Terrain* terrain, float filterSize);

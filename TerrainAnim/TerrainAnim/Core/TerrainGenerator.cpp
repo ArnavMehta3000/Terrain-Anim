@@ -4,7 +4,7 @@
 #include <random>
 #include <numbers>
 
-static float GetRandomFloat(float min = -1.0f, float max = 1.0f)
+float TerrainGenerator::GetRandomFloat(float min, float max)
 {
 	static std::random_device rd;
 	static std::mt19937 gen(rd());

@@ -28,6 +28,7 @@ private:
 
 	void GenerateBuffers();
 	void UpdateBuffers();
+	std::vector<float> GenerateNoiseMap();
 
 	std::unique_ptr<HeightMap> m_heightMap;
 	std::unique_ptr<Shader>    m_shader;
@@ -47,6 +48,7 @@ private:
 	ComPtr<ID3D11Buffer> m_indexBuffer;
 	ComPtr<ID3D11Buffer> m_tessFactorsHS;
 	ComPtr<ID3D11Buffer> m_gradientBuffer;
+	ComPtr<ID3D11ShaderResourceView> m_noiseTexture;
 	TessellationFactors  m_tessellationFactors;
 	TerrainGradients m_gradients;
 

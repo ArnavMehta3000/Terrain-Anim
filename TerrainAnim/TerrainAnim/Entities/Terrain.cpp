@@ -2,6 +2,7 @@
 #include "Entities/Terrain.h"
 #include "Graphics/Direct3D.h"
 #include "Core/TerrainGenerator.h"
+#include "FastNoiseLite.h"
 
 Terrain::Terrain()
 	:
@@ -14,7 +15,8 @@ Terrain::Terrain()
 	m_vertexCount(0),
 	m_faceCount(0),
 	m_indexCount(0),
-	m_isHeightMapApplied(false)
+	m_isHeightMapApplied(false), 
+	m_noiseTexture(nullptr)
 {
 	m_tessellationFactors.EdgeTessFactor = 1.0f;
 	m_tessellationFactors.InsideTessFactor = 1.0f;
@@ -119,6 +121,17 @@ void Terrain::GUI()
 
 	ImGui::Separator();
 
+	if (ImGui::Button("Generate noise"))
+	{
+		auto noiseData = GenerateNoiseMap();
+		auto size = m_terrainVertices.size();
+		for (size_t i = 0; i < size; i++)
+		{
+			m_terrainVertices[i].Pos.y = noiseData[i] * 100;
+		}
+		UpdateBuffers();
+	}
+
 	if (ImGui::Button("Fault Formation"))
 	{
 		Flatten();
@@ -164,12 +177,28 @@ void Terrain::GUI()
 
 	ImGui::Separator();
 
+	if (m_noiseTexture)
+	{
+		ImGui::Image((void*)m_noiseTexture.Get(), { 250, 250 });
+	}
+
+	ImGui::Separator();
+
 
 	ImGui::DragFloat("Low Dirt" , &m_gradients.Dirt0Height);
 	ImGui::DragFloat("High Dirt", &m_gradients.Dirt1Height);
 	ImGui::DragFloat("Stone"    , &m_gradients.StoneHeight);
 	ImGui::DragFloat("Grass"    , &m_gradients.GrassHeight);
 	ImGui::DragFloat("Snow"     , &m_gradients.SnowHeight);
+	
+	ImGui::Separator();
+
+	if (ImGui::TreeNode("Tessellation"))
+	{
+		ImGui::DragFloat("Edge", &m_tessellationFactors.EdgeTessFactor, 0.1f, 0.01f, HS_MAX_TESS_FACTOR);
+		ImGui::DragFloat("Inside", &m_tessellationFactors.InsideTessFactor, 0.1f, 0.01f, HS_MAX_TESS_FACTOR);
+		ImGui::TreePop();
+	}
 }
 
 
@@ -315,4 +344,72 @@ void Terrain::UpdateBuffers()
 	}
 
 	D3D_CONTEXT->Unmap(m_vertexBuffer.Get(), 0);
+}
+
+std::vector<float> Terrain::GenerateNoiseMap()
+{
+	FastNoiseLite generator;
+	generator.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	generator.SetSeed((int)TerrainGenerator::GetRandomFloat(0, 999));
+
+	auto width = m_heightMap->GetWidth();
+	auto height = m_heightMap->GetHeight();
+
+	std::vector<float> noiseData(width * height);
+
+	int index = 0;
+	for (int y = 0; y < width; y++)
+	{
+		for (int x = 0; x < height; x++)
+		{
+			auto noiseValue  = generator.GetNoise((float)x, (float)y);
+			noiseData[index] = noiseValue;
+			index++;
+		}
+	}
+
+	const float noiseScale = 0.5f;
+
+	// Convert the noise data to uint to create a texture
+	std::vector<float> textureData(width * height * 4);
+	for (int i = 0; i < width * height; i++)
+	{
+		float noiseValue       = (noiseData[i] + 1.0f) * noiseScale;
+		textureData[i * 4]     = noiseValue;
+		textureData[i * 4 + 1] = noiseValue;
+		textureData[i * 4 + 2] = noiseValue;
+		textureData[i * 4 + 3] = 1.0f;
+	}
+
+	// Create the texture resource
+	CREATE_ZERO(D3D11_TEXTURE2D_DESC, textureDesc);
+	textureDesc.Width            = width;
+	textureDesc.Height           = height;
+	textureDesc.MipLevels        = 1;
+	textureDesc.ArraySize        = 1;
+	textureDesc.Format           = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.Usage            = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags        = D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags   = 0;
+	textureDesc.MiscFlags        = 0;
+
+	CREATE_ZERO(D3D11_SUBRESOURCE_DATA, textureInitData);
+	textureInitData.pSysMem          = textureData.data();
+	textureInitData.SysMemPitch      = width * sizeof(float) * 4;
+	textureInitData.SysMemSlicePitch = width * height * sizeof(float) * 4;
+
+	ID3D11Texture2D* texture = nullptr;
+	HR(D3D_DEVICE->CreateTexture2D(&textureDesc, &textureInitData, &texture));
+
+
+	// Create the shader resource view
+	CREATE_ZERO(D3D11_SHADER_RESOURCE_VIEW_DESC, srvDesc);
+	srvDesc.Format                    = textureDesc.Format;
+	srvDesc.ViewDimension             = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels       = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	HR(D3D_DEVICE->CreateShaderResourceView(texture, &srvDesc, m_noiseTexture.ReleaseAndGetAddressOf()));
+
+	return noiseData;
 }

@@ -203,6 +203,9 @@
     <ClInclude Include="Core\TerrainGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FastNoiseLite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

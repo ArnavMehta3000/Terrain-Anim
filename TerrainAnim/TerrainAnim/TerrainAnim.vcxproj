@@ -161,6 +161,7 @@
     <ClInclude Include="External\tinygltf\stb_image.h" />
     <ClInclude Include="External\tinygltf\stb_image_write.h" />
     <ClInclude Include="External\tinygltf\tiny_gltf.h" />
+    <ClInclude Include="FastNoiseLite.h" />
     <ClInclude Include="Graphics\Direct3D.h" />
     <ClInclude Include="Core\Primitives.h" />
     <ClInclude Include="Graphics\HeightMap.h" />
