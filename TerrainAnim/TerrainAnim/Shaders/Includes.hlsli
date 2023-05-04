@@ -43,3 +43,11 @@ struct TerrainGradients
     float SnowHeight;
     float3 _padding;
 };
+
+struct TerrainData
+{
+    bool  UseHeightMap;
+    float NoiseWidth;
+    float NoiseHeight;
+    float HeightMultiplier;
+};

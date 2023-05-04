@@ -44,13 +44,15 @@ private:
 	int m_faceCount;
 	int m_indexCount;
 
-	ComPtr<ID3D11Buffer> m_vertexBuffer;
-	ComPtr<ID3D11Buffer> m_indexBuffer;
-	ComPtr<ID3D11Buffer> m_tessFactorsHS;
-	ComPtr<ID3D11Buffer> m_gradientBuffer;
+	ComPtr<ID3D11Buffer>             m_vertexBuffer;
+	ComPtr<ID3D11Buffer>             m_indexBuffer;
+	ComPtr<ID3D11Buffer>             m_tessFactorsHS;
+	ComPtr<ID3D11Buffer>             m_gradientBuffer;
+	ComPtr<ID3D11Buffer>             m_terrainDataBuffer;
 	ComPtr<ID3D11ShaderResourceView> m_noiseTexture;
-	TessellationFactors  m_tessellationFactors;
-	TerrainGradients m_gradients;
+	TessellationFactors              m_tessellationFactors;
+	TerrainGradients                 m_gradients;
+	TerrainData                      m_terrainData;
 
 	bool m_isHeightMapApplied;
 };

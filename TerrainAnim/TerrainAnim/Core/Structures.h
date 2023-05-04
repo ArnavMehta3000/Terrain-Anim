@@ -49,6 +49,14 @@ struct TerrainGradients
 	Vector3 _padding;
 };
 
+struct TerrainData
+{
+	bool  UseHeightMap     = false;
+	float NoiseWidth       = 513.0f;
+	float NoiseHeight      = 513.0f;
+	float HeightMultiplier = 100.0f;
+};
+
 struct TessellationFactors
 {
 	float EdgeTessFactor = 8.0f;

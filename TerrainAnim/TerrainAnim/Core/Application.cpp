@@ -85,7 +85,7 @@ void Application::GUI()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 	
-	ImGui::Begin("Editor");
+	ImGui::Begin("Editor", NULL, ImGuiWindowFlags_AlwaysVerticalScrollbar);
 	ImGui::SetWindowPos({ 0.0f, 0.0f }, ImGuiCond_Always);
 	ImGui::SetWindowSize({ 350.0f, static_cast<float>(m_width) }, ImGuiCond_Once);
 	
