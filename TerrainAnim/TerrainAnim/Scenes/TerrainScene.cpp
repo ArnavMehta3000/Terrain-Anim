@@ -15,13 +15,13 @@ void TerrainScene::Load()
 	m_sceneCamera.Position(Vector3(0, 10, -8));
 	LOG("Loaded terrain scene")
 
-	m_betterTerrain = std::make_unique<Terrain>();
-	m_betterTerrain->LoadFile("Assets/Textures513/coastMountain513.raw", 513, 513);
+	m_terrain = std::make_unique<Terrain>();
+	m_terrain->LoadFile("Assets/Textures513/coastMountain513.raw", 513, 513);
 }
 
 void TerrainScene::Update(float dt, const InputEvent& input)
 {
-	m_betterTerrain->Update(dt, input);
+	m_terrain->Update(dt, input);
 	m_sceneCamera.Update(dt, input.KeyboardState, input.MouseState);
 
 	WVPBuffer wvp
@@ -37,14 +37,14 @@ void TerrainScene::Update(float dt, const InputEvent& input)
 void TerrainScene::Render()
 {
 	D3D_CONTEXT->DSSetConstantBuffers(0, 1, m_wvpBuffer.GetAddressOf());
-	m_betterTerrain->Render();
+	m_terrain->Render();
 }
 
 void TerrainScene::GUI()
 {
 	if (ImGui::CollapsingHeader("Terrain Scene Settings", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		m_betterTerrain->GUI();
+		m_terrain->GUI();
 	}
 }
 

@@ -15,6 +15,5 @@ public:
 	void Unload() override;
 
 private:
-	ComPtr<ID3D11Buffer>           m_wvpBuffer;
-	std::unique_ptr<Terrain>       m_betterTerrain;
+	std::unique_ptr<Terrain> m_terrain;
 };
