@@ -1,11 +1,11 @@
 #pragma once
 #include "Core/Scene.h"
 
-class AdvanceTerrainScene : public Scene
+class AdvancedTerrainScene : public Scene
 {
 public:
-	AdvanceTerrainScene(UINT width, UINT height);
-	~AdvanceTerrainScene() final = default;
+	AdvancedTerrainScene(UINT width, UINT height);
+	~AdvancedTerrainScene() final = default;
 
 	void Load() override;
 	void Update(float dt, const InputEvent& input);

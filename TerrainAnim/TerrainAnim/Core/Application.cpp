@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Scenes/TestScene.h"
 #include "Scenes/TerrainScene.h"
+#include "Scenes/AdvancedTerrainScene.h"
 #include "Scenes/AnimScene.h"
 #include <algorithm>
 #include <execution>
@@ -35,10 +36,11 @@ bool Application::Init()
 
 	m_scenes.push_back(new TestScene(m_width, m_height));
 	m_scenes.push_back(new TerrainScene(m_width, m_height));
+	m_scenes.push_back(new AdvancedTerrainScene(m_width, m_height));
 	m_scenes.push_back(new AnimScene(m_width, m_height));
 	
 	// Load all scenes sequentially
-	std::for_each(std::execution::seq, m_scenes.begin(), m_scenes.end(), 
+	std::ranges::for_each(m_scenes,
 		[](Scene* scene)
 		{
 			scene->Load();
@@ -55,9 +57,9 @@ void Application::Run(const InputEvent& input)
 	m_appTimer.Tick();
 	D3D->ClearBackBuffer({ 0.01f, 0.01f, 0.015f, 1 });
 
-	Update(m_appTimer, input);
-	Render();
-	GUI();
+	this->Update(m_appTimer, input);
+	this->Render();
+	this->GUI();
 
 	D3D->Present();
 }
@@ -110,8 +112,11 @@ void Application::GUI()
 			if (ImGui::Selectable("Terrain Scene"))
 				m_currentScene = 1;
 
-			if (ImGui::Selectable("Animation Scene"))
+			if (ImGui::Selectable("Advanced Terrain Scene"))
 				m_currentScene = 2;
+
+			if (ImGui::Selectable("Animation Scene"))
+				m_currentScene = 3;
 
 			ImGui::EndCombo();
 		}

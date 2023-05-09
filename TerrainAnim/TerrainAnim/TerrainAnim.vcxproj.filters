@@ -96,7 +96,7 @@
     <ClCompile Include="Core\TerrainGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scenes\AdvanceTerrainScene.cpp">
+    <ClCompile Include="Scenes\AdvancedTerrainScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -209,7 +209,7 @@
     <ClInclude Include="FastNoiseLite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scenes\AdvanceTerrainScene.h">
+    <ClInclude Include="Scenes\AdvancedTerrainScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -12,7 +12,7 @@ TerrainScene::TerrainScene(UINT width, UINT height)
 
 void TerrainScene::Load()
 {
-	m_sceneCamera.Position(Vector3(0, 10, -8));
+	m_sceneCamera.Position(Vector3(200, 20, -8));
 	LOG("Loaded terrain scene")
 
 	m_terrain = std::make_unique<Terrain>();

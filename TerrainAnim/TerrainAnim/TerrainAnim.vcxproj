@@ -90,7 +90,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Scenes\AdvanceTerrainScene.cpp" />
+    <ClCompile Include="Scenes\AdvancedTerrainScene.cpp" />
     <ClCompile Include="Animation\Animation.cpp" />
     <ClCompile Include="Animation\GLTF.cpp" />
     <ClCompile Include="Core\Application.cpp" />
@@ -146,7 +146,7 @@
     <ClCompile Include="Scenes\TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Scenes\AdvanceTerrainScene.h" />
+    <ClInclude Include="Scenes\AdvancedTerrainScene.h" />
     <ClInclude Include="Animation\Animation.h" />
     <ClInclude Include="Animation\GLTF.h" />
     <ClInclude Include="Core\Application.h" />
